@@ -1,3 +1,10 @@
+import { CHART_LABELS } from "./label-sets/charts";
+import { DATA_LABELS } from "./label-sets/data";
+import { DATE_LABELS } from "./label-sets/dates";
+import { DISPLAY_LABELS } from "./label-sets/display";
+import { OVERLAY_LABELS } from "./label-sets/overlays";
+import { SHELL_LABELS } from "./label-sets/shell";
+
 /**
  * Built-in strings of the design system.
  *
@@ -6,8 +13,9 @@
  * DEFAULT_LABELS. The application passes its own map to <DesignSystemProvider labels>; keys it leaves out fall
  * back to English, and a key that exists nowhere resolves to the key itself so the gap is visible on screen.
  *
- * DEFAULT_LABELS is empty until the labels work fills it in; when it does, LabelKey becomes
- * `keyof typeof DEFAULT_LABELS` so a component can only ask for a key that exists.
+ * DEFAULT_LABELS is composed from one file per area in ./label-sets/, so agents and components add their keys
+ * without editing the same file. When the sets are complete, LabelKey becomes `keyof typeof DEFAULT_LABELS`
+ * so a component can only ask for a key that exists.
  */
 
 /** Values for the {name} placeholders. */
@@ -26,7 +34,14 @@ export type LabelKey = string;
 export type LabelFn = (key: LabelKey, params?: LabelParams) => string;
 
 /** English defaults for every built-in string. */
-export const DEFAULT_LABELS: LabelMap = {};
+export const DEFAULT_LABELS: LabelMap = {
+  ...OVERLAY_LABELS,
+  ...DATA_LABELS,
+  ...DISPLAY_LABELS,
+  ...CHART_LABELS,
+  ...SHELL_LABELS,
+  ...DATE_LABELS,
+};
 
 /** Replaces {name} with the matching parameter. A placeholder with no parameter is left as it is. */
 export function interpolate(template: string, params?: LabelParams): string {
