@@ -25,6 +25,14 @@ export interface LinkComponentProps extends ComponentPropsWithRef<"a"> {
 /** A component that renders a link, such as the router's Link. Must forward `className`, `ref` and anchor props. */
 export type LinkComponent = ComponentType<LinkComponentProps>;
 
+/**
+ * What the `linkComponent` prop accepts: a LinkComponent, or any router Link. A router Link (next/link declares its
+ * optional props without `| undefined`) is not assignable to LinkComponent in a project that turns on
+ * exactOptionalPropertyTypes, although it renders an <a> and forwards the anchor props. The provider stores it as a
+ * LinkComponent; the router's Link is trusted to forward `className`, `ref` and anchor props.
+ */
+export type LinkComponentInput = LinkComponent | ComponentType<never>;
+
 /** Moves to another page. */
 export type NavigateFn = (href: string) => void;
 
@@ -74,7 +82,7 @@ export interface DesignSystemProviderProps {
   /** The application's own text, by key. Keys left out fall back to English. */
   labels?: LabelMap | undefined;
   /** The router's Link. Default: a plain <a>. Must be created in a client file. */
-  linkComponent?: LinkComponent | undefined;
+  linkComponent?: LinkComponentInput | undefined;
   /** Moves to a page (DataTable rowHref). Default: full page load. Must be created in a client file. */
   navigate?: NavigateFn | undefined;
   /** The current path, for route-backed tabs. A string, not a hook. Default: "" (nothing is active). */
@@ -101,7 +109,7 @@ export function DesignSystemProvider({
       dir: dir ?? (locale !== undefined ? directionOf(locale) : parent.dir),
       labels: merged,
       label: merged === parent.labels ? parent.label : createLabelFn(merged),
-      linkComponent: linkComponent ?? parent.linkComponent,
+      linkComponent: (linkComponent as LinkComponent | undefined) ?? parent.linkComponent,
       navigate: navigate ?? parent.navigate,
       activePath: activePath ?? parent.activePath,
     };

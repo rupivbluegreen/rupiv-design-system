@@ -1,4 +1,5 @@
 import { render } from "@testing-library/react";
+import type { ComponentType, MouseEventHandler, ReactNode } from "react";
 import { describe, expect, it } from "vitest";
 import { CustomLink, LOCALE_CASES, renderBoth, renderIn } from "../../test/harness";
 import {
@@ -122,5 +123,32 @@ describe("DesignSystemProvider", () => {
     expect(getByRole("link", { name: "go" }).getAttribute("data-custom-link")).toBe("true");
     getByRole("button", { name: "nav" }).click();
     expect(calls).toEqual(["/y"]);
+  });
+});
+
+describe("linkComponent accepts a router Link", () => {
+  it("compiles and renders with a Link whose optional props have no `| undefined` (next/link declares them this way)", () => {
+    // Under exactOptionalPropertyTypes such a component is not assignable to LinkComponent. The provider prop is wider.
+    interface RouterLinkProps {
+      href: string | { pathname: string };
+      onMouseEnter?: MouseEventHandler<HTMLAnchorElement>;
+      children?: ReactNode;
+      className?: string;
+    }
+    const RouterLink: ComponentType<RouterLinkProps> = ({ href, children, className }) => (
+      <a data-router-link href={typeof href === "string" ? href : href.pathname} className={className}>
+        {children}
+      </a>
+    );
+    function Consumer() {
+      const Link = useLink();
+      return <Link href="/x">go</Link>;
+    }
+    const view = render(
+      <DesignSystemProvider linkComponent={RouterLink}>
+        <Consumer />
+      </DesignSystemProvider>,
+    );
+    expect(view.container.querySelector("a[data-router-link]")?.getAttribute("href")).toBe("/x");
   });
 });

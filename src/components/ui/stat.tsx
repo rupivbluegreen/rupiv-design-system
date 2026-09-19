@@ -32,7 +32,8 @@ export function Stat({ label, value, unit, delta, icon, hint, href, footer, clas
       <div className={styles.deltaRow}>
         <span className={cn(styles.delta, tone)}>
           <Icon aria-hidden="true" />
-          {format.delta(delta.value)}
+          {/* A sign is a weak character: without isolation it lands at the end of an Arabic run (+4.2% shows as 4.2%+). */}
+          <bdi dir="ltr">{format.delta(delta.value)}</bdi>
         </span>
         {delta.label ? <span className={cn("t-caption", styles.deltaLabel)}>{delta.label}</span> : null}
       </div>

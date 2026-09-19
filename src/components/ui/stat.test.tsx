@@ -38,6 +38,14 @@ describe("Stat", () => {
 });
 
 describe("Stat delta", () => {
+  it("isolates the delta text as left to right, so the sign stays first in an Arabic page (+4.2%, not 4.2%+)", () => {
+    const views = renderBoth(<Stat label="Median wait" value="2:10" delta={{ value: 4.2 }} />);
+    for (const view of [views.en, views.ar]) {
+      const isolated = view.container.querySelector("bdi[dir='ltr']");
+      expect(isolated?.textContent).toBe("+4.2%");
+    }
+  });
+
   it("writes the delta for the provider's language: Western digits and an ASCII percent sign in both", () => {
     const views = renderBoth(<Stat label="Median wait" value="2:10" delta={{ value: 3.24 }} />);
     for (const view of [views.en, views.ar]) {

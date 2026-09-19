@@ -12,6 +12,7 @@ export type {
   Direction,
   DesignSystemProviderProps,
   LinkComponent,
+  LinkComponentInput,
   LinkComponentProps,
   NavigateFn,
 } from "./provider";
