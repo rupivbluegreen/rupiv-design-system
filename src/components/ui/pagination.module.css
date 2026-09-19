@@ -8,21 +8,21 @@
   font-size: var(--text-13);
 }
 
-.left,
-.right {
+.start,
+.end {
   display: flex;
   align-items: center;
   gap: var(--space-16);
   min-inline-size: 0;
 }
 
-.right {
+.end {
   gap: var(--space-4);
   margin-inline-start: auto;
 }
 
 /* previous and next chevrons mirror in right-to-left; the page buttons are not direct children */
-.right > button:dir(rtl) svg {
+.end > button:dir(rtl) svg {
   transform: scaleX(-1);
 }
 

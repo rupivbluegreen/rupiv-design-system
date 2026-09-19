@@ -1,6 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { useLabels } from "../../provider";
 import { Breadcrumbs } from "./breadcrumbs";
 import type { BreadcrumbItem } from "./breadcrumbs";
 import { IconButton } from "./button";
@@ -9,14 +12,15 @@ import styles from "./page-header.module.css";
 export interface PageHeaderProps {
   title: ReactNode;
   description?: ReactNode;
-  breadcrumbs?: BreadcrumbItem[];
-  /** Inline, right of the title — e.g. a StatusPill. */
+  breadcrumbs?: BreadcrumbItem[] | undefined;
+  /** Inline, after the title (at its inline end): a StatusPill, a data-source badge. */
   meta?: ReactNode;
-  /** Right-aligned buttons. */
+  /** Buttons at the inline end of the header. */
   actions?: ReactNode;
   /** Rendered below the header with a bottom border — pass <Tabs /> or <TabLinks />. */
   tabs?: ReactNode;
-  backHref?: string;
+  /** Shows a back link before the title. The arrow points at the inline start: it mirrors in right-to-left. */
+  backHref?: string | undefined;
   className?: string | undefined;
 }
 
@@ -30,8 +34,9 @@ export function PageHeader({
   backHref,
   className,
 }: PageHeaderProps) {
+  const label = useLabels();
   return (
-    <header className={cn(styles.root, tabs != null && styles.withTabs, className)}>
+    <header className={cn(styles.root, className)}>
       {breadcrumbs && breadcrumbs.length > 0 && <Breadcrumbs items={breadcrumbs} className={styles.breadcrumbs} />}
       <div className={styles.row}>
         <div className={styles.main}>
@@ -39,7 +44,7 @@ export function PageHeader({
             <IconButton
               href={backHref}
               icon={<ArrowLeft />}
-              label="Back"
+              label={label("pageHeader.back")}
               variant="ghost"
               size="sm"
               className={styles.back}

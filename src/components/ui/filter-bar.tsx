@@ -1,22 +1,25 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Check, ChevronDown, CirclePlus, X } from "lucide-react";
+import { ChevronDown, CirclePlus, X } from "lucide-react";
 import { cn } from "../../lib/cn";
-import { Menu, type MenuItem } from "./menu";
+import { useLabels } from "../../provider";
+import { Menu, type MenuEntry } from "./menu";
 import { SearchInput } from "./search-input";
 import styles from "./filter-bar.module.css";
 
 export interface FilterBarProps {
-  search?: { value?: string; onChange?: (v: string) => void; placeholder?: string };
+  /** The search box. `placeholder` defaults to the provider's "searchInput.placeholder". */
+  search?: { value?: string | undefined; onChange?: ((v: string) => void) | undefined; placeholder?: string | undefined };
   filters?: ReactNode;
   actions?: ReactNode;
-  activeFilters?: { label: string; onRemove: () => void }[];
-  onClearAll?: () => void;
+  activeFilters?: { label: string; onRemove: () => void }[] | undefined;
+  onClearAll?: (() => void) | undefined;
   className?: string | undefined;
 }
 
 export function FilterBar({ search, filters, actions, activeFilters, onClearAll, className }: FilterBarProps) {
+  const label = useLabels();
   const hasActive = !!activeFilters && activeFilters.length > 0;
   return (
     <div className={cn(styles.bar, className)}>
@@ -25,7 +28,7 @@ export function FilterBar({ search, filters, actions, activeFilters, onClearAll,
           <SearchInput
             value={search.value}
             onChange={search.onChange}
-            placeholder={search.placeholder ?? "Search"}
+            placeholder={search.placeholder}
             size="sm"
             className={styles.search}
           />
@@ -35,7 +38,7 @@ export function FilterBar({ search, filters, actions, activeFilters, onClearAll,
       </div>
       {hasActive ? (
         <div className={styles.activeRow}>
-          <span className={styles.activeLabel}>Filtered by</span>
+          <span className={styles.activeLabel}>{label("filterBar.filteredBy")}</span>
           <ul className={styles.chips} role="list">
             {activeFilters.map((f, i) => (
               <li key={`${f.label}-${i}`} className={styles.chip}>
@@ -44,7 +47,7 @@ export function FilterBar({ search, filters, actions, activeFilters, onClearAll,
                   type="button"
                   className={styles.chipRemove}
                   onClick={f.onRemove}
-                  aria-label={`Remove filter ${f.label}`}
+                  aria-label={label("filterBar.removeFilter", { label: f.label })}
                 >
                   <X aria-hidden="true" />
                 </button>
@@ -53,7 +56,7 @@ export function FilterBar({ search, filters, actions, activeFilters, onClearAll,
           </ul>
           {onClearAll ? (
             <button type="button" className={styles.clearAll} onClick={onClearAll}>
-              Clear all
+              {label("filterBar.clearAll")}
             </button>
           ) : null}
         </div>
@@ -64,23 +67,29 @@ export function FilterBar({ search, filters, actions, activeFilters, onClearAll,
 
 export interface FilterChipProps {
   label: string;
-  value?: string;
+  value?: string | undefined;
   options: { value: string; label: string }[];
   onChange: (v: string | undefined) => void;
   className?: string | undefined;
 }
 
 export function FilterChip({ label, value, options, onChange, className }: FilterChipProps) {
+  const text = useLabels();
   const selected = value !== undefined ? options.find((o) => o.value === value) : undefined;
   const isSet = value !== undefined && value !== "";
 
-  const items: (MenuItem | "separator")[] = options.map((o) => ({
-    label: o.label,
-    icon: o.value === value ? <Check /> : <span className={styles.checkSpacer} />,
-    onSelect: () => onChange(o.value),
-  }));
+  // The options are radio items of the menu (one is chosen, the menu marks it); "Clear" is an ordinary item below them.
+  const items: MenuEntry[] = [
+    {
+      type: "radio-group",
+      options: options.map((o) => ({ value: o.value, label: o.label })),
+      value: isSet ? value : undefined,
+      onValueChange: (next) => onChange(next),
+      label,
+    },
+  ];
   if (isSet) {
-    items.push("separator", { label: "Clear", icon: <X />, onSelect: () => onChange(undefined) });
+    items.push("separator", { label: text("filterBar.clearFilter"), icon: <X />, onSelect: () => onChange(undefined) });
   }
 
   return (

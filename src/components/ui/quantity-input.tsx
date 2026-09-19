@@ -4,33 +4,57 @@ import { useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { useFormat } from "../../lib/use-format";
+import { useLabels } from "../../provider";
 import styles from "./quantity-input.module.css";
 
 export interface QuantityInputProps {
-  value?: number;
-  defaultValue?: number;
-  onChange?: (n: number) => void;
-  step?: number;
-  min?: number;
-  max?: number;
+  /** Controlled value. Without it the input keeps the value itself, starting at `defaultValue`, then `min`, then 0. */
+  value?: number | undefined;
+  defaultValue?: number | undefined;
+  onChange?: ((n: number) => void) | undefined;
+  step?: number | undefined;
+  min?: number | undefined;
+  max?: number | undefined;
   /** Unit suffix, e.g. "m", "kg", "rolls". */
-  uom?: string;
-  size?: "sm" | "md" | "lg";
-  id?: string;
-  name?: string;
-  disabled?: boolean;
+  uom?: string | undefined;
+  size?: "sm" | "md" | "lg" | undefined;
+  id?: string | undefined;
+  name?: string | undefined;
+  disabled?: boolean | undefined;
   /** Error styling + `aria-invalid` (same as passing `aria-invalid`). */
-  invalid?: boolean;
+  invalid?: boolean | undefined;
   className?: string | undefined;
-  "aria-label"?: string;
-  "aria-describedby"?: string;
-  "aria-invalid"?: boolean | "true" | "false";
+  "aria-label"?: string | undefined;
+  "aria-describedby"?: string | undefined;
+  "aria-invalid"?: boolean | "true" | "false" | undefined;
 }
-
-const displayFormat = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 3 });
 
 function round3(n: number): number {
   return Math.round(n * 1000) / 1000;
+}
+
+const ARABIC_INDIC_ZERO = 0x0660;
+const EXTENDED_ARABIC_INDIC_ZERO = 0x06f0;
+const ARABIC_DECIMAL_SEPARATOR = "\u066B";
+const ARABIC_THOUSANDS_SEPARATOR = "\u066C";
+
+/**
+ * What a person typed, as plain ASCII: Arabic-Indic digits (U+0660 to U+0669) and Persian digits (U+06F0 to U+06F9) become
+ * 0-9, the Arabic decimal separator (U+066B) becomes ".", and thousands separators (, and U+066C) are dropped.
+ * An Arabic keyboard often types those digits, and the input would otherwise reject them silently.
+ */
+function normalizeTyped(text: string): string {
+  return Array.from(text, (char) => {
+    const code = char.codePointAt(0) ?? 0;
+    if (code >= ARABIC_INDIC_ZERO && code <= ARABIC_INDIC_ZERO + 9) return String(code - ARABIC_INDIC_ZERO);
+    if (code >= EXTENDED_ARABIC_INDIC_ZERO && code <= EXTENDED_ARABIC_INDIC_ZERO + 9) {
+      return String(code - EXTENDED_ARABIC_INDIC_ZERO);
+    }
+    if (char === ARABIC_DECIMAL_SEPARATOR) return ".";
+    if (char === ARABIC_THOUSANDS_SEPARATOR || char === ",") return "";
+    return char;
+  }).join("");
 }
 
 export function QuantityInput({
@@ -51,6 +75,9 @@ export function QuantityInput({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
 }: QuantityInputProps) {
+  const label = useLabels();
+  const { formatNumber } = useFormat();
+  const display = (n: number) => formatNumber(n, { maximumFractionDigits: 3 });
   const [internal, setInternal] = useState<number>(defaultValue ?? min ?? 0);
   const current = value !== undefined ? value : internal;
   /** Raw text while the user is editing; null shows the formatted value. */
@@ -83,7 +110,7 @@ export function QuantityInput({
   }
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    const raw = event.target.value.replace(/,/g, "");
+    const raw = normalizeTyped(event.target.value);
     if (/^-?\d*\.?\d*$/.test(raw)) setDraft(raw);
   }
 
@@ -126,7 +153,7 @@ export function QuantityInput({
         type="button"
         tabIndex={-1}
         className={styles.stepper}
-        aria-label="Decrease"
+        aria-label={label("quantityInput.decrease")}
         disabled={disabled || atMin}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => stepBy(-1)}
@@ -143,11 +170,11 @@ export function QuantityInput({
           autoComplete="off"
           className={styles.input}
           disabled={disabled}
-          value={draft ?? displayFormat.format(current)}
+          value={draft ?? display(current)}
           aria-valuenow={current}
           aria-valuemin={min}
           aria-valuemax={max}
-          aria-valuetext={uom ? `${displayFormat.format(current)} ${uom}` : undefined}
+          aria-valuetext={uom ? `${display(current)} ${uom}` : undefined}
           aria-label={ariaLabel}
           aria-describedby={ariaDescribedBy}
           aria-invalid={isInvalid || undefined}
@@ -170,7 +197,7 @@ export function QuantityInput({
         type="button"
         tabIndex={-1}
         className={styles.stepper}
-        aria-label="Increase"
+        aria-label={label("quantityInput.increase")}
         disabled={disabled || atMax}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => stepBy(1)}

@@ -4,22 +4,26 @@ import { useId, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
 import { CloudUpload, FileText, X } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { useFormat, type Formatters } from "../../lib/use-format";
+import { useLabels } from "../../provider";
+import type { LabelFn } from "../../provider";
 import styles from "./file-drop.module.css";
 
 export interface FileDropProps {
   /** Same syntax as the native `accept` attribute, e.g. ".pdf,image/*". */
-  accept?: string;
-  hint?: string;
-  multiple?: boolean;
-  onFiles?: (files: File[]) => void;
-  id?: string;
+  accept?: string | undefined;
+  hint?: string | undefined;
+  multiple?: boolean | undefined;
+  onFiles?: ((files: File[]) => void) | undefined;
+  id?: string | undefined;
   className?: string | undefined;
 }
 
-function formatBytes(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(bytes < 10 * 1024 ? 1 : 0)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+/** 812 B, 1.5 KB, 48 KB, 2.3 MB: units from the provider's labels, digits Western, one decimal below 10 KB and for MB. */
+function formatBytes(bytes: number, format: Pick<Formatters, "int" | "num">, label: LabelFn): string {
+  if (bytes < 1024) return label("fileDrop.sizeBytes", { size: format.int(bytes) });
+  if (bytes < 1024 * 1024) return label("fileDrop.sizeKb", { size: format.num(bytes / 1024, bytes < 10 * 1024 ? 1 : 0) });
+  return label("fileDrop.sizeMb", { size: format.num(bytes / (1024 * 1024), 1) });
 }
 
 function isAccepted(file: File, accept?: string): boolean {
@@ -38,6 +42,8 @@ function isAccepted(file: File, accept?: string): boolean {
 }
 
 export function FileDrop({ accept, hint, multiple = false, onFiles, id, className }: FileDropProps) {
+  const label = useLabels();
+  const format = useFormat();
   const autoId = useId();
   const inputId = id ?? `file-drop-${autoId}`;
   const hintId = hint ? `${inputId}-hint` : undefined;
@@ -105,10 +111,11 @@ export function FileDrop({ accept, hint, multiple = false, onFiles, id, classNam
         </span>
         <span className={styles.prompt}>
           {dragging ? (
-            "Drop to upload"
+            label("fileDrop.dropToUpload")
           ) : (
             <>
-              Drag {multiple ? "files" : "a file"} here or <span className={styles.browse}>browse</span>
+              {label(multiple ? "fileDrop.promptMany" : "fileDrop.promptOne")}{" "}
+              <span className={styles.browse}>{label("fileDrop.browse")}</span>
             </>
           )}
         </span>
@@ -120,18 +127,18 @@ export function FileDrop({ accept, hint, multiple = false, onFiles, id, classNam
       </label>
 
       {files.length > 0 && (
-        <ul role="list" className={styles.files} aria-label="Selected files">
+        <ul role="list" className={styles.files} aria-label={label("fileDrop.selectedFiles")}>
           {files.map((file, index) => (
             <li key={`${file.name}-${file.size}-${index}`} className={styles.file}>
               <FileText className={styles.fileIcon} aria-hidden="true" />
               <span className={styles.fileName} title={file.name}>
                 {file.name}
               </span>
-              <span className={styles.fileSize}>{formatBytes(file.size)}</span>
+              <span className={styles.fileSize}>{formatBytes(file.size, format, label)}</span>
               <button
                 type="button"
                 className={styles.remove}
-                aria-label={`Remove ${file.name}`}
+                aria-label={label("fileDrop.remove", { name: file.name })}
                 onClick={() => removeFile(index)}
               >
                 <X aria-hidden="true" />

@@ -11,13 +11,14 @@ function isAriaInvalid(value: unknown): boolean {
 /* ------------------------------------------------------------------ */
 
 export interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix"> {
-  size?: "sm" | "md" | "lg";
-  /** Leading text adornment, e.g. "₹". */
+  size?: "sm" | "md" | "lg" | undefined;
+  /** Text adornment before the value, at the inline start, e.g. "$". */
   prefix?: ReactNode;
-  /** Trailing text adornment, e.g. "m", "%". */
+  /** Text adornment after the value, at the inline end, e.g. "m", "%". */
   suffix?: ReactNode;
-  leftIcon?: ReactNode;
-  invalid?: boolean;
+  /** Icon at the inline start (the left in English, the right in Arabic). */
+  startIcon?: ReactNode;
+  invalid?: boolean | undefined;
   ref?: Ref<HTMLInputElement>;
 }
 
@@ -29,7 +30,7 @@ export function Input({
   size = "md",
   prefix,
   suffix,
-  leftIcon,
+  startIcon,
   invalid = false,
   className,
   ref,
@@ -47,9 +48,9 @@ export function Input({
         className,
       )}
     >
-      {leftIcon && (
-        <span className={styles.leftIcon} aria-hidden="true">
-          {leftIcon}
+      {startIcon && (
+        <span className={styles.startIcon} aria-hidden="true">
+          {startIcon}
         </span>
       )}
       {prefix != null && <span className={cn(styles.affix, styles.prefix)}>{prefix}</span>}
@@ -64,7 +65,7 @@ export function Input({
 /* ------------------------------------------------------------------ */
 
 export interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
-  invalid?: boolean;
+  invalid?: boolean | undefined;
   ref?: Ref<HTMLTextAreaElement>;
 }
 

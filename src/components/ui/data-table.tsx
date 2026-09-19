@@ -15,25 +15,33 @@ import {
 } from "react";
 import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { textCollator } from "../../lib/intl";
 import type { Tone } from "../../lib/types";
-import { useNavigate } from "../../provider";
+import { useLabels, useLocale, useNavigate } from "../../provider";
 import { Checkbox } from "./checkbox";
 import { EmptyState } from "./empty-state";
 import { Pagination } from "./pagination";
 import styles from "./data-table.module.css";
 
+/** The column the rows are sorted by and the direction. */
+export interface DataTableSort {
+  key: string;
+  direction: "asc" | "desc";
+}
+
 export interface Column<T> {
   key: string;
   header: ReactNode;
   cell: (row: T) => ReactNode;
-  /** Makes the column sortable. */
-  sortValue?: (row: T) => string | number;
-  align?: "left" | "right" | "center";
-  width?: number | string;
+  /** Makes the column sortable. Text sorts by the provider's locale, numerically aware ("item 2" before "item 10"). */
+  sortValue?: ((row: T) => string | number) | undefined;
+  /** Where the content sits: "start" (default) and "end" follow the reading direction, so "end" is the right in English and the left in Arabic. Use "end" for numbers. */
+  align?: "start" | "end" | "center" | undefined;
+  width?: number | string | undefined;
   /** Hide on narrow screens: "md" < 768px, "lg" < 1024px. */
-  hideBelow?: "md" | "lg";
+  hideBelow?: "md" | "lg" | undefined;
   /** Sticky on horizontal scroll (use on the first column). */
-  sticky?: boolean;
+  sticky?: boolean | undefined;
 }
 
 export interface DataTableProps<T> {
@@ -41,28 +49,41 @@ export interface DataTableProps<T> {
   rows: T[];
   getRowId: (row: T) => string;
   /** Whole row navigates. Clicks on links, buttons, inputs and menus inside the row don't. */
-  rowHref?: (row: T) => string;
-  selectable?: boolean;
-  bulkActions?: (selectedIds: string[], clear: () => void) => ReactNode;
+  rowHref?: ((row: T) => string) | undefined;
+  selectable?: boolean | undefined;
+  bulkActions?: ((selectedIds: string[], clear: () => void) => ReactNode) | undefined;
   /** Default 10; 0 = no pagination. */
-  pageSize?: number;
-  dense?: boolean;
-  defaultSort?: { key: string; direction: "asc" | "desc" };
+  pageSize?: number | undefined;
+  dense?: boolean | undefined;
+  /** The sort to start with when `sort` is not given. */
+  defaultSort?: DataTableSort | undefined;
+  /**
+   * Controlled sort, for a sort kept in the address bar or in a store. `null` is "not sorted". Without this prop
+   * the table keeps the sort itself. Either way `onSortChange` is called when a header is pressed.
+   */
+  sort?: DataTableSort | null | undefined;
+  onSortChange?: ((sort: DataTableSort) => void) | undefined;
+  /**
+   * Controlled page, 1-based. Without this prop the table keeps the page itself. Either way `onPageChange` is
+   * called when the person moves to another page, and with 1 when a new sort or page size sends them back to the start.
+   */
+  page?: number | undefined;
+  onPageChange?: ((page: number) => void) | undefined;
   emptyState?: ReactNode;
   /**
    * Totals row content, rendered in <tfoot>. Pass either `<tr>` element(s), or `<td>` cells
    * (in a fragment) — cells are wrapped in a row and offset for the selection column.
-   * Anything else spans the full width. Use `<td data-align="right">` for numeric cells.
+   * Anything else spans the full width. Use `<td data-align="end">` for numeric cells.
    * Footer cells inherit the `hideBelow` of the column(s) they sit under (colSpan aware);
    * set `data-hide-below="md" | "lg"` on a cell to control it manually.
    */
   footer?: ReactNode;
   /** Screen-reader caption. */
-  caption?: string;
+  caption?: string | undefined;
   /** Header stays visible while the table body scrolls inside a height-capped container. */
-  stickyHeader?: boolean;
-  /** Subtle tone tint + 2px left edge for a row (e.g. overdue → "danger"). Hover/selected still win. */
-  rowTone?: (row: T) => Tone | undefined;
+  stickyHeader?: boolean | undefined;
+  /** Subtle tone tint + a 2px edge at the inline start of the row (e.g. overdue → "danger"). Hover/selected still win. */
+  rowTone?: ((row: T) => Tone | undefined) | undefined;
   className?: string | undefined;
 }
 
@@ -87,16 +108,14 @@ function cellSpan(props: FooterCellProps): number {
   return Number.isFinite(span) && span > 1 ? span : 1;
 }
 
-type SortState = { key: string; direction: "asc" | "desc" } | null;
-
 const IGNORE_ROW_CLICK =
   'a, button, input, select, textarea, label, summary, [role="button"], [role="checkbox"], [role="switch"], [role="menuitem"], [role="option"], [contenteditable="true"], [data-row-click="ignore"]';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
 
-function compareValues(a: string | number, b: string | number): number {
+function compareValues(a: string | number, b: string | number, collator: Intl.Collator): number {
   if (typeof a === "number" && typeof b === "number") return a - b;
-  return String(a).localeCompare(String(b), "en-IN", { numeric: true, sensitivity: "base" });
+  return collator.compare(String(a), String(b));
 }
 
 function flattenNodes(node: ReactNode): ReactNode[] {
@@ -133,6 +152,10 @@ export function DataTable<T>({
   pageSize: initialPageSize = 10,
   dense = false,
   defaultSort,
+  sort: sortProp,
+  onSortChange,
+  page: pageProp,
+  onPageChange,
   emptyState,
   footer,
   caption,
@@ -141,10 +164,16 @@ export function DataTable<T>({
   className,
 }: DataTableProps<T>) {
   const navigate = useNavigate();
-  const [sort, setSort] = useState<SortState>(defaultSort ?? null);
-  const [page, setPage] = useState(1);
+  const label = useLabels();
+  const collator = textCollator(useLocale());
+  const [ownSort, setOwnSort] = useState<DataTableSort | null>(defaultSort ?? null);
+  const [ownPage, setOwnPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
   const [selected, setSelected] = useState<ReadonlySet<string>>(() => new Set());
+
+  // A prop that is given (even null for the sort) means the parent holds that state.
+  const sort = sortProp !== undefined ? sortProp : ownSort;
+  const page = pageProp !== undefined ? pageProp : ownPage;
 
   const sortedRows = useMemo(() => {
     if (!sort) return rows;
@@ -154,9 +183,9 @@ export function DataTable<T>({
     const dir = sort.direction === "asc" ? 1 : -1;
     return rows
       .map((row, index) => ({ row, index, value: getValue(row) }))
-      .sort((a, b) => compareValues(a.value, b.value) * dir || a.index - b.index)
+      .sort((a, b) => compareValues(a.value, b.value, collator) * dir || a.index - b.index)
       .map((entry) => entry.row);
-  }, [rows, columns, sort]);
+  }, [rows, columns, sort, collator]);
 
   const paginated = pageSize > 0;
   const pageCount = paginated ? Math.max(1, Math.ceil(sortedRows.length / pageSize)) : 1;
@@ -199,17 +228,24 @@ export function DataTable<T>({
     });
   };
 
+  /** Moves to `next`. Reports it, and keeps it itself unless the parent holds the page. */
+  const goToPage = (next: number) => {
+    if (pageProp === undefined) setOwnPage(next);
+    if (next !== currentPage) onPageChange?.(next);
+  };
+
   const toggleSort = (key: string) => {
-    setSort((prev) =>
-      prev?.key === key
-        ? { key, direction: prev.direction === "asc" ? "desc" : "asc" }
-        : { key, direction: "asc" },
-    );
-    setPage(1);
+    const next: DataTableSort = {
+      key,
+      direction: sort?.key === key && sort.direction === "asc" ? "desc" : "asc",
+    };
+    if (sortProp === undefined) setOwnSort(next);
+    onSortChange?.(next);
+    goToPage(1);
   };
 
   const alignClass = (align: Column<T>["align"]) =>
-    align === "right" ? styles.alignRight : align === "center" ? styles.alignCenter : undefined;
+    align === "end" ? styles.alignEnd : align === "center" ? styles.alignCenter : undefined;
 
   const cellClass = (column: Column<T>) =>
     cn(
@@ -275,25 +311,26 @@ export function DataTable<T>({
   };
 
   const bulkBarVisible = selectable && selectedIds.length > 0;
+  const selectAllLabel = label(allVisibleSelected ? "dataTable.deselectAllRows" : "dataTable.selectAllRows");
 
   return (
     <div className={cn(styles.root, dense && styles.dense, className)}>
       {bulkBarVisible ? (
-        <div className={styles.bulkBar} role="region" aria-label="Bulk actions">
+        <div className={styles.bulkBar} role="region" aria-label={label("dataTable.bulkActions")}>
           <span className={styles.bulkCheck}>
             <Checkbox
-              aria-label={allVisibleSelected ? "Deselect all rows on this page" : "Select all rows on this page"}
+              aria-label={selectAllLabel}
               checked={allVisibleSelected}
               indeterminate={someVisibleSelected}
               onChange={toggleVisible}
             />
           </span>
           <span className={styles.bulkCount} aria-live="polite">
-            {selectedIds.length} selected
+            {label("dataTable.selectedCount", { n: selectedIds.length })}
           </span>
           {bulkActions ? <div className={styles.bulkActions}>{bulkActions(selectedIds, clearSelection)}</div> : null}
           <button type="button" className={styles.bulkClear} onClick={clearSelection}>
-            Clear
+            {label("dataTable.clearSelection")}
           </button>
         </div>
       ) : null}
@@ -306,7 +343,7 @@ export function DataTable<T>({
               {selectable ? (
                 <th scope="col" className={cn(styles.selectCell, hasStickyColumn && styles.stickySelect)}>
                   <Checkbox
-                    aria-label={allVisibleSelected ? "Deselect all rows on this page" : "Select all rows on this page"}
+                    aria-label={selectAllLabel}
                     checked={allVisibleSelected}
                     indeterminate={someVisibleSelected}
                     onChange={toggleVisible}
@@ -357,8 +394,8 @@ export function DataTable<T>({
                   {emptyState ?? (
                     <EmptyState
                       compact
-                      title="No records found"
-                      description="Try adjusting your search or filters."
+                      title={label("dataTable.emptyTitle")}
+                      description={label("dataTable.emptyDescription")}
                     />
                   )}
                 </td>
@@ -413,7 +450,11 @@ export function DataTable<T>({
                         className={cn(styles.selectCell, hasStickyColumn && styles.stickySelect)}
                         data-row-click="ignore"
                       >
-                        <Checkbox aria-label={`Select row ${id}`} checked={isSelected} onChange={() => toggleRow(id)} />
+                        <Checkbox
+                          aria-label={label("dataTable.selectRow", { id })}
+                          checked={isSelected}
+                          onChange={() => toggleRow(id)}
+                        />
                       </td>
                     ) : null}
                     {columns.map((column) => (
@@ -438,13 +479,13 @@ export function DataTable<T>({
           <Pagination
             page={currentPage}
             pageCount={pageCount}
-            onPageChange={setPage}
+            onPageChange={goToPage}
             total={sortedRows.length}
             pageSize={pageSize}
             pageSizeOptions={pageSizeOptions}
             onPageSizeChange={(n) => {
               setPageSize(n);
-              setPage(1);
+              goToPage(1);
             }}
           />
         </div>

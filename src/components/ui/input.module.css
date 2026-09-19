@@ -67,7 +67,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-.leftIcon {
+.startIcon {
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
@@ -75,17 +75,17 @@
   color: var(--icon-muted);
 }
 
-.sm .leftIcon {
+.sm .startIcon {
   padding-inline-start: var(--space-8);
 }
 
-.leftIcon > svg {
+.startIcon > svg {
   inline-size: var(--icon-md);
   block-size: var(--icon-md);
 }
 
-.leftIcon + .input,
-.leftIcon + .affix {
+.startIcon + .input,
+.startIcon + .affix {
   padding-inline-start: var(--space-8);
 }
 
@@ -149,7 +149,7 @@
 }
 
 .disabled .affix,
-.disabled .leftIcon {
+.disabled .startIcon {
   color: var(--text-disabled);
 }
 

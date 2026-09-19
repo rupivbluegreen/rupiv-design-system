@@ -1,18 +1,21 @@
+"use client";
+
 import { Children, cloneElement, isValidElement, useId } from "react";
 import type { HTMLAttributes, ReactElement, ReactNode } from "react";
 import { CircleAlert } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { useLabels } from "../../provider";
 import styles from "./field.module.css";
 
 export interface FieldProps {
   label: string;
   /** id of the control. When omitted, an id is generated and injected into a single child element. */
-  htmlFor?: string;
+  htmlFor?: string | undefined;
   hint?: ReactNode;
-  error?: string;
-  required?: boolean;
-  optional?: boolean;
-  /** Right-aligned slot on the label row, e.g. a "Use party default" link button. */
+  error?: string | undefined;
+  required?: boolean | undefined;
+  optional?: boolean | undefined;
+  /** Slot at the inline end of the label row, e.g. a "Use default" link button. */
   labelAction?: ReactNode;
   className?: string | undefined;
   children: ReactNode;
@@ -26,6 +29,7 @@ type InjectableProps = {
   role?: string;
   "aria-describedby"?: string;
   "aria-invalid"?: boolean | "true" | "false";
+  "aria-required"?: boolean | "true" | "false";
   "aria-label"?: string;
   "aria-labelledby"?: string;
 };
@@ -35,7 +39,7 @@ const LABELABLE_TAGS = new Set(["input", "select", "textarea", "button", "meter"
 
 /**
  * Label + control + hint/error. When `children` is a single element, Field wires
- * `id`, `aria-describedby` (hint / error) and `aria-invalid` onto it.
+ * `id`, `aria-describedby` (hint / error), `aria-invalid` and (with `required`) `aria-required` onto it.
  * For children that are not native form controls (e.g. SegmentedControl, RadioGroup)
  * `<label htmlFor>` doesn't name them, so Field also passes `aria-labelledby` pointing at its label —
  * unless the child already sets `aria-label` / `aria-labelledby`.
@@ -52,6 +56,7 @@ export function Field({
   children,
   ...rest
 }: FieldProps & FieldRootAttributes) {
+  const text = useLabels();
   const autoId = useId();
   const controlId = htmlFor ?? `field-${autoId}`;
   const labelId = `${controlId}-label`;
@@ -70,6 +75,7 @@ export function Field({
         : describedBy;
     }
     if (error) extra["aria-invalid"] = true;
+    if (required && child.props["aria-required"] === undefined) extra["aria-required"] = true;
 
     const isNativeTag = typeof child.type === "string";
     const isLabelable = isNativeTag && LABELABLE_TAGS.has(child.type as string);
@@ -93,7 +99,7 @@ export function Field({
               *
             </span>
           )}
-          {optional && !required && <span className={styles.optional}>(optional)</span>}
+          {optional && !required && <span className={styles.optional}>{text("field.optional")}</span>}
         </label>
         {labelAction && <div className={styles.labelAction}>{labelAction}</div>}
       </div>

@@ -3,12 +3,12 @@
 import { Fragment } from "react";
 import { ChevronRight } from "lucide-react";
 import { cn } from "../../lib/cn";
-import { useLink } from "../../provider";
+import { useLabels, useLink } from "../../provider";
 import styles from "./breadcrumbs.module.css";
 
 export interface BreadcrumbItem {
   label: string;
-  href?: string;
+  href?: string | undefined;
 }
 
 export interface BreadcrumbsProps {
@@ -16,12 +16,13 @@ export interface BreadcrumbsProps {
   className?: string | undefined;
 }
 
-/** The last item is always rendered as the current page. */
+/** The last item is always rendered as the current page. The separator chevron mirrors in right-to-left (CSS `:dir(rtl)`). */
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
   const Link = useLink();
+  const label = useLabels();
   if (items.length === 0) return null;
   return (
-    <nav aria-label="Breadcrumb" className={cn(styles.root, className)}>
+    <nav aria-label={label("breadcrumbs.label")} className={cn(styles.root, className)}>
       <ol role="list" className={styles.list}>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;

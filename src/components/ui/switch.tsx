@@ -6,17 +6,18 @@ import { cn } from "../../lib/cn";
 import styles from "./switch.module.css";
 
 export interface SwitchProps {
-  checked?: boolean;
-  defaultChecked?: boolean;
-  onCheckedChange?: (v: boolean) => void;
+  /** Controlled state. Without it the switch keeps the state itself, starting at `defaultChecked`. */
+  checked?: boolean | undefined;
+  defaultChecked?: boolean | undefined;
+  onCheckedChange?: ((v: boolean) => void) | undefined;
   label?: ReactNode;
   description?: ReactNode;
-  disabled?: boolean;
-  id?: string;
+  disabled?: boolean | undefined;
+  id?: string | undefined;
   className?: string | undefined;
   /** Required when there is no visible `label`. */
-  "aria-label"?: string;
-  "aria-describedby"?: string;
+  "aria-label"?: string | undefined;
+  "aria-describedby"?: string | undefined;
 }
 
 export function Switch({

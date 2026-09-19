@@ -2,7 +2,8 @@
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "../../lib/cn";
-import { formatNumber } from "../../lib/format";
+import { useFormat } from "../../lib/use-format";
+import { useLabels } from "../../provider";
 import { IconButton } from "./button";
 import { Select } from "./select";
 import styles from "./pagination.module.css";
@@ -12,10 +13,10 @@ export interface PaginationProps {
   page: number;
   pageCount: number;
   onPageChange: (p: number) => void;
-  total?: number;
-  pageSize?: number;
-  pageSizeOptions?: number[];
-  onPageSizeChange?: (n: number) => void;
+  total?: number | undefined;
+  pageSize?: number | undefined;
+  pageSizeOptions?: number[] | undefined;
+  onPageSizeChange?: ((n: number) => void) | undefined;
   className?: string | undefined;
 }
 
@@ -50,6 +51,8 @@ export function Pagination({
   onPageSizeChange,
   className,
 }: PaginationProps) {
+  const label = useLabels();
+  const { int: format } = useFormat();
   const count = Math.max(pageCount, 1);
   const current = Math.min(Math.max(page, 1), count);
 
@@ -57,22 +60,22 @@ export function Pagination({
   if (total !== undefined && pageSize !== undefined) {
     const from = total === 0 ? 0 : (current - 1) * pageSize + 1;
     const to = Math.min(current * pageSize, total);
-    summary = `${formatNumber(from)}–${formatNumber(to)} of ${formatNumber(total)}`;
+    summary = label("pagination.range", { from: format(from), to: format(to), total: format(total) });
   } else {
-    summary = `Page ${formatNumber(current)} of ${formatNumber(count)}`;
+    summary = label("pagination.pageOf", { page: format(current), pages: format(count) });
   }
 
   const showPageSize = pageSizeOptions && pageSizeOptions.length > 0 && onPageSizeChange;
 
   return (
-    <nav aria-label="Pagination" className={cn(styles.root, className)}>
-      <div className={styles.left}>
+    <nav aria-label={label("pagination.label")} className={cn(styles.root, className)}>
+      <div className={styles.start}>
         <span className={styles.summary} aria-live="polite">
           {summary}
         </span>
         {showPageSize && (
           <label className={styles.pageSize}>
-            <span className={styles.pageSizeLabel}>Rows per page</span>
+            <span className={styles.pageSizeLabel}>{label("pagination.pageSize")}</span>
             <Select
               size="sm"
               className={styles.pageSizeSelect}
@@ -84,10 +87,10 @@ export function Pagination({
         )}
       </div>
 
-      <div className={styles.right}>
+      <div className={styles.end}>
         <IconButton
           icon={<ChevronLeft />}
-          label="Previous page"
+          label={label("pagination.previous")}
           variant="secondary"
           size="sm"
           disabled={current <= 1}
@@ -101,12 +104,12 @@ export function Pagination({
                   type="button"
                   className={cn(styles.page, token === current && styles.current)}
                   aria-current={token === current ? "page" : undefined}
-                  aria-label={`Page ${token}`}
+                  aria-label={label("pagination.goToPage", { page: format(token) })}
                   onClick={() => {
                     if (token !== current) onPageChange(token);
                   }}
                 >
-                  {formatNumber(token)}
+                  {format(token)}
                 </button>
               </li>
             ) : (
@@ -117,11 +120,11 @@ export function Pagination({
           )}
         </ul>
         <span className={styles.compact} aria-hidden="true">
-          {current} / {count}
+          {label("pagination.compact", { page: format(current), pages: format(count) })}
         </span>
         <IconButton
           icon={<ChevronRight />}
-          label="Next page"
+          label={label("pagination.next")}
           variant="secondary"
           size="sm"
           disabled={current >= count}

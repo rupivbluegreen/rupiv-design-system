@@ -4,23 +4,25 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent, Ref, RefObject } from "react";
 import { Search, X } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { useLabels } from "../../provider";
 import { Kbd } from "./kbd";
 import styles from "./search-input.module.css";
 
 export interface SearchInputProps {
   value?: string | undefined;
-  defaultValue?: string;
+  defaultValue?: string | undefined;
   onChange?: ((value: string) => void) | undefined;
-  placeholder?: string;
+  /** Default: the provider's "searchInput.placeholder". Also the accessible name unless `aria-label` is given. */
+  placeholder?: string | undefined;
   /** Single key (e.g. "/") that focuses the input from anywhere on the page. Shown as a Kbd hint. */
-  shortcut?: string;
-  size?: "sm" | "md" | "lg";
+  shortcut?: string | undefined;
+  size?: "sm" | "md" | "lg" | undefined;
   /** Disabled styling; also hides the clear button and ignores the shortcut. */
-  disabled?: boolean;
+  disabled?: boolean | undefined;
   className?: string | undefined;
-  id?: string;
-  name?: string;
-  "aria-label"?: string;
+  id?: string | undefined;
+  name?: string | undefined;
+  "aria-label"?: string | undefined;
   ref?: Ref<HTMLInputElement>;
 }
 
@@ -34,7 +36,7 @@ export function SearchInput({
   value,
   defaultValue = "",
   onChange,
-  placeholder = "Search",
+  placeholder,
   shortcut,
   size = "md",
   disabled = false,
@@ -44,6 +46,8 @@ export function SearchInput({
   "aria-label": ariaLabel,
   ref,
 }: SearchInputProps) {
+  const label = useLabels();
+  const placeholderText = placeholder ?? label("searchInput.placeholder");
   const [internal, setInternal] = useState(defaultValue);
   const current = value ?? internal;
   const localRef = useRef<HTMLInputElement | null>(null);
@@ -105,8 +109,8 @@ export function SearchInput({
         spellCheck={false}
         disabled={disabled}
         className={styles.input}
-        placeholder={placeholder}
-        aria-label={ariaLabel ?? placeholder}
+        placeholder={placeholderText}
+        aria-label={ariaLabel ?? placeholderText}
         aria-keyshortcuts={shortcut}
         value={current}
         onChange={handleChange}
@@ -116,7 +120,7 @@ export function SearchInput({
         <button
           type="button"
           className={styles.clear}
-          aria-label="Clear search"
+          aria-label={label("searchInput.clear")}
           onClick={() => {
             update("");
             localRef.current?.focus();

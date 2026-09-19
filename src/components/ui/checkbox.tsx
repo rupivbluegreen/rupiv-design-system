@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef } from "react";
-import type { InputHTMLAttributes, ReactNode, Ref, RefObject } from "react";
+import type { ChangeEvent, InputHTMLAttributes, ReactNode, Ref, RefObject } from "react";
 import { Check, Minus } from "lucide-react";
 import { cn } from "../../lib/cn";
 import styles from "./checkbox.module.css";
@@ -35,6 +35,13 @@ export function Checkbox({
     if (localRef.current) localRef.current.indeterminate = indeterminate;
   }, [indeterminate]);
 
+  // A click makes the browser clear `indeterminate`. The prop is what the parent wants, so put it back until the parent
+  // says otherwise (a new value of the prop runs the effect above).
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
+    rest.onChange?.(event);
+    if (indeterminate && localRef.current) localRef.current.indeterminate = true;
+  }
+
   const setRefs = useCallback(
     (node: HTMLInputElement | null) => {
       localRef.current = node;
@@ -56,6 +63,7 @@ export function Checkbox({
         className={styles.input}
         aria-checked={indeterminate ? "mixed" : undefined}
         aria-describedby={describedBy}
+        onChange={rest.onChange ? handleChange : undefined}
       />
       <span className={styles.box} aria-hidden="true">
         <Check className={styles.checkIcon} strokeWidth={3} />

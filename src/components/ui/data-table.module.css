@@ -201,7 +201,7 @@
   white-space: normal;
 }
 
-.alignRight {
+.alignEnd {
   text-align: end !important;
   font-variant-numeric: tabular-nums;
 }
@@ -210,7 +210,7 @@
   text-align: center !important;
 }
 
-.alignRight .sortButton {
+.alignEnd .sortButton {
   flex-direction: row-reverse;
 }
 

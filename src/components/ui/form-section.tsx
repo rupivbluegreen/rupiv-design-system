@@ -37,7 +37,7 @@ export function FormSection({ title, description, actions, className, children }
 /* ------------------------------------------------------------------ */
 
 export interface FormGridProps {
-  columns?: 1 | 2 | 3 | 4;
+  columns?: 1 | 2 | 3 | 4 | undefined;
   className?: string | undefined;
   children: ReactNode;
 }
