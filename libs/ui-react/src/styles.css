@@ -6,6 +6,7 @@
 @import './patterns/kpi-card.css';
 @import './patterns/ai-insight-card.css';
 @import './patterns/empty-state.css';
+@import './patterns/page-header.css';
 @import './patterns/app-shell.css';
 @import './primitives/field.css';
 @import './primitives/input.css';

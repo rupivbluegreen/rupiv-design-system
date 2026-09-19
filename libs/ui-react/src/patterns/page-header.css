@@ -1,0 +1,108 @@
+.omni-page-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--tx-space-2) var(--tx-space-3);
+  margin-block-end: var(--tx-space-3);
+}
+
+/* The basis makes the actions drop under the title instead of squeezing it. */
+.omni-page-header-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tx-space-0-5);
+  flex: 1 1 16rem;
+  min-inline-size: 0;
+}
+
+.omni-page-header-crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tx-space-0-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.omni-page-header-crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--tx-space-0-5);
+  font-size: var(--tx-typography-size-body-sm);
+  color: var(--tx-color-text-secondary);
+}
+
+.omni-page-header-crumb a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.omni-page-header-crumb a:hover {
+  color: var(--tx-color-text-primary);
+  text-decoration: underline;
+}
+
+.omni-page-header-crumb a:focus-visible {
+  outline: 2px solid var(--tx-color-brand-500);
+  outline-offset: 2px;
+  border-radius: var(--tx-radius-xs);
+}
+
+.omni-page-header-crumb [aria-current='page'] {
+  color: var(--tx-color-text-primary);
+  font-weight: var(--tx-typography-weight-medium);
+}
+
+.omni-page-header-crumb-separator {
+  flex: none;
+  color: var(--tx-color-text-tertiary);
+}
+
+.omni-page-header-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tx-space-1) var(--tx-space-1-5);
+}
+
+/* DM Serif Display only exists in weight 400: say so, or headings get a faux bold. */
+.omni-page-header-title {
+  margin: 0;
+  min-inline-size: 0;
+  overflow-wrap: break-word;
+  font-family: var(--tx-typography-font-display);
+  font-size: var(--tx-typography-size-heading-xl);
+  font-weight: var(--tx-typography-weight-regular);
+  line-height: var(--tx-typography-leading-tight);
+  color: var(--tx-color-text-primary);
+}
+
+/* The display font has no Arabic glyphs, so Arabic titles switch to the Arabic family, like the body text does. */
+.omni-page-header-title:lang(ar),
+[dir='rtl'] .omni-page-header-title,
+.omni-page-header-title[dir='rtl'] {
+  font-family: var(--tx-typography-font-arabic);
+  font-weight: var(--tx-typography-weight-semibold);
+  line-height: var(--tx-typography-leading-normal);
+}
+
+.omni-page-header-meta {
+  display: inline-flex;
+  align-items: center;
+}
+
+.omni-page-header-subtitle {
+  margin: 0;
+  font-size: var(--tx-typography-size-body-md);
+  line-height: var(--tx-typography-leading-normal);
+  color: var(--tx-color-text-secondary);
+}
+
+.omni-page-header-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--tx-space-1);
+}

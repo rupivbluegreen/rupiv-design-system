@@ -16,6 +16,7 @@ describe('@omniappsuiux/ui-react barrel', () => {
     'KPICard',
     'AIInsightCard',
     'EmptyState',
+    'PageHeader',
     'AppShell',
     'DataTable',
     'Field',
