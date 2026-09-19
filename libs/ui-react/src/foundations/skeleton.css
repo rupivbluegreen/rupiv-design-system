@@ -1,0 +1,29 @@
+.omni-skeleton {
+  display: block;
+  background: var(--tx-color-border-subtle);
+  animation: omni-skeleton-pulse calc(var(--tx-motion-duration-slow) * 5)
+    var(--tx-motion-easing-standard) infinite;
+}
+
+.omni-skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--tx-space-1);
+}
+
+/* Opacity only: it has no direction, so nothing needs an [dir='rtl'] override. */
+@keyframes omni-skeleton-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .omni-skeleton {
+    animation: none;
+  }
+}

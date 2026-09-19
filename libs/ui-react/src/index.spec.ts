@@ -11,6 +11,8 @@ describe('@omniappsuiux/ui-react barrel', () => {
     'IconButton',
     'StatusBadge',
     'MetricDelta',
+    'Skeleton',
+    'SkeletonText',
     'KPICard',
     'AIInsightCard',
     'AppShell',

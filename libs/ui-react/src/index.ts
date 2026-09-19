@@ -2,6 +2,7 @@
 export * from './foundations/surface';
 export * from './foundations/button';
 export * from './foundations/status-badge';
+export * from './foundations/skeleton';
 export * from './patterns/kpi-card';
 export * from './patterns/ai-insight-card';
 export * from './patterns/app-shell';
