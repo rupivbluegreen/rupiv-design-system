@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { useLabels } from "../../provider";
 import styles from "./modal.module.css";
 
 export interface ModalProps {
@@ -38,6 +39,7 @@ function focusables(panel: HTMLElement): HTMLElement[] {
 }
 
 export function Modal({ open, onClose, title, description, size = "md", footer, className, children }: ModalProps) {
+  const label = useLabels();
   const isClient = useIsClient();
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -50,10 +52,12 @@ export function Modal({ open, onClose, title, description, size = "md", footer, 
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const body = document.body;
     const prevOverflow = body.style.overflow;
-    const prevPadding = body.style.paddingRight;
+    const prevPadding = body.style.paddingInlineEnd;
+    // The page scrollbar is at the inline end in both directions (right in English, left in Arabic), and it
+    // disappears with the scroll, so its width is kept as padding on that side.
     const scrollbar = window.innerWidth - document.documentElement.clientWidth;
     body.style.overflow = "hidden";
-    if (scrollbar > 0) body.style.paddingRight = `${scrollbar}px`;
+    if (scrollbar > 0) body.style.paddingInlineEnd = `${scrollbar}px`;
 
     if (panel) {
       const auto = panel.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
@@ -63,7 +67,7 @@ export function Modal({ open, onClose, title, description, size = "md", footer, 
 
     return () => {
       body.style.overflow = prevOverflow;
-      body.style.paddingRight = prevPadding;
+      body.style.paddingInlineEnd = prevPadding;
       if (previous && previous.isConnected) previous.focus({ preventScroll: true });
     };
   }, [open, isClient]);
@@ -132,15 +136,19 @@ export function Modal({ open, onClose, title, description, size = "md", footer, 
             type="button"
             className={styles.close}
             onClick={onClose}
-            aria-label="Close"
-            title="Close"
+            aria-label={label("modal.close")}
+            title={label("modal.close")}
             data-dialog-close=""
           >
             <X aria-hidden="true" />
           </button>
         </div>
         <div className={styles.body}>{children}</div>
-        {footer ? <div className={styles.footer}>{footer}</div> : null}
+        {footer ? (
+          <div className={styles.footer} data-overlay-footer="">
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>,
     document.body,

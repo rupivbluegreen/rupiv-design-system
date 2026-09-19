@@ -1,7 +1,8 @@
 .region {
   position: fixed;
   inset-inline-end: var(--space-24);
-  inset-block-end: var(--space-24);
+  /* --rd-toast-lift is set by the provider while a drawer or modal footer would sit under the stack */
+  inset-block-end: calc(var(--space-24) + var(--rd-toast-lift, 0px));
   z-index: var(--z-toast);
   display: flex;
   flex-direction: column;
@@ -123,6 +124,6 @@
 @media (max-width: 639px) {
   .region {
     inset-inline-end: var(--space-16);
-    inset-block-end: var(--space-16);
+    inset-block-end: calc(var(--space-16) + var(--rd-toast-lift, 0px));
   }
 }

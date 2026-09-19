@@ -95,3 +95,8 @@
 .select:disabled + .chevron {
   color: var(--text-disabled);
 }
+
+/* Width of the content instead of the width of the container (a select inside a row of controls). */
+.auto {
+  inline-size: auto;
+}

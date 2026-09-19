@@ -5,6 +5,8 @@ import type { ChangeEvent, CSSProperties, KeyboardEvent as ReactKeyboardEvent } 
 import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { alignedLeft, computedDirection } from "../../lib/placement";
+import { useLabels } from "../../provider";
 import styles from "./combobox.module.css";
 
 export interface ComboboxOption {
@@ -19,7 +21,9 @@ export interface ComboboxProps {
   options: ComboboxOption[];
   value?: string;
   onChange?: (value: string) => void;
+  /** Text of the empty field. Default: the "combobox.placeholder" label. */
   placeholder?: string;
+  /** Text when the search matches nothing. Default: the "combobox.empty" label. */
   emptyText?: string;
   size?: "sm" | "md" | "lg";
   invalid?: boolean;
@@ -33,6 +37,7 @@ export interface ComboboxProps {
 }
 
 interface ListPosition {
+  /** Viewport coordinates of the list; its width is the width of the field. */
   left: number;
   width: number;
   top?: number | undefined;
@@ -49,7 +54,8 @@ function measureAnchor(el: HTMLElement): ListPosition {
   const placeAbove = spaceBelow < 220 && spaceAbove > spaceBelow;
   const available = placeAbove ? spaceAbove : spaceBelow;
   return {
-    left: rect.left,
+    // The list is as wide as the field and lines up with its inline start, which is the right edge in right-to-left.
+    left: alignedLeft(rect, rect.width, "start", computedDirection(el)),
     width: rect.width,
     top: placeAbove ? undefined : rect.bottom + GAP,
     bottom: placeAbove ? window.innerHeight - rect.top + GAP : undefined,
@@ -68,8 +74,8 @@ export function Combobox({
   options,
   value,
   onChange,
-  placeholder = "Select…",
-  emptyText = "No matches",
+  placeholder,
+  emptyText,
   size = "md",
   invalid = false,
   id,
@@ -80,6 +86,7 @@ export function Combobox({
   "aria-describedby": ariaDescribedBy,
   "aria-invalid": ariaInvalid,
 }: ComboboxProps) {
+  const label = useLabels();
   const autoId = useId();
   const inputId = id ?? `combobox-${autoId}`;
   const listId = `${inputId}-listbox`;
@@ -204,10 +211,10 @@ export function Combobox({
   const listStyle: CSSProperties | undefined = position
     ? {
         left: position.left,
-        width: position.width,
+        inlineSize: position.width,
         top: position.top,
         bottom: position.bottom,
-        maxHeight: position.maxHeight,
+        maxBlockSize: position.maxHeight,
       }
     : undefined;
 
@@ -232,7 +239,7 @@ export function Combobox({
         spellCheck={false}
         className={styles.input}
         disabled={disabled}
-        placeholder={open && selected ? selected.label : placeholder}
+        placeholder={open && selected ? selected.label : (placeholder ?? label("combobox.placeholder"))}
         value={open ? query : (selected?.label ?? "")}
         aria-expanded={open}
         aria-controls={listId}
@@ -253,7 +260,7 @@ export function Combobox({
         tabIndex={-1}
         className={styles.toggle}
         disabled={disabled}
-        aria-label={open ? "Hide options" : "Show options"}
+        aria-label={open ? label("combobox.hide") : label("combobox.show")}
         onMouseDown={(event) => event.preventDefault()}
         onClick={() => {
           if (open) closeList();
@@ -270,7 +277,7 @@ export function Combobox({
           <ul ref={listRef} id={listId} role="listbox" className={styles.list} style={listStyle}>
             {filtered.length === 0 ? (
               <li role="presentation" className={styles.empty}>
-                {emptyText}
+                {emptyText ?? label("combobox.empty")}
               </li>
             ) : (
               filtered.map((option, index) => {

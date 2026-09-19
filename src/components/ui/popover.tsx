@@ -15,14 +15,18 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "../../lib/cn";
+import { applyPlacement, computedDirection, measureFloating, placeBlock, viewportSize } from "../../lib/placement";
 import styles from "./popover.module.css";
 
 export interface PopoverProps {
   trigger: ReactElement;
   children?: ReactNode;
+  /** Which edge of the trigger the panel lines up with: its inline start (left in English, right in Arabic) or inline end. */
   align?: "start" | "end";
   /** Panel width in px. Defaults to content width (min 240px). */
   width?: number;
+  /** Accessible name of the panel. */
+  label?: string;
   /** Controlled open state. Omit for uncontrolled. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -33,26 +37,20 @@ const noopSubscribe = () => () => {};
 const useIsClient = () => useSyncExternalStore(noopSubscribe, () => true, () => false);
 
 const GAP = 6;
-const MARGIN = 8;
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
-function placePanel(anchor: HTMLElement, panel: HTMLElement, align: "start" | "end") {
-  const r = anchor.getBoundingClientRect();
-  const { width, height } = panel.getBoundingClientRect();
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  let top = r.bottom + GAP;
-  let side = "bottom";
-  if (top + height > vh - MARGIN && r.top - GAP - height >= MARGIN) {
-    top = r.top - GAP - height;
-    side = "top";
-  }
-  let left = align === "end" ? r.right - width : r.left;
-  left = Math.max(MARGIN, Math.min(left, vw - MARGIN - width));
-  panel.style.top = `${Math.round(top)}px`;
-  panel.style.left = `${Math.round(left)}px`;
-  panel.dataset.side = side;
+function placePopover(anchor: HTMLElement, panel: HTMLElement, align: "start" | "end") {
+  const size = measureFloating(panel);
+  applyPlacement(
+    panel,
+    placeBlock(anchor.getBoundingClientRect(), size, viewportSize(), {
+      dir: computedDirection(anchor),
+      align,
+      side: "bottom",
+      gap: GAP,
+    }),
+  );
 }
 
 export function Popover({
@@ -60,6 +58,7 @@ export function Popover({
   children,
   align = "start",
   width,
+  label,
   open: openProp,
   onOpenChange,
   className,
@@ -83,6 +82,11 @@ export function Popover({
     onOpenChange?.(next);
   };
 
+  const focusTrigger = () => {
+    const el = anchorRef.current?.firstElementChild;
+    if (el instanceof HTMLElement) el.focus({ preventScroll: true });
+  };
+
   // Position + dismissal listeners
   useLayoutEffect(() => {
     if (!open || !isClient) return;
@@ -91,7 +95,7 @@ export function Popover({
     const anchor = anchorWrap?.firstElementChild;
     if (!panel || !anchorWrap || !(anchor instanceof HTMLElement)) return;
 
-    const place = () => placePanel(anchor, panel, align);
+    const place = () => placePopover(anchor, panel, align);
     place();
     if (openedByKeyboard.current) {
       const first = panel.querySelector<HTMLElement>(FOCUSABLE);
@@ -128,14 +132,13 @@ export function Popover({
     setOpen(!open);
   };
 
-  const onPanelKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === "Escape") {
-      e.preventDefault();
-      e.stopPropagation();
-      setOpen(false);
-      const el = anchorRef.current?.firstElementChild;
-      if (el instanceof HTMLElement) el.focus({ preventScroll: true });
-    }
+  // Escape closes it whether focus is in the panel or still on the trigger (a mouse click leaves it there).
+  const onEscape = (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key !== "Escape" || !open) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setOpen(false);
+    focusTrigger();
   };
 
   const triggerEl = cloneElement(trigger as ReactElement<Record<string, unknown>>, {
@@ -146,7 +149,7 @@ export function Popover({
 
   return (
     <>
-      <span ref={anchorRef} className={styles.anchor} onClick={onAnchorClick}>
+      <span ref={anchorRef} className={styles.anchor} onClick={onAnchorClick} onKeyDown={onEscape}>
         {triggerEl}
       </span>
       {open && isClient
@@ -155,10 +158,11 @@ export function Popover({
               ref={panelRef}
               id={panelId}
               role="dialog"
+              aria-label={label}
               tabIndex={-1}
               className={cn(styles.popover, className)}
-              style={width ? { width } : undefined}
-              onKeyDown={onPanelKeyDown}
+              style={width ? { inlineSize: width } : undefined}
+              onKeyDown={onEscape}
             >
               {children}
             </div>,

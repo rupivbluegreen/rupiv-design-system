@@ -13,11 +13,15 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import { Check } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { applyPlacement, computedDirection, measureFloating, placeBlock, viewportSize } from "../../lib/placement";
 import { useLink } from "../../provider";
 import styles from "./menu.module.css";
 
 export interface MenuItem {
+  /** Optional discriminant; an entry with no `type` is an ordinary item. */
+  type?: "item";
   label: ReactNode;
   icon?: ReactNode;
   onSelect?: () => void;
@@ -27,10 +31,43 @@ export interface MenuItem {
   disabled?: boolean;
 }
 
+/** A small title over the entries that follow it. Not focusable. */
+export interface MenuHeading {
+  type: "heading";
+  label: ReactNode;
+}
+
+export interface MenuRadioOption {
+  value: string;
+  label: ReactNode;
+  icon?: ReactNode;
+  disabled?: boolean;
+}
+
+/**
+ * One choice out of several. The options are `menuitemradio` items with a check mark on the chosen one, inside a
+ * `group` named by `heading` (shown) or `label`. Choosing an option closes the menu and calls `onValueChange`
+ * when the value changed.
+ */
+export interface MenuRadioGroup {
+  type: "radio-group";
+  options: MenuRadioOption[];
+  /** The chosen value; none is checked when it matches no option. */
+  value: string | undefined;
+  onValueChange: (value: string) => void;
+  /** Visible title of the group. It also names the group for assistive technology. */
+  heading?: ReactNode;
+  /** Accessible name of the group when there is no visible `heading`. */
+  label?: string;
+}
+
+export type MenuEntry = MenuItem | MenuHeading | MenuRadioGroup | "separator";
+
 export interface MenuProps {
   /** A button element. Receives aria-haspopup / aria-expanded; clicks toggle the menu. */
   trigger: ReactElement;
-  items: (MenuItem | "separator")[];
+  items: MenuEntry[];
+  /** Which edge of the trigger the menu lines up with: its inline start (left in English, right in Arabic) or inline end. */
   align?: "start" | "end";
   /** Accessible name for the menu. */
   label?: string;
@@ -41,29 +78,21 @@ const noopSubscribe = () => () => {};
 const useIsClient = () => useSyncExternalStore(noopSubscribe, () => true, () => false);
 
 const GAP = 4;
-const MARGIN = 8;
+const MIN_WIDTH = 180;
 
-function placePanel(anchor: HTMLElement, panel: HTMLElement, align: "start" | "end") {
-  const r = anchor.getBoundingClientRect();
-  panel.style.minWidth = `${Math.max(r.width, 180)}px`;
-  const { width, height } = panel.getBoundingClientRect();
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  let top = r.bottom + GAP;
-  let side = "bottom";
-  if (top + height > vh - MARGIN && r.top - GAP - height >= MARGIN) {
-    top = r.top - GAP - height;
-    side = "top";
-  }
-  let left = align === "end" ? r.right - width : r.left;
-  left = Math.max(MARGIN, Math.min(left, vw - MARGIN - width));
-  panel.style.top = `${Math.round(top)}px`;
-  panel.style.left = `${Math.round(left)}px`;
-  panel.dataset.side = side;
+function placeMenu(anchor: HTMLElement, panel: HTMLElement, align: "start" | "end") {
+  const anchorBox = anchor.getBoundingClientRect();
+  panel.style.minInlineSize = `${Math.max(anchorBox.width, MIN_WIDTH)}px`;
+  const size = measureFloating(panel);
+  applyPlacement(
+    panel,
+    placeBlock(anchorBox, size, viewportSize(), { dir: computedDirection(anchor), align, side: "bottom", gap: GAP }),
+  );
 }
 
+/** Items the arrow keys can reach: ordinary items and radio items that are not disabled. */
 function menuItems(panel: HTMLElement): HTMLElement[] {
-  return Array.from(panel.querySelectorAll<HTMLElement>('[role="menuitem"]:not([aria-disabled="true"])'));
+  return Array.from(panel.querySelectorAll<HTMLElement>('[role^="menuitem"]:not([aria-disabled="true"])'));
 }
 
 export function Menu({ trigger, items, align = "start", label, className }: MenuProps) {
@@ -87,7 +116,7 @@ export function Menu({ trigger, items, align = "start", label, className }: Menu
     const anchor = anchorWrap?.firstElementChild;
     if (!panel || !anchorWrap || !(anchor instanceof HTMLElement)) return;
 
-    placePanel(anchor, panel, align);
+    placeMenu(anchor, panel, align);
     if (openedByKeyboard.current) {
       menuItems(panel)[0]?.focus({ preventScroll: true });
     } else {
@@ -129,6 +158,8 @@ export function Menu({ trigger, items, align = "start", label, className }: Menu
     }
   };
 
+  // The menu is vertical and has no submenus, so no arrow key depends on the text direction: Up and Down move,
+  // Left and Right do nothing in either direction. Direction matters here only for where the panel is placed.
   const onPanelKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     const panel = panelRef.current;
     if (!panel) return;
@@ -165,7 +196,11 @@ export function Menu({ trigger, items, align = "start", label, className }: Menu
     }
   };
 
-  const renderItem = (item: MenuItem, i: number) => {
+  const onMouseEnter = (e: MouseEvent<HTMLElement>) => {
+    if (e.currentTarget.getAttribute("aria-disabled") !== "true") e.currentTarget.focus({ preventScroll: true });
+  };
+
+  const renderItem = (item: MenuItem, key: string) => {
     const content = (
       <>
         {item.icon ? (
@@ -177,7 +212,7 @@ export function Menu({ trigger, items, align = "start", label, className }: Menu
         {item.shortcut ? <span className={styles.shortcut}>{item.shortcut}</span> : null}
       </>
     );
-    const className = cn(styles.item, item.danger && styles.danger);
+    const itemClass = cn(styles.item, item.danger && styles.danger);
     const onClick = (e: MouseEvent<HTMLElement>) => {
       if (item.disabled) {
         e.preventDefault();
@@ -187,18 +222,15 @@ export function Menu({ trigger, items, align = "start", label, className }: Menu
       setOpen(false);
       item.onSelect?.();
     };
-    const onMouseEnter = (e: MouseEvent<HTMLElement>) => {
-      if (!item.disabled) e.currentTarget.focus({ preventScroll: true });
-    };
 
     if (item.href && !item.disabled) {
       return (
         <Link
-          key={i}
+          key={key}
           href={item.href}
           role="menuitem"
           tabIndex={-1}
-          className={className}
+          className={itemClass}
           onClick={onClick}
           onMouseEnter={onMouseEnter}
         >
@@ -208,18 +240,85 @@ export function Menu({ trigger, items, align = "start", label, className }: Menu
     }
     return (
       <button
-        key={i}
+        key={key}
         type="button"
         role="menuitem"
         tabIndex={-1}
         aria-disabled={item.disabled || undefined}
-        className={className}
+        className={itemClass}
         onClick={onClick}
         onMouseEnter={onMouseEnter}
       >
         {content}
       </button>
     );
+  };
+
+  const renderRadioGroup = (group: MenuRadioGroup, key: string) => {
+    const headingId = `${menuId}-${key}`;
+    return (
+      <div
+        key={key}
+        role="group"
+        className={styles.group}
+        aria-labelledby={group.heading ? headingId : undefined}
+        aria-label={group.heading ? undefined : group.label}
+      >
+        {group.heading ? (
+          <div id={headingId} className={styles.heading}>
+            {group.heading}
+          </div>
+        ) : null}
+        {group.options.map((option) => {
+          const checked = option.value === group.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="menuitemradio"
+              aria-checked={checked}
+              aria-disabled={option.disabled || undefined}
+              tabIndex={-1}
+              className={styles.item}
+              onMouseEnter={onMouseEnter}
+              onClick={(e) => {
+                if (option.disabled) {
+                  e.preventDefault();
+                  return;
+                }
+                focusTrigger();
+                setOpen(false);
+                if (!checked) group.onValueChange(option.value);
+              }}
+            >
+              <span className={styles.check} aria-hidden="true">
+                <Check />
+              </span>
+              {option.icon ? (
+                <span className={styles.icon} aria-hidden="true">
+                  {option.icon}
+                </span>
+              ) : null}
+              <span className={styles.label}>{option.label}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  };
+
+  const renderEntry = (entry: MenuEntry, i: number) => {
+    const key = `entry-${i}`;
+    if (entry === "separator") return <div key={key} role="separator" className={styles.separator} />;
+    if (entry.type === "heading") {
+      return (
+        <div key={key} role="presentation" className={styles.heading}>
+          {entry.label}
+        </div>
+      );
+    }
+    if (entry.type === "radio-group") return renderRadioGroup(entry, key);
+    return renderItem(entry, key);
   };
 
   const triggerEl = cloneElement(trigger as ReactElement<Record<string, unknown>>, {
@@ -245,13 +344,7 @@ export function Menu({ trigger, items, align = "start", label, className }: Menu
               className={cn(styles.menu, className)}
               onKeyDown={onPanelKeyDown}
             >
-              {items.map((item, i) =>
-                item === "separator" ? (
-                  <div key={i} role="separator" className={styles.separator} />
-                ) : (
-                  renderItem(item, i)
-                ),
-              )}
+              {items.map(renderEntry)}
             </div>,
             document.body,
           )

@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { cn } from "../../lib/cn";
+import { computedDirection } from "../../lib/placement";
 import styles from "./segmented-control.module.css";
 
 export interface SegmentedControlOption {
@@ -54,10 +55,14 @@ export function SegmentedControl({
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    // The segments are laid out along the text direction: the horizontal key that points to the next segment on
+    // screen is ArrowRight in English and ArrowLeft in Arabic. ArrowDown and ArrowUp do not depend on direction.
+    const rtl = computedDirection(event.currentTarget) === "rtl";
+    const nextKeys = rtl ? ["ArrowLeft", "ArrowDown"] : ["ArrowRight", "ArrowDown"];
+    const previousKeys = rtl ? ["ArrowRight", "ArrowUp"] : ["ArrowLeft", "ArrowUp"];
     let nextIndex: number | null = null;
-    if (event.key === "ArrowRight" || event.key === "ArrowDown") nextIndex = (index + 1) % options.length;
-    else if (event.key === "ArrowLeft" || event.key === "ArrowUp")
-      nextIndex = (index - 1 + options.length) % options.length;
+    if (nextKeys.includes(event.key)) nextIndex = (index + 1) % options.length;
+    else if (previousKeys.includes(event.key)) nextIndex = (index - 1 + options.length) % options.length;
     else if (event.key === "Home") nextIndex = 0;
     else if (event.key === "End") nextIndex = options.length - 1;
     if (nextIndex === null) return;

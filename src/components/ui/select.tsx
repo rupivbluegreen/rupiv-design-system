@@ -14,6 +14,8 @@ export interface SelectProps extends Omit<SelectHTMLAttributes<HTMLSelectElement
   /** Adds an empty-value first option. Selectable (to clear) unless `required`. */
   placeholder?: string;
   size?: "sm" | "md" | "lg";
+  /** `"full"` (default) fills its container; `"auto"` is as wide as its longest option, for a select in a row of controls. */
+  width?: "full" | "auto";
   invalid?: boolean;
   ref?: Ref<HTMLSelectElement>;
 }
@@ -23,6 +25,7 @@ export function Select({
   options,
   placeholder,
   size = "md",
+  width = "full",
   invalid = false,
   className,
   value,
@@ -35,7 +38,7 @@ export function Select({
     value === undefined && defaultValue === undefined && placeholder !== undefined ? "" : defaultValue;
 
   return (
-    <span className={cn(styles.root, styles[size], className)}>
+    <span className={cn(styles.root, styles[size], width === "auto" && styles.auto, className)}>
       <select
         {...rest}
         ref={ref}

@@ -3,7 +3,8 @@
 import { useId, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { cn } from "../../lib/cn";
-import { useActivePath, useLink } from "../../provider";
+import { computedDirection } from "../../lib/placement";
+import { useActivePath, useLabels, useLink } from "../../provider";
 import styles from "./tabs.module.css";
 
 /* ------------------------------------------------------------------ */
@@ -59,9 +60,14 @@ export function Tabs({
   }
 
   function handleKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    // The tabs are laid out along the text direction: the key that points to the next tab on screen is
+    // ArrowRight in English and ArrowLeft in Arabic.
+    const rtl = computedDirection(event.currentTarget) === "rtl";
+    const nextKey = rtl ? "ArrowLeft" : "ArrowRight";
+    const previousKey = rtl ? "ArrowRight" : "ArrowLeft";
     let nextIndex: number | null = null;
-    if (event.key === "ArrowRight") nextIndex = (index + 1) % items.length;
-    else if (event.key === "ArrowLeft") nextIndex = (index - 1 + items.length) % items.length;
+    if (event.key === nextKey) nextIndex = (index + 1) % items.length;
+    else if (event.key === previousKey) nextIndex = (index - 1 + items.length) % items.length;
     else if (event.key === "Home") nextIndex = 0;
     else if (event.key === "End") nextIndex = items.length - 1;
     if (nextIndex === null) return;
@@ -123,7 +129,7 @@ export interface TabLinkItem {
 
 export interface TabLinksProps {
   items: TabLinkItem[];
-  /** Default "Sections". */
+  /** Name of the navigation landmark. Default: the "tabs.sections" label. */
   ariaLabel?: string;
   /** Alias of `ariaLabel`; wins when both are set. */
   "aria-label"?: string;
@@ -131,7 +137,8 @@ export interface TabLinksProps {
 }
 
 /** Route-backed tabs (line style). Active = exact match or the longest matching path prefix. */
-export function TabLinks({ items, ariaLabel = "Sections", "aria-label": ariaLabelAttr, className }: TabLinksProps) {
+export function TabLinks({ items, ariaLabel, "aria-label": ariaLabelAttr, className }: TabLinksProps) {
+  const label = useLabels();
   const Link = useLink();
   const pathname = useActivePath();
   let activeHref: string | undefined;
@@ -142,7 +149,7 @@ export function TabLinks({ items, ariaLabel = "Sections", "aria-label": ariaLabe
   }
 
   return (
-    <nav aria-label={ariaLabelAttr ?? ariaLabel} className={cn(styles.list, styles.line, className)}>
+    <nav aria-label={ariaLabelAttr ?? ariaLabel ?? label("tabs.sections")} className={cn(styles.list, styles.line, className)}>
       {items.map((item) => {
         const isActive = item.href.split(/[?#]/)[0] === activeHref;
         return (

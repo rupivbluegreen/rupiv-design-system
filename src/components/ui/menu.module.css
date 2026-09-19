@@ -146,3 +146,38 @@
     transform: translateY(0);
   }
 }
+
+/* A group of radio items: the group only names them (no box of its own), so items keep the menu's rhythm. */
+.group {
+  display: flex;
+  flex-direction: column;
+  flex: none;
+}
+
+/* The check mark of a radio item. It keeps its space when hidden so the labels of a group line up. */
+.check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  inline-size: var(--icon-sm);
+  color: var(--icon-accent);
+  visibility: hidden;
+}
+
+.check svg {
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}
+
+.item[aria-checked="true"] .check {
+  visibility: visible;
+}
+
+/* A title over the entries below it (not focusable, not announced as an item). */
+.heading {
+  padding: var(--space-6) var(--space-8) var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+}

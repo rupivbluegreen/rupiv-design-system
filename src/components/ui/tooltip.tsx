@@ -8,62 +8,62 @@ import {
   useRef,
   useState,
   useSyncExternalStore,
+  type MouseEvent,
+  type PointerEvent,
   type ReactElement,
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
+import {
+  applyPlacement,
+  computedDirection,
+  measureFloating,
+  placeBlock,
+  placeInline,
+  viewportSize,
+} from "../../lib/placement";
 import styles from "./tooltip.module.css";
+
+/** Where the tooltip sits: above or below the trigger, or at its inline start or inline end (left or right in English, the reverse in Arabic). */
+export type TooltipSide = "top" | "bottom" | "start" | "end";
 
 export interface TooltipProps {
   content: ReactNode;
   children: ReactElement;
-  side?: "top" | "bottom" | "left" | "right";
+  /** Preferred side; the tooltip flips to the opposite one when it does not fit. `data-side` on the tooltip holds the side it took. */
+  side?: TooltipSide;
 }
 
 const noopSubscribe = () => () => {};
 const useIsClient = () => useSyncExternalStore(noopSubscribe, () => true, () => false);
 
+/** Hover and focus wait this long before the tooltip appears, in ms. */
 const DELAY = 300;
+/** A tooltip opened by tapping an aria-disabled control goes away after this long, in ms. */
+const TAP_DURATION = 2600;
 const GAP = 6;
-const MARGIN = 8;
 
-function placeTip(anchor: HTMLElement, tip: HTMLElement, side: NonNullable<TooltipProps["side"]>) {
-  const r = anchor.getBoundingClientRect();
-  const { width, height } = tip.getBoundingClientRect();
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  let resolved = side;
-  if (side === "top" && r.top - GAP - height < MARGIN) resolved = "bottom";
-  else if (side === "bottom" && r.bottom + GAP + height > vh - MARGIN) resolved = "top";
-  else if (side === "left" && r.left - GAP - width < MARGIN) resolved = "right";
-  else if (side === "right" && r.right + GAP + width > vw - MARGIN) resolved = "left";
-
-  let top: number;
-  let left: number;
-  switch (resolved) {
-    case "bottom":
-      top = r.bottom + GAP;
-      left = r.left + r.width / 2 - width / 2;
-      break;
-    case "left":
-      top = r.top + r.height / 2 - height / 2;
-      left = r.left - GAP - width;
-      break;
-    case "right":
-      top = r.top + r.height / 2 - height / 2;
-      left = r.right + GAP;
-      break;
-    default:
-      top = r.top - GAP - height;
-      left = r.left + r.width / 2 - width / 2;
+function placeTip(anchor: HTMLElement, tip: HTMLElement, side: TooltipSide) {
+  const anchorBox = anchor.getBoundingClientRect();
+  const size = measureFloating(tip);
+  const viewport = viewportSize();
+  const dir = computedDirection(anchor);
+  if (side === "top" || side === "bottom") {
+    applyPlacement(tip, placeBlock(anchorBox, size, viewport, { dir, align: "center", side, gap: GAP }));
+  } else {
+    applyPlacement(tip, placeInline(anchorBox, size, viewport, { dir, side, gap: GAP }));
   }
-  left = Math.max(MARGIN, Math.min(left, vw - MARGIN - width));
-  top = Math.max(MARGIN, Math.min(top, vh - MARGIN - height));
-  tip.style.top = `${Math.round(top)}px`;
-  tip.style.left = `${Math.round(left)}px`;
-  tip.dataset.side = resolved;
 }
 
+/**
+ * A short explanation on hover, keyboard focus and Escape-to-dismiss.
+ *
+ * An aria-disabled control keeps its focus and tooltip, and never acts: tapping or clicking it shows the tooltip at
+ * once (a touch screen has no hover) for a few seconds, cancels the click's default action (a link does not
+ * navigate) and stops the click where the application's React root receives it, before it reaches the control or
+ * anything around it. That is how a screen says why an action is unavailable. A native `disabled` control gets no
+ * pointer events at all, so use aria-disabled for a control that explains itself.
+ */
 export function Tooltip({ content, children, side = "top" }: TooltipProps) {
   const isClient = useIsClient();
   const [open, setOpen] = useState(false);
@@ -75,6 +75,11 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
   const show = () => {
     window.clearTimeout(timer.current);
     timer.current = window.setTimeout(() => setOpen(true), DELAY);
+  };
+  const showNow = (hideAfter?: number) => {
+    window.clearTimeout(timer.current);
+    setOpen(true);
+    if (hideAfter !== undefined) timer.current = window.setTimeout(() => setOpen(false), hideAfter);
   };
   const hide = () => {
     window.clearTimeout(timer.current);
@@ -106,6 +111,26 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
 
   if (content === null || content === undefined || content === "") return children;
 
+  // The nearest aria-disabled element under the pointer, when it is (or is inside) the trigger.
+  const disabledTarget = (target: EventTarget): boolean => {
+    const anchor = anchorRef.current;
+    if (!anchor || !(target instanceof Element)) return false;
+    const found = target.closest('[aria-disabled="true"]');
+    return found !== null && anchor.contains(found);
+  };
+
+  const onPointerDown = (e: PointerEvent<HTMLSpanElement>) => {
+    // A press that will click something hides the tooltip; a press on a disabled control keeps it for the tap below.
+    if (!disabledTarget(e.target)) hide();
+  };
+
+  const onClickCapture = (e: MouseEvent<HTMLSpanElement>) => {
+    if (!disabledTarget(e.target)) return;
+    e.preventDefault();
+    e.stopPropagation();
+    showNow(TAP_DURATION);
+  };
+
   const childProps = children.props as Record<string, unknown>;
   const describedBy = [childProps["aria-describedby"], open ? tipId : undefined].filter(Boolean).join(" ") || undefined;
   const child = cloneElement(children as ReactElement<Record<string, unknown>>, {
@@ -121,7 +146,8 @@ export function Tooltip({ content, children, side = "top" }: TooltipProps) {
         onMouseLeave={hide}
         onFocus={show}
         onBlur={hide}
-        onPointerDown={hide}
+        onPointerDown={onPointerDown}
+        onClickCapture={onClickCapture}
       >
         {child}
       </span>

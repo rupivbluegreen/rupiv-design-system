@@ -12,6 +12,7 @@ import {
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { cn } from "../../lib/cn";
+import { useLabels } from "../../provider";
 import styles from "./drawer.module.css";
 
 export interface DrawerProps {
@@ -19,8 +20,13 @@ export interface DrawerProps {
   onClose: () => void;
   title: ReactNode;
   subtitle?: ReactNode;
-  /** Panel width in px (default 480). Capped to the viewport. */
+  /** Panel width in px (default: the `--drawer-w` token, 480). Capped to the viewport. */
   width?: number;
+  /**
+   * The edge the panel slides in from: `"end"` (default) is the inline end, the right edge in English and the left in
+   * Arabic; `"start"` is the inline start, for a navigation drawer.
+   */
+  side?: "start" | "end";
   footer?: ReactNode;
   className?: string | undefined;
   children?: ReactNode;
@@ -38,7 +44,18 @@ function focusables(panel: HTMLElement): HTMLElement[] {
   );
 }
 
-export function Drawer({ open, onClose, title, subtitle, width = 480, footer, className, children }: DrawerProps) {
+export function Drawer({
+  open,
+  onClose,
+  title,
+  subtitle,
+  width,
+  side = "end",
+  footer,
+  className,
+  children,
+}: DrawerProps) {
+  const label = useLabels();
   const isClient = useIsClient();
   const panelRef = useRef<HTMLDivElement>(null);
   const titleId = useId();
@@ -50,10 +67,12 @@ export function Drawer({ open, onClose, title, subtitle, width = 480, footer, cl
     const previous = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const body = document.body;
     const prevOverflow = body.style.overflow;
-    const prevPadding = body.style.paddingRight;
+    const prevPadding = body.style.paddingInlineEnd;
+    // The page scrollbar is at the inline end in both directions (right in English, left in Arabic), and it
+    // disappears with the scroll, so its width is kept as padding on that side.
     const scrollbar = window.innerWidth - document.documentElement.clientWidth;
     body.style.overflow = "hidden";
-    if (scrollbar > 0) body.style.paddingRight = `${scrollbar}px`;
+    if (scrollbar > 0) body.style.paddingInlineEnd = `${scrollbar}px`;
 
     if (panel) {
       const auto = panel.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
@@ -63,7 +82,7 @@ export function Drawer({ open, onClose, title, subtitle, width = 480, footer, cl
 
     return () => {
       body.style.overflow = prevOverflow;
-      body.style.paddingRight = prevPadding;
+      body.style.paddingInlineEnd = prevPadding;
       if (previous && previous.isConnected) previous.focus({ preventScroll: true });
     };
   }, [open, isClient]);
@@ -115,8 +134,9 @@ export function Drawer({ open, onClose, title, subtitle, width = 480, footer, cl
         aria-labelledby={titleId}
         aria-describedby={subtitle ? subtitleId : undefined}
         tabIndex={-1}
+        data-side={side}
         className={cn(styles.panel, className)}
-        style={{ width }}
+        style={width !== undefined ? { inlineSize: width } : undefined}
       >
         <div className={styles.header}>
           <div className={styles.headerText}>
@@ -133,15 +153,19 @@ export function Drawer({ open, onClose, title, subtitle, width = 480, footer, cl
             type="button"
             className={styles.close}
             onClick={onClose}
-            aria-label="Close"
-            title="Close"
+            aria-label={label("drawer.close")}
+            title={label("drawer.close")}
             data-dialog-close=""
           >
             <X aria-hidden="true" />
           </button>
         </div>
         <div className={styles.body}>{children}</div>
-        {footer ? <div className={styles.footer}>{footer}</div> : null}
+        {footer ? (
+          <div className={styles.footer} data-overlay-footer="">
+            {footer}
+          </div>
+        ) : null}
       </div>
     </div>,
     document.body,
