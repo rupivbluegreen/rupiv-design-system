@@ -5,6 +5,7 @@ export * from './foundations/status-badge';
 export * from './foundations/skeleton';
 export * from './patterns/kpi-card';
 export * from './patterns/ai-insight-card';
+export * from './patterns/empty-state';
 export * from './patterns/app-shell';
 export * from './patterns/data-table';
 export * from './primitives/field';

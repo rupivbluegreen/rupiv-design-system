@@ -5,6 +5,7 @@
 @import './foundations/skeleton.css';
 @import './patterns/kpi-card.css';
 @import './patterns/ai-insight-card.css';
+@import './patterns/empty-state.css';
 @import './patterns/app-shell.css';
 @import './primitives/field.css';
 @import './primitives/input.css';

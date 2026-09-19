@@ -1,0 +1,50 @@
+.omni-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--tx-space-1);
+  padding-block: var(--tx-space-6);
+  padding-inline: var(--tx-space-3);
+  text-align: center;
+}
+
+.omni-empty-state-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 48px;
+  block-size: 48px;
+  margin-block-end: var(--tx-space-1);
+  border-radius: var(--tx-radius-pill);
+  background: var(--tx-color-surface-subtle);
+  color: var(--tx-color-text-secondary);
+}
+
+.omni-empty-state-icon svg {
+  inline-size: 24px;
+  block-size: 24px;
+}
+
+.omni-empty-state--red .omni-empty-state-icon {
+  background: var(--tx-color-red-100);
+  color: var(--tx-color-status-danger);
+}
+
+.omni-empty-state-title {
+  margin: 0;
+  font-size: var(--tx-typography-size-heading-md);
+  font-weight: var(--tx-typography-weight-semibold);
+  color: var(--tx-color-text-primary);
+}
+
+.omni-empty-state-description {
+  margin: 0;
+  max-inline-size: 40ch;
+  font-size: var(--tx-typography-size-body-md);
+  line-height: var(--tx-typography-leading-normal);
+  color: var(--tx-color-text-secondary);
+}
+
+.omni-empty-state-action {
+  margin-block-start: var(--tx-space-1);
+}
