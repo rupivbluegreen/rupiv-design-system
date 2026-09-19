@@ -1,36 +1,67 @@
-# Minimal redesign rules (Darwinbox teardown → Cachet)
+# Minimal screens: page and content rules
 
-> Note (19 Sep 2026): written for the Cachet / Tanabana ERP. The reference screen (`src/app/(app)/home`), the Cachet and textile domain
-> components, the app shell and the domain brief are not part of this repository: they carry a client's names and data.
-> Sections that describe them are kept for history and will be removed when the design system is packaged.
+Screens built with this design system are calm, dense and scannable. Users scan tables and forms all day, so a screen
+carries what the task needs and nothing else. These rules apply to every screen. The tokens and components in
+`docs/design-system.md` make them easy to follow; this page says what to leave out.
 
-The client said the screens are **too busy, too much text, cluttered**. The approved reference is
-`/home` → `src/app/(app)/home/page.tsx` + `home.module.css`. Every screen must feel like it.
+## The eight principles
 
-## The eight principles (from the Darwinbox teardown)
-1. **Charcoal does the work, teal only points.** Buttons/text charcoal. Teal only for the active tab, links, selection, one progress bar. Never teal backgrounds on big areas.
-2. **Borders, not shadows.** White cards, 1px `#e9e9e9` border, 8px radius, on the `#f6f6f6` ground. No shadows at rest, no tinted/dashed boxes, no coloured side stripes.
-3. **Three text sizes do the work.** 12 / 14 / 16px. Page title 20px bold. Hierarchy by weight (400/500/600/700), not size. No serif, no monospace (tokens already enforce this), no uppercase overlines except tiny table headers if needed.
-4. **One rhythm.** Card padding 24px, gaps between cards 16px, inner gaps 8/12px. Row height ~52px.
-5. **Colour = category or status only.** Pastel tiles (rose `#ffecf1`, sky `#e7f6fd`, sand `#fff8e6`, lilac `#f3effe`, mint `#eef6f6`) with charcoal outline icons. Status chips: soft background + dark text.
-6. **Chrome recedes.** The shell (icon rail + white top bar) is done — don't add in-page navigation clutter.
-7. **One icon language.** lucide outline, 20–24px, stroke 1.5–1.6, charcoal (or teal on mint).
-8. **Empty states are designed.** Small line illustration + short positive title + one line.
+1. **Charcoal does the work, teal points.** Buttons and text are charcoal (`--bg-primary`, `--text-title`,
+   `--text-body`). Teal (`--bg-accent`, `--text-accent`) is for the active tab, links, selection, focus and one
+   progress bar. Never a teal background over a large area.
+2. **Borders, not shadows.** A card is `--bg-surface` with a 1px `--border-default` and `--radius-lg`, on the
+   `--bg-app` ground. `--shadow-*` is only for floating layers: menus, popovers, drawers, modals, toasts. No tinted or
+   dashed boxes, no coloured side stripes.
+3. **Hierarchy by weight, not size.** Three text sizes do the work: `--text-12`, `--text-14`, `--text-16`. The page title
+   is `t-heading-l` (`--text-20`, bold). Weights are 400, 500, 600 and 700. No serif and no monospace (the tokens
+   enforce it). No uppercase overlines: only the shell's small group headings are uppercase, and not in Arabic.
+4. **One rhythm.** Card padding is `--space-16` (`Card` `padding="md"`, the default) or `--space-24` (`padding="lg"`),
+   gaps between cards are `--space-16`, inner gaps `--space-8` or `--space-12`. A table row is `--table-row-h` (44px), or
+   `--table-row-h-dense` (36px).
+5. **Colour is status or category, never decoration.** Status uses the tone tokens (`neutral`, `accent`, `success`,
+   `warning`, `danger`, `info`) through `Badge` and `StatusPill`. Category uses the category tokens and the pastel
+   `Tile` colours. A status chip is a soft background with dark text.
+6. **Chrome recedes.** The shell (icon rail and a white top bar) is done. Do not add navigation inside the page.
+7. **One icon language.** `lucide-react` outline icons only, in the icon colours (`--icon-*`). The components set the
+   size: 16px in controls (`--icon-md`), 20px in empty states and tiles (`--icon-lg`). Pass a bare icon element.
+8. **Every state is designed.** Empty, loading (skeleton), error, filled, disabled. An empty state is a small icon, a
+   short positive title and one line at most.
 
-## Hard rules for decluttering (apply to every screen)
-- **Page header:** title + at most ONE short subtitle (≤ 8 words) or none. Breadcrumbs only on detail pages. Max 2 visible actions (one primary charcoal); everything else in a `Menu` ("More").
-- **Delete explanatory prose.** No paragraphs explaining the feature, no "nothing retyped — …" banners, no "simulated in demo" sentences (a tiny muted tag is fine), no requirement/section references on screen.
-  "Created from X" becomes a small muted meta line with a link, once.
-- **Text budgets:** labels 1–3 words · chips 1–2 words · meta lines ≤ 6 words · card titles ≤ 4 words · no card subtitles unless essential (≤ 5 words).
-- **Summary strip:** at most 4 stats; value + label only (drop hints, or ≤ 3 words).
-- **Tables:** ≤ 6–7 columns by default; the rest go to the detail page or `hideBelow="lg"`. One line per cell where possible; second lines muted and short. Right-align numbers.
-- **Detail pages:** header · (optional) the value-chain strip · a main column with 1–3 cards · an aside with ≤ 3 small cards. Everything else (history, evidence, activity, audit, long lists) goes into Tabs.
-- **AI:** at most ONE `AiSuggestion` per page, short (title + ≤ 1 sentence). Elsewhere use `AiTag`. Evidence lives in its collapsed disclosure.
-- **Value chain:** use only `<ValueChain steps={goldenChain} variant="compact" activeKey=… />` — it now renders a slim progress bar WITH previous/next links. **Remove any hand-made previous/next step links** and "Step N of 15" labels you added.
-- **Filters:** search + ≤ 3 filter chips. Tabs ≤ 5.
-- **Documents** (Sales Offer, PO, Proforma, Packing list): keep the document faithful, but surround it with at most a slim aside (status + 3 key facts + linked docs).
-- **Numbers & facts stay.** Do not change data, routes, ids, behaviour or the golden-thread figures — you are removing noise, not content that the demo relies on.
+## Page rules
+
+- **Page header.** A title and at most one short subtitle (8 words or fewer), or none. Breadcrumbs only on detail
+  pages. **At most 2 visible actions**, one of them the primary (charcoal); everything else goes into a `Menu`
+  labelled "More".
+- **No explanatory paragraphs on screens.** No text that explains what the feature does, no banners that restate what
+  the user just did, no "this is simulated" sentences (a tiny muted tag is fine), no requirement or section references.
+  "Created from X" is one small muted meta line with a link.
+- **Summary strip.** **At most 4 summary figures**, each a value and a label. Drop hints, or keep them to 3 words.
+- **Tables.** **At most 7 columns by default.** The rest go to the detail page or get `hideBelow="lg"`. One line per
+  cell where possible; a second line is muted and short. Numbers sit at the end of the cell (`align: "end"`), tabular.
+- **Filters.** A search box and at most 3 filter chips. Tabs: at most 5.
+- **Detail pages.** Header, then a main column of 1 to 3 cards, then an aside of at most 3 small cards. History,
+  evidence, activity, audit and long lists go into Tabs.
+- **Forms.** Group fields in `FormSection`s. Put the actions in the page header, or in one footer bar; not in both.
+
+## Text budgets
+
+| Element | Budget |
+|---|---|
+| Label | 1 to 3 words |
+| Chip | 1 to 2 words |
+| Meta line | 6 words or fewer |
+| Card title | 4 words or fewer |
+| Card subtitle | none, unless essential (5 words or fewer) |
+| Page subtitle | 8 words or fewer |
+
+Budgets are for English. Arabic is often shorter in words and taller in line height: check both, and never cut text
+to make English fit.
 
 ## CSS
-- Prefer the tokens (they now carry the Darwinbox values). Reuse the home patterns: `.card`, `.cardHead`, `.cardTitle`, `.viewAll`, task rows, chips, pastel tiles, apps grid, tabs, empty state.
-- Remove decorative backgrounds, gradients, dashed borders, coloured left borders, heavy uppercase labels and extra dividers.
+
+- Read tokens (`--bg-*`, `--text-*`, `--border-*`, tone and category tokens). No raw hex, no pixel font sizes, no
+  ad-hoc shadows. Stylelint enforces this.
+- Write logical properties only, so the same CSS works in both directions.
+- Reuse the patterns the components already give: card, card header, tabs, chips, tiles, empty state.
+- Remove decorative backgrounds, gradients, dashed borders, coloured left borders, heavy uppercase labels and extra
+  dividers.
