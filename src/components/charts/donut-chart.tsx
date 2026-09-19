@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import { ChartLegend } from "./chart-legend";
 import { ChartTooltip, TooltipRow, TooltipTitle } from "./chart-tooltip";
 import { finite, formatCompact, round, seriesColor } from "./scale";
@@ -90,7 +90,7 @@ export function DonutChart({
   const summary =
     total > 0
       ? `Donut chart, total ${format(total)}: ${data
-          .map((d, i) => `${d.label} ${format(values[i])} (${pct(values[i])}%)`)
+          .map((d, i) => `${d.label} ${format(values[i] ?? 0)} (${pct(values[i] ?? 0)}%)`)
           .join(", ")}.`
       : "Donut chart, no data.";
 
@@ -130,14 +130,14 @@ export function DonutChart({
         ) : null}
         {activeSeg && active !== null ? (
           <ChartTooltip x={anchor.x} y={anchor.y} containerWidth={size} containerHeight={size}>
-            <TooltipTitle>{data[active].label}</TooltipTitle>
-            <TooltipRow color={colors[active]} label={`${pct(values[active])}%`} value={format(data[active].value)} />
+            <TooltipTitle>{data[active]?.label}</TooltipTitle>
+            <TooltipRow color={colors[active]} label={`${pct(values[active] ?? 0)}%`} value={format(data[active]?.value ?? 0)} />
           </ChartTooltip>
         ) : null}
       </div>
       {showLegend && data.length > 0 ? (
         <div className={styles.legend}>
-          <ChartLegend items={data.map((d, i) => ({ label: d.label, color: colors[i], value: format(d.value) }))} />
+          <ChartLegend items={data.map((d, i) => ({ label: d.label, color: seriesColor(i, d.color), value: format(d.value) }))} />
         </div>
       ) : null}
     </div>

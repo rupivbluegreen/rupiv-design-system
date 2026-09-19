@@ -96,7 +96,8 @@ export function niceScale(dataMin: number, dataMax: number, target = 4): NiceSca
     const t = Number((start + i * step).toFixed(decimals));
     ticks.push(Object.is(t, -0) ? 0 : t);
   }
-  return { min: ticks[0], max: ticks[ticks.length - 1], ticks };
+  // `ticks` always holds at least two entries (count >= 1), so the fallbacks are never used.
+  return { min: ticks[0] ?? start, max: ticks[ticks.length - 1] ?? end, ticks };
 }
 
 /** Width of the widest formatted tick label. */

@@ -4,7 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ChangeEvent, CSSProperties, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { createPortal } from "react-dom";
 import { Check, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./combobox.module.css";
 
 export interface ComboboxOption {
@@ -25,7 +25,7 @@ export interface ComboboxProps {
   invalid?: boolean;
   id?: string;
   disabled?: boolean;
-  className?: string;
+  className?: string | undefined;
   "aria-label"?: string;
   "aria-labelledby"?: string;
   "aria-describedby"?: string;
@@ -35,8 +35,8 @@ export interface ComboboxProps {
 interface ListPosition {
   left: number;
   width: number;
-  top?: number;
-  bottom?: number;
+  top?: number | undefined;
+  bottom?: number | undefined;
   maxHeight: number;
 }
 

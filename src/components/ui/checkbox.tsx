@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useId, useRef } from "react";
 import type { InputHTMLAttributes, ReactNode, Ref, RefObject } from "react";
 import { Check, Minus } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./checkbox.module.css";
 
 export interface CheckboxProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "type"> {

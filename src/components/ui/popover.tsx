@@ -14,7 +14,7 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./popover.module.css";
 
 export interface PopoverProps {
@@ -26,7 +26,7 @@ export interface PopoverProps {
   /** Controlled open state. Omit for uncontrolled. */
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
-  className?: string;
+  className?: string | undefined;
 }
 
 const noopSubscribe = () => () => {};

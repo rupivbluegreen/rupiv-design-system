@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Inbox } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./empty-state.module.css";
 
 export interface EmptyStateProps {
@@ -9,7 +9,7 @@ export interface EmptyStateProps {
   description?: ReactNode;
   action?: ReactNode;
   compact?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function EmptyState({ icon, title, description, action, compact = false, className }: EmptyStateProps) {

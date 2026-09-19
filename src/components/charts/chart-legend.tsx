@@ -1,4 +1,4 @@
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./chart-legend.module.css";
 
 export interface ChartLegendProps {

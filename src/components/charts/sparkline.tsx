@@ -1,7 +1,7 @@
 "use client";
 
 import { useId } from "react";
-import type { Tone } from "@/lib/types";
+import type { Tone } from "../../lib/types";
 import { finite, round, sanitizeId } from "./scale";
 import styles from "./sparkline.module.css";
 
@@ -38,10 +38,12 @@ export function Sparkline({ data, width = 120, height = 32, tone = "chart-1", ar
   const x = (i: number) => round(values.length === 1 ? PAD + innerW : PAD + (i / (values.length - 1)) * innerW);
   const y = (v: number) => round(span === 0 ? PAD + innerH / 2 : PAD + ((max - v) / span) * innerH);
 
-  const points = values.length === 1 ? [[PAD, y(values[0])] as const, [x(0), y(values[0])] as const] : values.map((v, i) => [x(i), y(v)] as const);
+  const only = values[0] ?? 0; // values is not empty here (see the early return)
+  const points = values.length === 1 ? [[PAD, y(only)] as const, [x(0), y(only)] as const] : values.map((v, i) => [x(i), y(v)] as const);
   const line = points.map(([px, py], i) => `${i === 0 ? "M" : "L"}${px} ${py}`).join("");
-  const first = points[0];
-  const last = points[points.length - 1];
+  // points is never empty (one value gives two points), so the fallbacks are never used.
+  const first = points[0] ?? ([PAD, y(only)] as const);
+  const last = points[points.length - 1] ?? first;
   const bottom = height - PAD / 2;
   const areaPath = `${line}L${last[0]} ${bottom}L${first[0]} ${bottom}Z`;
   const end = values[values.length - 1];

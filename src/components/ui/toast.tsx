@@ -11,8 +11,8 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from "lucide-react";
-import { cn } from "@/lib/cn";
-import type { Tone } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import type { Tone } from "../../lib/types";
 import styles from "./toast.module.css";
 
 export interface ToastOptions {
@@ -64,9 +64,8 @@ function createApi(setToasts: (update: (list: ToastRecord[]) => ToastRecord[]) =
 
 const fallbackToast: ToastApi = Object.assign(
   (options: ToastOptions) => {
-    if (process.env.NODE_ENV !== "production") {
-      console.warn("useToast() called outside <ToastProvider>; toast ignored:", options.title);
-    }
+    // Always warns (no process.env in a framework-free package): a toast outside the provider is a mistake anywhere.
+    console.warn("useToast() called outside <ToastProvider>; toast ignored:", options.title);
     return "";
   },
   {

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
-import type { Tone } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import type { Tone } from "../../lib/types";
 import { Avatar } from "./avatar";
 import styles from "./timeline.module.css";
 
@@ -17,7 +17,7 @@ export interface TimelineItem {
 export interface TimelineProps {
   items: TimelineItem[];
   dense?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function Timeline({ items, dense = false, className }: TimelineProps) {

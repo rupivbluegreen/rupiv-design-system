@@ -1,10 +1,10 @@
-import { statusTone } from "@/lib/status";
+import { statusTone } from "../../lib/status";
 import { Badge } from "./badge";
 
 export interface StatusPillProps {
   status: string;
   size?: "sm" | "md";
-  className?: string;
+  className?: string | undefined;
 }
 
 export function StatusPill({ status, size = "md", className }: StatusPillProps) {

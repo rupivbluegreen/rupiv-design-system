@@ -3,7 +3,7 @@
 import { useId, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
 import { CloudUpload, FileText, X } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./file-drop.module.css";
 
 export interface FileDropProps {
@@ -13,7 +13,7 @@ export interface FileDropProps {
   multiple?: boolean;
   onFiles?: (files: File[]) => void;
   id?: string;
-  className?: string;
+  className?: string | undefined;
 }
 
 function formatBytes(bytes: number): string {

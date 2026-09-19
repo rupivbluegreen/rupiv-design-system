@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./segmented-control.module.css";
 
 export interface SegmentedControlOption {
@@ -26,7 +26,7 @@ export interface SegmentedControlProps {
   "aria-describedby"?: string;
   /** id of the radiogroup element (injected by `Field`). */
   id?: string;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function SegmentedControl({
@@ -62,7 +62,9 @@ export function SegmentedControl({
     else if (event.key === "End") nextIndex = options.length - 1;
     if (nextIndex === null) return;
     event.preventDefault();
-    select(options[nextIndex].value);
+    const target = options[nextIndex];
+    if (!target) return;
+    select(target.value);
     buttonsRef.current[nextIndex]?.focus();
   }
 

@@ -70,6 +70,8 @@ export function HeatGrid({ rows, columns, values, format = formatCompact, tone =
     });
   };
 
+  const hoverValue = hover ? values[hover.r]?.[hover.c] : undefined;
+
   return (
     <div ref={rootRef} className={styles.root}>
       <div className={styles.scroll} onScroll={() => setHover(null)}>
@@ -124,13 +126,13 @@ export function HeatGrid({ rows, columns, values, format = formatCompact, tone =
           ))}
         </div>
       </div>
-      {hover && finite(values[hover.r]?.[hover.c]) ? (
+      {hover && finite(hoverValue) ? (
         <ChartTooltip x={hover.x} y={hover.y} containerWidth={hover.w} containerHeight={hover.h}>
           <TooltipTitle>{rows[hover.r]}</TooltipTitle>
           <TooltipRow
-            color={`color-mix(in srgb, var(--${tone}-solid) ${mixFor(values[hover.r][hover.c])}%, var(--bg-surface))`}
+            color={`color-mix(in srgb, var(--${tone}-solid) ${mixFor(hoverValue)}%, var(--bg-surface))`}
             label={columns[hover.c]}
-            value={format(values[hover.r][hover.c])}
+            value={format(hoverValue)}
           />
         </ChartTooltip>
       ) : null}

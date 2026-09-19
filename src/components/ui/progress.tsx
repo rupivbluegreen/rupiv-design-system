@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
-import type { Tone } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import type { Tone } from "../../lib/types";
 import styles from "./progress.module.css";
 
 export interface ProgressProps {
@@ -12,7 +12,7 @@ export interface ProgressProps {
   showValue?: boolean;
   /** Replaces the default "62%" text when `showValue` is on. */
   valueLabel?: string;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function Progress({
@@ -62,7 +62,7 @@ export interface SegmentBarProps {
   segments: SegmentBarSegment[];
   height?: number;
   showLegend?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 const CHART_SEQUENCE = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "var(--chart-4)", "var(--chart-5)", "var(--chart-6)"];
@@ -70,7 +70,7 @@ const CHART_SEQUENCE = ["var(--chart-1)", "var(--chart-2)", "var(--chart-3)", "v
 function segmentColor(seg: SegmentBarSegment, index: number): string {
   if (seg.color) return seg.color;
   if (seg.tone) return `var(--${seg.tone}-solid)`;
-  return CHART_SEQUENCE[index % CHART_SEQUENCE.length];
+  return CHART_SEQUENCE[index % CHART_SEQUENCE.length] ?? "var(--chart-1)";
 }
 
 export function SegmentBar({ segments, height = 8, showLegend = false, className }: SegmentBarProps) {

@@ -75,7 +75,7 @@ export function formatDelta(value: number, decimals: 0 | 1 = 1): string {
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
 function parts(iso: string) {
-  const [y, m, d] = iso.slice(0, 10).split("-").map(Number);
+  const [y = NaN, m = NaN, d = NaN] = iso.slice(0, 10).split("-").map(Number);
   return { y, m, d };
 }
 

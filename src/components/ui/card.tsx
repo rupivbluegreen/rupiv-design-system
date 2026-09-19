@@ -1,5 +1,5 @@
 import type { ElementType, HTMLAttributes, ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./card.module.css";
 
 export interface CardProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
@@ -10,7 +10,7 @@ export interface CardProps extends Omit<HTMLAttributes<HTMLElement>, "title"> {
   as?: ElementType;
   /** Passed through when `as` is a link component. */
   href?: string;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 
@@ -47,7 +47,7 @@ export interface CardHeaderProps {
   icon?: ReactNode;
   actions?: ReactNode;
   bordered?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function CardHeader({ title, subtitle, icon, actions, bordered = false, className }: CardHeaderProps) {
@@ -68,7 +68,7 @@ export function CardHeader({ title, subtitle, icon, actions, bordered = false, c
 }
 
 export interface CardBodyProps {
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 
@@ -77,7 +77,7 @@ export function CardBody({ className, children }: CardBodyProps) {
 }
 
 export interface CardFooterProps {
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
   align?: "start" | "end" | "between";
 }

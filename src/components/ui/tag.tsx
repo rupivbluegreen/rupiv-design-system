@@ -1,14 +1,14 @@
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
-import { cn } from "@/lib/cn";
-import type { CategoryColor } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import type { CategoryColor } from "../../lib/types";
 import styles from "./tag.module.css";
 
 export interface TagProps {
   color?: CategoryColor;
   onRemove?: () => void;
   icon?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 

@@ -45,7 +45,7 @@ export function TooltipTitle({ children }: { children: ReactNode }) {
   return <div className={styles.title}>{children}</div>;
 }
 
-export function TooltipRow({ color, label, value }: { color?: string; label: ReactNode; value: ReactNode }) {
+export function TooltipRow({ color, label, value }: { color?: string | undefined; label: ReactNode; value: ReactNode }) {
   return (
     <div className={styles.row}>
       {color ? <span className={styles.swatch} style={{ background: color }} /> : null}

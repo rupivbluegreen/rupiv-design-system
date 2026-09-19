@@ -1,5 +1,8 @@
 // Tanabana Design System — generic primitives. See docs/design-system.md §5.
 
+// provider: language, direction, link component, navigation, labels
+export * from "../../provider";
+
 export * from "./layout";
 
 // actions

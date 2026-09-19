@@ -1,10 +1,10 @@
 import type { CSSProperties, ElementType, HTMLAttributes, ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./layout.module.css";
 
 export type LayoutGap = 0 | 2 | 4 | 6 | 8 | 12 | 16 | 20 | 24 | 32 | 40 | 48;
 
-const gapClass: Record<LayoutGap, string> = {
+const gapClass: Record<LayoutGap, string | undefined> = {
   0: styles.gap0,
   2: styles.gap2,
   4: styles.gap4,
@@ -27,7 +27,7 @@ export interface StackProps extends Omit<HTMLAttributes<HTMLElement>, "children"
   gap?: LayoutGap;
   align?: "start" | "center" | "end" | "stretch";
   as?: ElementType;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 
@@ -50,7 +50,7 @@ export interface InlineProps extends Omit<HTMLAttributes<HTMLElement>, "children
   justify?: "start" | "center" | "end" | "between";
   wrap?: boolean;
   as?: ElementType;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 
@@ -91,7 +91,7 @@ export interface GridProps extends Omit<HTMLAttributes<HTMLDivElement>, "childre
   /** e.g. "240px" — switches to an auto-fill grid with this minimum item width. */
   minItemWidth?: string;
   gap?: LayoutGap;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 
@@ -119,7 +119,7 @@ export interface DividerProps {
   label?: string;
   vertical?: boolean;
   spacing?: 0 | 8 | 12 | 16 | 24;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function Divider({ label, vertical = false, spacing = 0, className }: DividerProps) {

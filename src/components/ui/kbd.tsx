@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./kbd.module.css";
 
 export interface KbdProps extends Omit<HTMLAttributes<HTMLElement>, "children"> {

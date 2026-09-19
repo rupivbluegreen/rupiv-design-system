@@ -1,10 +1,15 @@
+"use client";
+
 import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode, Ref } from "react";
-import Link from "next/link";
 import { LoaderCircle } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
+import { useLink } from "../../provider";
 import styles from "./button.module.css";
 
 type Size = "sm" | "md" | "lg";
+
+/** Button props are spread onto the link when there is an href; the href itself is always the explicit one. */
+type AnchorProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">;
 
 /* ------------------------------------------------------------------ */
 /* Button                                                              */
@@ -18,7 +23,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   /** Shows a spinner and disables the button. */
   loading?: boolean;
   fullWidth?: boolean;
-  /** Renders a next/link styled identically. */
+  /** Renders the provider's link component (a plain <a> by default) styled identically. */
   href?: string;
   ref?: Ref<HTMLButtonElement>;
 }
@@ -38,6 +43,7 @@ export function Button({
   ref,
   ...rest
 }: ButtonProps) {
+  const Link = useLink();
   const isDisabled = Boolean(disabled || loading);
   const classes = cn(
     styles.root,
@@ -70,7 +76,7 @@ export function Button({
 
   if (href && !isDisabled) {
     return (
-      <Link href={href} className={classes} {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}>
+      <Link href={href} className={classes} {...(rest as AnchorProps)}>
         {content}
       </Link>
     );
@@ -116,6 +122,7 @@ export function IconButton({
   ref,
   ...rest
 }: IconButtonProps) {
+  const Link = useLink();
   const classes = cn(styles.root, styles.iconOnly, styles[variant], styles[size], className);
   const glyph = (
     <span className={styles.icon} aria-hidden="true">
@@ -130,7 +137,7 @@ export function IconButton({
         className={classes}
         aria-label={label}
         title={label}
-        {...(rest as AnchorHTMLAttributes<HTMLAnchorElement>)}
+        {...(rest as AnchorProps)}
       >
         {glyph}
       </Link>
@@ -159,7 +166,7 @@ export function IconButton({
 export interface ButtonGroupProps {
   /** Joins buttons into one segmented control (shared borders, inner radii removed). */
   attached?: boolean;
-  className?: string;
+  className?: string | undefined;
   children: ReactNode;
 }
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { ArrowLeft } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import { Breadcrumbs } from "./breadcrumbs";
 import type { BreadcrumbItem } from "./breadcrumbs";
 import { IconButton } from "./button";
@@ -17,7 +17,7 @@ export interface PageHeaderProps {
   /** Rendered below the header with a bottom border — pass <Tabs /> or <TabLinks />. */
   tabs?: ReactNode;
   backHref?: string;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function PageHeader({

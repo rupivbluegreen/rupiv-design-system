@@ -1,6 +1,6 @@
 import type { Ref, SelectHTMLAttributes } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./select.module.css";
 
 export interface SelectOption {

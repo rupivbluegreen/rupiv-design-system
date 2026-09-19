@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
-import type { Tone } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import type { Tone } from "../../lib/types";
 import styles from "./badge.module.css";
 
 export interface BadgeProps {
@@ -9,7 +9,7 @@ export interface BadgeProps {
   size?: "sm" | "md";
   dot?: boolean;
   icon?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 
@@ -39,7 +39,7 @@ export interface CountBadgeProps {
   count: number;
   tone?: Tone;
   max?: number;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function CountBadge({ count, tone = "neutral", max = 99, className }: CountBadgeProps) {

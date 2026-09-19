@@ -1,8 +1,10 @@
+"use client";
+
 import type { ReactNode } from "react";
-import Link from "next/link";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
-import { cn } from "@/lib/cn";
-import { formatDelta } from "@/lib/format";
+import { cn } from "../../lib/cn";
+import { formatDelta } from "../../lib/format";
+import { useLink } from "../../provider";
 import styles from "./stat.module.css";
 
 export interface StatProps {
@@ -14,10 +16,11 @@ export interface StatProps {
   hint?: ReactNode;
   href?: string;
   footer?: ReactNode;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function Stat({ label, value, unit, delta, icon, hint, href, footer, className }: StatProps) {
+  const Link = useLink();
   let deltaNode: ReactNode = null;
   if (delta) {
     const goodWhen = delta.goodWhen ?? "up";

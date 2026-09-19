@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import { ChartLegend } from "./chart-legend";
 import { ChartTooltip, TooltipRow, TooltipTitle } from "./chart-tooltip";
 import {
@@ -59,7 +59,7 @@ export function BarChart({
 
   const colors = series.map((s, i) => seriesColor(i, s.color));
   const legend =
-    series.length > 1 ? <ChartLegend items={series.map((s, i) => ({ label: s.name, color: colors[i] }))} /> : null;
+    series.length > 1 ? <ChartLegend items={series.map((s, i) => ({ label: s.name, color: seriesColor(i, s.color) }))} /> : null;
 
   if (data.length === 0 || series.length === 0) {
     return (
@@ -75,7 +75,7 @@ export function BarChart({
   const S = series.length;
   const n = data.length;
   const value = (row: number, s: number) => {
-    const v = data[row].values[s];
+    const v = data[row]?.values[s];
     return finite(v) ? v : 0;
   };
 
@@ -205,7 +205,7 @@ export function BarChart({
         const y0 = Math.min(from, to);
         const h = Math.max(1, Math.abs(to - from));
         minY = Math.min(minY, y0);
-        bars[s].push({ key: `${r}`, d: barPath(offset, y0, thickness, h, RADIUS, side) });
+        bars[s]?.push({ key: `${r}`, d: barPath(offset, y0, thickness, h, RADIUS, side) });
       });
       hitAreas.push(
         <rect
@@ -230,8 +230,8 @@ export function BarChart({
     const top = 4;
     const bottom = 22;
     const catLabelW = Math.min(widestLabel(data.map((d) => d.label)), width * 0.35);
-    const left = Math.ceil(Math.max(catLabelW + 12, textWidth(tickLabels[0]) / 2 + 2));
-    const right = Math.ceil(Math.max(8, textWidth(tickLabels[tickLabels.length - 1]) / 2 + 2));
+    const left = Math.ceil(Math.max(catLabelW + 12, textWidth(tickLabels[0] ?? "") / 2 + 2));
+    const right = Math.ceil(Math.max(8, textWidth(tickLabels[tickLabels.length - 1] ?? "") / 2 + 2));
     const plotW = Math.max(1, width - left - right);
     const plotH = Math.max(1, height - top - bottom);
     const x = (v: number) => left + ((v - scale.min) / span) * plotW;
@@ -285,7 +285,7 @@ export function BarChart({
         const x0 = Math.min(from, to);
         const w = Math.max(1, Math.abs(to - from));
         maxX = Math.max(maxX, x0 + w);
-        bars[s].push({ key: `${r}`, d: barPath(x0, offset, w, thickness, RADIUS, side) });
+        bars[s]?.push({ key: `${r}`, d: barPath(x0, offset, w, thickness, RADIUS, side) });
       });
       hitAreas.push(
         <rect
@@ -309,7 +309,7 @@ export function BarChart({
   }
 
   const svgLabel = `${stacked ? "Stacked" : "Grouped"} ${horizontal ? "horizontal " : ""}bar chart of ${n} categories${
-    S > 1 ? ` and ${S} series (${series.map((s) => s.name).join(", ")})` : ` for ${series[0].name}`
+    S > 1 ? ` and ${S} series (${series.map((s) => s.name).join(", ")})` : ` for ${series[0]?.name ?? ""}`
   }, values from ${format(lo)} to ${format(hi)}.`;
 
   const activeIndex = active !== null && active < n ? active : null;

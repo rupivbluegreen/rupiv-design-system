@@ -2,9 +2,8 @@
 
 import { useId, useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
+import { useActivePath, useLink } from "../../provider";
 import styles from "./tabs.module.css";
 
 /* ------------------------------------------------------------------ */
@@ -30,7 +29,7 @@ export interface TabsProps {
   "aria-labelledby"?: string;
   /** Prefix for tab element ids: tabs get `${id}-tab-${value}` so panels can use aria-labelledby. */
   id?: string;
-  className?: string;
+  className?: string | undefined;
 }
 
 /** Tab list only — render the active panel yourself based on `value`. */
@@ -67,7 +66,9 @@ export function Tabs({
     else if (event.key === "End") nextIndex = items.length - 1;
     if (nextIndex === null) return;
     event.preventDefault();
-    select(items[nextIndex].value);
+    const target = items[nextIndex];
+    if (!target) return;
+    select(target.value);
     tabsRef.current[nextIndex]?.focus();
   }
 
@@ -126,15 +127,16 @@ export interface TabLinksProps {
   ariaLabel?: string;
   /** Alias of `ariaLabel`; wins when both are set. */
   "aria-label"?: string;
-  className?: string;
+  className?: string | undefined;
 }
 
 /** Route-backed tabs (line style). Active = exact match or the longest matching path prefix. */
 export function TabLinks({ items, ariaLabel = "Sections", "aria-label": ariaLabelAttr, className }: TabLinksProps) {
-  const pathname = usePathname() ?? "";
+  const Link = useLink();
+  const pathname = useActivePath();
   let activeHref: string | undefined;
   for (const item of items) {
-    const href = item.href.split(/[?#]/)[0];
+    const href = item.href.split(/[?#]/)[0] ?? item.href; // split() always returns at least one element
     const isMatch = pathname === href || pathname.startsWith(`${href.replace(/\/$/, "")}/`);
     if (isMatch && (activeHref === undefined || href.length > activeHref.length)) activeHref = href;
   }

@@ -1,5 +1,5 @@
 import type { InputHTMLAttributes, Ref } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./date-input.module.css";
 
 export interface DateInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "type"> {

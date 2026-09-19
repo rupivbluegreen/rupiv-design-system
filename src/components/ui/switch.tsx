@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./switch.module.css";
 
 export interface SwitchProps {
@@ -13,7 +13,7 @@ export interface SwitchProps {
   description?: ReactNode;
   disabled?: boolean;
   id?: string;
-  className?: string;
+  className?: string | undefined;
   /** Required when there is no visible `label`. */
   "aria-label"?: string;
   "aria-describedby"?: string;

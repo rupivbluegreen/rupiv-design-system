@@ -1,12 +1,12 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./section.module.css";
 
 export interface SectionProps {
   title: ReactNode;
   description?: ReactNode;
   actions?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 

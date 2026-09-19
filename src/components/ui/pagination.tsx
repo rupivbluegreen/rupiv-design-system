@@ -1,8 +1,8 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { cn } from "@/lib/cn";
-import { formatNumber } from "@/lib/format";
+import { cn } from "../../lib/cn";
+import { formatNumber } from "../../lib/format";
 import { IconButton } from "./button";
 import { Select } from "./select";
 import styles from "./pagination.module.css";
@@ -16,7 +16,7 @@ export interface PaginationProps {
   pageSize?: number;
   pageSizeOptions?: number[];
   onPageSizeChange?: (n: number) => void;
-  className?: string;
+  className?: string | undefined;
 }
 
 type PageToken = number | "gap-start" | "gap-end";

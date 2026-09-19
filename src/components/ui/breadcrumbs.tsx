@@ -1,7 +1,9 @@
+"use client";
+
 import { Fragment } from "react";
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
+import { useLink } from "../../provider";
 import styles from "./breadcrumbs.module.css";
 
 export interface BreadcrumbItem {
@@ -11,11 +13,12 @@ export interface BreadcrumbItem {
 
 export interface BreadcrumbsProps {
   items: BreadcrumbItem[];
-  className?: string;
+  className?: string | undefined;
 }
 
 /** The last item is always rendered as the current page. */
 export function Breadcrumbs({ items, className }: BreadcrumbsProps) {
+  const Link = useLink();
   if (items.length === 0) return null;
   return (
     <nav aria-label="Breadcrumb" className={cn(styles.root, className)}>

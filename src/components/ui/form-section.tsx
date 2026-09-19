@@ -1,6 +1,6 @@
 import { useId } from "react";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./form-section.module.css";
 
 /* ------------------------------------------------------------------ */
@@ -11,7 +11,7 @@ export interface FormSectionProps {
   title: string;
   description?: ReactNode;
   actions?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   children: ReactNode;
 }
 
@@ -38,7 +38,7 @@ export function FormSection({ title, description, actions, className, children }
 
 export interface FormGridProps {
   columns?: 1 | 2 | 3 | 4;
-  className?: string;
+  className?: string | undefined;
   children: ReactNode;
 }
 

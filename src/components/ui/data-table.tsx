@@ -13,10 +13,10 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronUp, ChevronsUpDown } from "lucide-react";
-import { cn } from "@/lib/cn";
-import type { Tone } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import type { Tone } from "../../lib/types";
+import { useNavigate } from "../../provider";
 import { Checkbox } from "./checkbox";
 import { EmptyState } from "./empty-state";
 import { Pagination } from "./pagination";
@@ -63,11 +63,11 @@ export interface DataTableProps<T> {
   stickyHeader?: boolean;
   /** Subtle tone tint + 2px left edge for a row (e.g. overdue → "danger"). Hover/selected still win. */
   rowTone?: (row: T) => Tone | undefined;
-  className?: string;
+  className?: string | undefined;
 }
 
 type FooterCellProps = {
-  className?: string;
+  className?: string | undefined;
   colSpan?: number | string;
   "data-hide-below"?: string;
   children?: ReactNode;
@@ -140,7 +140,7 @@ export function DataTable<T>({
   rowTone,
   className,
 }: DataTableProps<T>) {
-  const router = useRouter();
+  const navigate = useNavigate();
   const [sort, setSort] = useState<SortState>(defaultSort ?? null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
@@ -377,7 +377,7 @@ export function DataTable<T>({
                         window.open(href, "_blank", "noopener");
                         return;
                       }
-                      router.push(href);
+                      navigate(href);
                     }
                   : undefined;
                 const onAuxClick = href
@@ -391,7 +391,7 @@ export function DataTable<T>({
                   ? (e: KeyboardEvent<HTMLTableRowElement>) => {
                       if (e.key === "Enter" && e.target === e.currentTarget) {
                         e.preventDefault();
-                        router.push(href);
+                        navigate(href);
                       }
                     }
                   : undefined;

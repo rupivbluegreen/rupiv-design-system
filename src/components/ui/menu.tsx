@@ -13,8 +13,8 @@ import {
   type ReactNode,
 } from "react";
 import { createPortal } from "react-dom";
-import Link from "next/link";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
+import { useLink } from "../../provider";
 import styles from "./menu.module.css";
 
 export interface MenuItem {
@@ -34,7 +34,7 @@ export interface MenuProps {
   align?: "start" | "end";
   /** Accessible name for the menu. */
   label?: string;
-  className?: string;
+  className?: string | undefined;
 }
 
 const noopSubscribe = () => () => {};
@@ -67,6 +67,7 @@ function menuItems(panel: HTMLElement): HTMLElement[] {
 }
 
 export function Menu({ trigger, items, align = "start", label, className }: MenuProps) {
+  const Link = useLink();
   const isClient = useIsClient();
   const [open, setOpen] = useState(false);
   const anchorRef = useRef<HTMLSpanElement>(null);

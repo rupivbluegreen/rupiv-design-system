@@ -1,7 +1,7 @@
 import { Children, cloneElement, isValidElement, useId } from "react";
 import type { HTMLAttributes, ReactElement, ReactNode } from "react";
 import { CircleAlert } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./field.module.css";
 
 export interface FieldProps {
@@ -14,7 +14,7 @@ export interface FieldProps {
   optional?: boolean;
   /** Right-aligned slot on the label row, e.g. a "Use party default" link button. */
   labelAction?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   children: ReactNode;
 }
 

@@ -11,7 +11,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./modal.module.css";
 
 export interface ModalProps {
@@ -21,7 +21,7 @@ export interface ModalProps {
   description?: ReactNode;
   size?: "sm" | "md" | "lg" | "xl";
   footer?: ReactNode;
-  className?: string;
+  className?: string | undefined;
   children?: ReactNode;
 }
 
@@ -82,13 +82,13 @@ export function Modal({ open, onClose, title, description, size = "md", footer, 
     if (!panel) return;
     const els = focusables(panel);
     const active = document.activeElement;
-    if (els.length === 0) {
+    const first = els[0];
+    const last = els[els.length - 1];
+    if (!first || !last) {
       e.preventDefault();
       panel.focus();
       return;
     }
-    const first = els[0];
-    const last = els[els.length - 1];
     if (!panel.contains(active)) {
       e.preventDefault();
       first.focus();

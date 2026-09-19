@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./stepper.module.css";
 
 export interface StepperStep {
@@ -12,7 +12,7 @@ export interface StepperProps {
   /** Index of the active step. Steps before it are completed. */
   current: number;
   orientation?: "horizontal" | "vertical";
-  className?: string;
+  className?: string | undefined;
 }
 
 export function Stepper({ steps, current, orientation = "horizontal", className }: StepperProps) {

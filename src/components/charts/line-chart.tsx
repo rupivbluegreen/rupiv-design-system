@@ -35,7 +35,7 @@ export function LineChart({ labels, series, height = 240, format = formatCompact
 
   const colors = series.map((s, i) => seriesColor(i, s.color));
   const legend =
-    series.length > 1 ? <ChartLegend items={series.map((s, i) => ({ label: s.name, color: colors[i] }))} /> : null;
+    series.length > 1 ? <ChartLegend items={series.map((s, i) => ({ label: s.name, color: seriesColor(i, s.color) }))} /> : null;
 
   const n = labels.length > 0 ? labels.length : series.reduce((m, s) => Math.max(m, s.data.length), 0);
   const allValues = series.flatMap((s) => s.data.slice(0, n).filter(finite));
@@ -93,12 +93,14 @@ export function LineChart({ labels, series, height = 240, format = formatCompact
     const area = s.area
       ? segments
           .filter((seg) => seg.length > 1)
-          .map(
-            (seg) =>
-              `M${seg[0][0]} ${baseline}` +
-              seg.map(([px, py]) => `L${px} ${py}`).join("") +
-              `L${seg[seg.length - 1][0]} ${baseline}Z`,
-          )
+          .map((seg) => {
+            const first = seg[0];
+            const last = seg[seg.length - 1];
+            if (!first || !last) return ""; // never: segments of fewer than two points are filtered out above
+            return (
+              `M${first[0]} ${baseline}` + seg.map(([px, py]) => `L${px} ${py}`).join("") + `L${last[0]} ${baseline}Z`
+            );
+          })
           .join("")
       : "";
     return { line, area, last, color: colors[si], gradientId: `${uid}-area-${si}` };
@@ -141,7 +143,7 @@ export function LineChart({ labels, series, height = 240, format = formatCompact
         >
           <defs>
             {drawn.map((d, si) =>
-              series[si].area ? (
+              series[si]?.area ? (
                 <linearGradient key={d.gradientId} id={d.gradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" style={{ stopColor: d.color, stopOpacity: 0.22 }} />
                   <stop offset="100%" style={{ stopColor: d.color, stopOpacity: 0 }} />
@@ -193,7 +195,7 @@ export function LineChart({ labels, series, height = 240, format = formatCompact
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeDasharray={series[si].dashed ? "5 4" : undefined}
+              strokeDasharray={series[si]?.dashed ? "5 4" : undefined}
             />
           ))}
 

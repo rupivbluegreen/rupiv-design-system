@@ -3,21 +3,21 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChangeEvent, KeyboardEvent as ReactKeyboardEvent, Ref, RefObject } from "react";
 import { Search, X } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import { Kbd } from "./kbd";
 import styles from "./search-input.module.css";
 
 export interface SearchInputProps {
-  value?: string;
+  value?: string | undefined;
   defaultValue?: string;
-  onChange?: (value: string) => void;
+  onChange?: ((value: string) => void) | undefined;
   placeholder?: string;
   /** Single key (e.g. "/") that focuses the input from anywhere on the page. Shown as a Kbd hint. */
   shortcut?: string;
   size?: "sm" | "md" | "lg";
   /** Disabled styling; also hides the clear button and ignores the shortcut. */
   disabled?: boolean;
-  className?: string;
+  className?: string | undefined;
   id?: string;
   name?: string;
   "aria-label"?: string;

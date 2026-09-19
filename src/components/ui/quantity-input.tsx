@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { ChangeEvent, KeyboardEvent } from "react";
 import { Minus, Plus } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./quantity-input.module.css";
 
 export interface QuantityInputProps {
@@ -21,7 +21,7 @@ export interface QuantityInputProps {
   disabled?: boolean;
   /** Error styling + `aria-invalid` (same as passing `aria-invalid`). */
   invalid?: boolean;
-  className?: string;
+  className?: string | undefined;
   "aria-label"?: string;
   "aria-describedby"?: string;
   "aria-invalid"?: boolean | "true" | "false";

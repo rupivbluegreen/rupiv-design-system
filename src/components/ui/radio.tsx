@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./radio.module.css";
 
 export interface RadioOption {
@@ -21,7 +21,7 @@ export interface RadioGroupProps {
   orientation?: "vertical" | "horizontal";
   disabled?: boolean;
   id?: string;
-  className?: string;
+  className?: string | undefined;
   "aria-label"?: string;
   "aria-labelledby"?: string;
   "aria-describedby"?: string;

@@ -1,6 +1,6 @@
-import { cn } from "@/lib/cn";
-import { initials } from "@/lib/format";
-import type { CategoryColor } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import { initials } from "../../lib/format";
+import type { CategoryColor } from "../../lib/types";
 import styles from "./avatar.module.css";
 
 const COLORS: CategoryColor[] = ["indigo", "madder", "turmeric", "neem", "lac", "kattha", "slate"];
@@ -11,14 +11,14 @@ function colorFor(name: string): CategoryColor {
   for (let i = 0; i < name.length; i++) {
     hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
   }
-  return COLORS[hash % COLORS.length];
+  return COLORS[hash % COLORS.length] ?? "slate";
 }
 
 export interface AvatarProps {
   name: string;
   size?: "xs" | "sm" | "md" | "lg";
   color?: CategoryColor;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function Avatar({ name, size = "md", color, className }: AvatarProps) {
@@ -35,7 +35,7 @@ export interface AvatarGroupProps {
   names: string[];
   max?: number;
   size?: "xs" | "sm" | "md";
-  className?: string;
+  className?: string | undefined;
 }
 
 export function AvatarGroup({ names, max = 4, size = "sm", className }: AvatarGroupProps) {

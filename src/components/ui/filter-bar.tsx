@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Check, ChevronDown, CirclePlus, X } from "lucide-react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import { Menu, type MenuItem } from "./menu";
 import { SearchInput } from "./search-input";
 import styles from "./filter-bar.module.css";
@@ -13,7 +13,7 @@ export interface FilterBarProps {
   actions?: ReactNode;
   activeFilters?: { label: string; onRemove: () => void }[];
   onClearAll?: () => void;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function FilterBar({ search, filters, actions, activeFilters, onClearAll, className }: FilterBarProps) {
@@ -67,7 +67,7 @@ export interface FilterChipProps {
   value?: string;
   options: { value: string; label: string }[];
   onChange: (v: string | undefined) => void;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function FilterChip({ label, value, options, onChange, className }: FilterChipProps) {

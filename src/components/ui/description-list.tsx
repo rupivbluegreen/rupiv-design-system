@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { cn } from "@/lib/cn";
+import { cn } from "../../lib/cn";
 import styles from "./description-list.module.css";
 
 export interface DescriptionListItem {
@@ -12,7 +12,7 @@ export interface DescriptionListProps {
   items: DescriptionListItem[];
   columns?: 1 | 2 | 3 | 4;
   dense?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function DescriptionList({ items, columns = 2, dense = false, className }: DescriptionListProps) {
@@ -36,7 +36,7 @@ export interface KeyValueProps {
   label: ReactNode;
   value: ReactNode;
   emphasis?: boolean;
-  className?: string;
+  className?: string | undefined;
 }
 
 export function KeyValue({ label, value, emphasis = false, className }: KeyValueProps) {

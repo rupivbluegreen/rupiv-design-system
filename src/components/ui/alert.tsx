@@ -2,8 +2,8 @@
 
 import type { ReactNode } from "react";
 import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from "lucide-react";
-import { cn } from "@/lib/cn";
-import type { Tone } from "@/lib/types";
+import { cn } from "../../lib/cn";
+import type { Tone } from "../../lib/types";
 import styles from "./alert.module.css";
 
 export interface AlertProps {
@@ -13,7 +13,7 @@ export interface AlertProps {
   icon?: ReactNode;
   action?: ReactNode;
   onDismiss?: () => void;
-  className?: string;
+  className?: string | undefined;
 }
 
 const DEFAULT_ICONS: Record<Tone, ReactNode> = {
