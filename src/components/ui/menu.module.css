@@ -5,14 +5,15 @@
 .menu {
   position: fixed;
   inset-block-start: 0;
-  inset-inline-start: 0;
+  /* Placed by script: it sets top and left in viewport coordinates. No base inline inset here, because
+     inset-inline-start would be the right edge in right-to-left and stretch the box. */
   z-index: var(--z-dropdown);
   display: flex;
   flex-direction: column;
   min-inline-size: 180px;
   max-inline-size: min(320px, calc(100vi - var(--space-16)));
   max-block-size: min(420px, calc(100dvb - var(--space-16)));
-  overflow-block: auto;
+  overflow: auto;
   padding: var(--space-4);
   background: var(--bg-surface-raised);
   border: 1px solid var(--border-default);
@@ -55,7 +56,8 @@
 }
 
 .item:focus-visible {
-  box-shadow: inset 0 0 0 1px var(--border-focus);
+  outline: 1px solid var(--border-focus);
+  outline-offset: -1px;
 }
 
 .icon {
@@ -85,6 +87,10 @@
   font-size: var(--text-12);
   color: var(--text-muted);
   letter-spacing: 0.02em;
+}
+
+.shortcut:lang(ar) {
+  letter-spacing: 0;
 }
 
 .danger,

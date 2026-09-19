@@ -14,7 +14,7 @@
 .scroll {
   position: relative;
   inline-size: 100%;
-  overflow-inline: auto;
+  overflow: auto;
   overscroll-behavior-inline: contain;
 }
 
@@ -164,8 +164,19 @@
   background: color-mix(in srgb, var(--dt-tone-bg) 55%, var(--bg-surface));
 }
 
-.toned td:first-child {
-  box-shadow: inset 2px 0 0 var(--dt-tone-solid);
+/* 2px edge at the inline start of the first cell. A pseudo-element, not an inset shadow, so it follows the direction
+   and survives the hover and selected backgrounds. Sticky cells are already positioned. */
+.toned td:first-child:not(.stickySelect, .stickyCol) {
+  position: relative;
+}
+
+.toned td:first-child::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 2px;
+  background: var(--dt-tone-solid);
 }
 
 .row:hover td {
@@ -251,6 +262,7 @@
   text-align: start;
 }
 
+.tfoot [data-align="end"],
 .tfoot [data-align="right"] {
   text-align: end;
 }
@@ -270,7 +282,8 @@
   align-items: center;
   gap: var(--space-12);
   block-size: var(--dt-head-h);
-  padding: 0 var(--space-12) 0 var(--space-16);
+  padding-block: 0;
+  padding-inline: var(--space-16) var(--space-12);
   background: var(--bg-selected);
   border-block-end: 1px solid var(--border-default);
   animation: bulkIn var(--dur-fast) var(--ease-out);
@@ -295,7 +308,7 @@
   align-items: center;
   gap: var(--space-6);
   min-inline-size: 0;
-  overflow-inline: auto;
+  overflow: auto;
 }
 
 .bulkClear {

@@ -4,7 +4,8 @@
   inline-size: 100%;
   min-inline-size: 0;
   block-size: var(--control-md);
-  padding: 0 var(--space-6) 0 var(--space-12);
+  padding-block: 0;
+  padding-inline: var(--space-12) var(--space-6);
   gap: var(--space-8);
   border: 1px solid var(--border-control);
   border-radius: var(--radius-md);

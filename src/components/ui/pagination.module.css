@@ -21,6 +21,11 @@
   margin-inline-start: auto;
 }
 
+/* previous and next chevrons mirror in right-to-left; the page buttons are not direct children */
+.right > button:dir(rtl) svg {
+  transform: scaleX(-1);
+}
+
 .summary {
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;

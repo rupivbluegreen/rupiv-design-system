@@ -3,8 +3,7 @@
   align-items: stretch;
   min-inline-size: 0;
   max-inline-size: 100%;
-  overflow-inline: auto;
-  overflow-block: hidden;
+  overflow: auto hidden;
   scrollbar-width: none;
 }
 
@@ -108,7 +107,9 @@
 }
 
 .line .tab:focus-visible {
-  box-shadow: inset var(--focus-ring);
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+  box-shadow: none;
 }
 
 /* ---------- pill ---------- */

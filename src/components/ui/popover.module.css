@@ -5,7 +5,8 @@
 .popover {
   position: fixed;
   inset-block-start: 0;
-  inset-inline-start: 0;
+  /* Placed by script: it sets top and left in viewport coordinates. No base inline inset here, because
+     inset-inline-start would be the right edge in right-to-left and stretch the box. */
   z-index: var(--z-dropdown);
   min-inline-size: 240px;
   max-inline-size: calc(100vi - var(--space-16));

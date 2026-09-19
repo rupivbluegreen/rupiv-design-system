@@ -65,7 +65,8 @@
   flex: none;
   inline-size: var(--control-sm);
   block-size: var(--control-sm);
-  margin: calc(var(--space-4) * -1) calc(var(--space-6) * -1) 0 0;
+  margin-block: calc(var(--space-4) * -1) 0;
+  margin-inline: 0 calc(var(--space-6) * -1);
   padding: 0;
   border: 0;
   border-radius: var(--radius-md);
@@ -95,7 +96,7 @@
 .body {
   flex: 1;
   min-block-size: 0;
-  overflow-block: auto;
+  overflow: auto;
   padding: var(--space-4) var(--space-20) var(--space-20);
   font-size: var(--text-14);
   line-height: var(--leading-ui);

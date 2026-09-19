@@ -25,11 +25,12 @@
 
 .input {
   position: absolute;
-  inset: 50% auto auto 50%;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
   inline-size: 28px;
   block-size: 28px;
   margin: 0;
-  transform: translate(-50%, -50%);
+  transform: translate(calc(-50% * var(--rd-dir)), -50%);
   opacity: 0;
   cursor: pointer;
   z-index: 1;

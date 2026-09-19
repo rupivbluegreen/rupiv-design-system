@@ -62,3 +62,8 @@
   inline-size: var(--icon-sm);
   block-size: var(--icon-sm);
 }
+
+/* the separator chevron points in the reading direction */
+.separator:dir(rtl) > svg {
+  transform: scaleX(-1);
+}

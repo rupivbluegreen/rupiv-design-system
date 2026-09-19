@@ -7,7 +7,7 @@
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--bg-subtle);
-  overflow-inline: auto;
+  overflow: auto;
   scrollbar-width: none;
 }
 

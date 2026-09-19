@@ -22,10 +22,10 @@
 
 @keyframes shimmer {
   from {
-    background-position: 150% 0;
+    background-position: calc(50% + 100% * var(--rd-dir)) 0;
   }
   to {
-    background-position: -50% 0;
+    background-position: calc(50% - 100% * var(--rd-dir)) 0;
   }
 }
 

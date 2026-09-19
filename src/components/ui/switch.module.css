@@ -45,7 +45,7 @@
   border-radius: var(--radius-full);
   background: var(--text-on-accent);
   box-shadow: var(--shadow-xs);
-  transition: transform var(--dur-base) var(--ease-out);
+  transition: translate var(--dur-base) var(--ease-out);
 }
 
 .on {
@@ -57,7 +57,7 @@
 }
 
 .on .thumb {
-  transform: translateX(14px);
+  translate: calc(14px * var(--rd-dir)) 0;
 }
 
 .track:disabled {

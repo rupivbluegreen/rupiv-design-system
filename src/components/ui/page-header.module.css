@@ -32,6 +32,11 @@
   margin-inline-start: calc(var(--space-6) * -1);
 }
 
+/* the back arrow points at the inline start, which is the right in right-to-left */
+.back:dir(rtl) svg {
+  transform: scaleX(-1);
+}
+
 .heading {
   display: flex;
   flex-direction: column;

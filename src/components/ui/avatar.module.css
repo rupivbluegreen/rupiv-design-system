@@ -13,6 +13,10 @@
   vertical-align: middle;
 }
 
+.avatar:lang(ar) {
+  letter-spacing: 0;
+}
+
 .xs {
   inline-size: 20px;
   block-size: 20px;

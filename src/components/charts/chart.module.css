@@ -12,7 +12,7 @@
  * The measured element. Its size must never be driven by the SVG, otherwise the
  * ResizeObserver never sees it shrink (min-content of the SVG props up every ancestor).
  * So the SVG is taken out of flow (absolute) and capped at 100%; the plot's height comes
- * from the inline `height` style. `overflow-x: clip` stops a stale, wider SVG from
+ * from the inline `height` style. `overflow: clip visible` (clip on the inline axis) stops a stale, wider SVG from
  * causing page scroll without clipping tooltips vertically or creating a scroll container.
  */
 .plot {
@@ -20,7 +20,7 @@
   display: block;
   inline-size: 100%;
   min-inline-size: 0;
-  overflow-inline: clip;
+  overflow: clip visible;
 }
 
 .svg {

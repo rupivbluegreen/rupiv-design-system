@@ -5,7 +5,8 @@
 .tooltip {
   position: fixed;
   inset-block-start: 0;
-  inset-inline-start: 0;
+  /* Placed by script: it sets top and left in viewport coordinates. No base inline inset here, because
+     inset-inline-start would be the right edge in right-to-left and stretch the box. */
   z-index: var(--z-tooltip);
   max-inline-size: 280px;
   padding: var(--space-4) var(--space-8);
@@ -24,12 +25,12 @@
   animation-name: fadeBottom;
 }
 
-.tooltip[data-side="left"] {
-  animation-name: fadeLeft;
+.tooltip[data-side="start"] {
+  animation-name: fadeStart;
 }
 
-.tooltip[data-side="right"] {
-  animation-name: fadeRight;
+.tooltip[data-side="end"] {
+  animation-name: fadeEnd;
 }
 
 @keyframes fadeTop {
@@ -54,24 +55,25 @@
   }
 }
 
-@keyframes fadeLeft {
+/* the tooltip sits at the inline start of its anchor and slides toward it */
+@keyframes fadeStart {
   from {
     opacity: 0;
-    transform: translateX(4px);
+    translate: calc(4px * var(--rd-dir)) 0;
   }
   to {
     opacity: 1;
-    transform: none;
+    translate: 0 0;
   }
 }
 
-@keyframes fadeRight {
+@keyframes fadeEnd {
   from {
     opacity: 0;
-    transform: translateX(-4px);
+    translate: calc(-4px * var(--rd-dir)) 0;
   }
   to {
     opacity: 1;
-    transform: none;
+    translate: 0 0;
   }
 }

@@ -68,7 +68,8 @@
   flex: none;
   inline-size: var(--control-sm);
   block-size: var(--control-sm);
-  margin: calc(var(--space-4) * -1) calc(var(--space-8) * -1) calc(var(--space-4) * -1) 0;
+  margin-block: calc(var(--space-4) * -1);
+  margin-inline: 0 calc(var(--space-8) * -1);
   padding: 0;
   border: 0;
   border-radius: var(--radius-md);
