@@ -1,12 +1,9 @@
 /**
- * Shared chart math: nice ticks, compact number formatting, text measurement
- * estimates and SVG path builders. No React here.
+ * Shared chart math: nice ticks, compact number formatting and SVG path builders. No React here.
+ * How wide a piece of text is comes from ./text-measure, never from a guess in this file.
  */
-
-/** Rough average glyph width for 11px UI text, used to size margins. */
-export const CHAR_WIDTH = 6.5;
-
-const compact = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
+import { formatNumber } from "../../lib/format";
+import { NO_VALUE } from "../../lib/locale";
 
 /** Round to 2 decimals so SVG attribute strings stay short and stable. */
 export function round(n: number): number {
@@ -17,44 +14,43 @@ export function clamp(n: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, n));
 }
 
-/** Compact Indian notation without currency: 950, 8.4 K, 12.6 L, 3.25 Cr. */
-export function formatCompact(value: number): string {
-  if (!Number.isFinite(value)) return "—";
+/** How a compact number is written around its digits. The language's own words come from the labels. */
+export interface CompactOptions {
+  /** BCP 47 tag. Digits are Western and grouping is en-US in every language, see lib/format. */
+  locale?: string | undefined;
+  /** 12.6 gives "12.6K" in English. */
+  thousand?: ((n: string) => string) | undefined;
+  million?: ((n: string) => string) | undefined;
+}
+
+/** "950", "8.4K", "12.6M", "-3.2K"; "-" for a value that is not a number. No lakh or crore grouping. */
+export function formatCompact(value: number, options: CompactOptions = {}): string {
+  if (!Number.isFinite(value)) return NO_VALUE;
+  const { locale, thousand = (n) => `${n}K`, million = (n) => `${n}M` } = options;
   const abs = Math.abs(value);
-  const sign = value < 0 ? "−" : "";
-  if (abs >= 1e7) return `${sign}${trimZeros((abs / 1e7).toFixed(2))} Cr`;
-  if (abs >= 1e5) return `${sign}${trimZeros((abs / 1e5).toFixed(1))} L`;
-  if (abs >= 1e3) return `${sign}${trimZeros((abs / 1e3).toFixed(1))} K`;
-  return `${sign}${compact.format(abs)}`;
+  // 999,950 would round to "1,000K" as thousands, so it moves up to millions instead.
+  if (abs >= 1e6 || Math.round(abs / 100) / 10 >= 1000) {
+    return million(formatNumber(value / 1e6, locale, { maximumFractionDigits: 1 }));
+  }
+  if (abs >= 1e3) return thousand(formatNumber(value / 1e3, locale, { maximumFractionDigits: 1 }));
+  return formatNumber(value, locale, { maximumFractionDigits: 2 });
 }
 
-function trimZeros(s: string): string {
-  return s.includes(".") ? s.replace(/\.?0+$/, "") : s;
-}
-
-/** Default series color: `var(--chart-1..6)` in order. */
+/**
+ * A series color: what the screen gave, or `var(--chart-1..6)` in order. The shorthand "chart-1" to "chart-6" means
+ * the token of that name, so `color: "chart-2"` and `color: "var(--chart-2)"` are the same.
+ */
 export function seriesColor(index: number, color?: string): string {
-  return color ?? `var(--chart-${(index % 6) + 1})`;
+  if (color === undefined) return `var(--chart-${(index % 6) + 1})`;
+  return /^chart-[1-6]$/.test(color) ? `var(--${color})` : color;
 }
 
-/** Estimated rendered width of 11px label text. */
-export function textWidth(text: string): number {
-  return text.length * CHAR_WIDTH;
-}
-
-/** Truncate a label with an ellipsis so it fits roughly within `maxWidth` px. */
-export function truncateLabel(text: string, maxWidth: number): string {
-  const maxChars = Math.max(1, Math.floor(maxWidth / CHAR_WIDTH));
-  if (text.length <= maxChars) return text;
-  return `${text.slice(0, Math.max(1, maxChars - 1))}…`;
-}
-
-/** Make a React `useId()` value safe for SVG `id` / `url(#…)` references. */
+/** Make a React `useId()` value safe for SVG `id` / `url(#...)` references. */
 export function sanitizeId(id: string): string {
   return id.replace(/[^a-zA-Z0-9_-]/g, "");
 }
 
-export function finite(n: number | undefined): n is number {
+export function finite(n: number | null | undefined): n is number {
   return typeof n === "number" && Number.isFinite(n);
 }
 
@@ -72,7 +68,7 @@ export interface NiceScale {
   ticks: number[];
 }
 
-/** Rounded axis domain + 3–6 evenly spaced ticks covering [dataMin, dataMax]. */
+/** Rounded axis domain + 3-6 evenly spaced ticks covering [dataMin, dataMax]. */
 export function niceScale(dataMin: number, dataMax: number, target = 4): NiceScale {
   let lo = Number.isFinite(dataMin) ? dataMin : 0;
   let hi = Number.isFinite(dataMax) ? dataMax : 0;
@@ -100,11 +96,6 @@ export function niceScale(dataMin: number, dataMax: number, target = 4): NiceSca
   return { min: ticks[0] ?? start, max: ticks[ticks.length - 1] ?? end, ticks };
 }
 
-/** Width of the widest formatted tick label. */
-export function widestLabel(labels: string[]): number {
-  return labels.reduce((w, l) => Math.max(w, textWidth(l)), 0);
-}
-
 export type RoundedSide = "top" | "bottom" | "left" | "right" | "none";
 
 /** Rectangle path with radius `r` applied only to the two corners on `side`. */
@@ -130,10 +121,4 @@ export function barPath(x: number, y: number, w: number, h: number, r: number, s
     return `M${x1} ${y1}H${f(x2 - rr)}Q${x2} ${y1} ${x2} ${f(y1 + rr)}V${f(y2 - rr)}Q${x2} ${y2} ${f(x2 - rr)} ${y2}H${x1}Z`;
   }
   return `M${x2} ${y1}V${y2}H${f(x1 + rr)}Q${x1} ${y2} ${x1} ${f(y2 - rr)}V${f(y1 + rr)}Q${x1} ${y1} ${f(x1 + rr)} ${y1}Z`;
-}
-
-/** Show every nth label so labels of `labelWidth` px don't collide at `spacing` px apart. */
-export function labelEvery(spacing: number, labelWidth: number, gap = 10): number {
-  if (!(spacing > 0)) return 1;
-  return Math.max(1, Math.ceil((labelWidth + gap) / spacing));
 }

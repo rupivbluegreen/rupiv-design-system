@@ -2,21 +2,13 @@
 
 import { useState, type ReactNode } from "react";
 import { cn } from "../../lib/cn";
+import { useLabels } from "../../provider";
 import { ChartLegend } from "./chart-legend";
 import { ChartTooltip, TooltipRow, TooltipTitle } from "./chart-tooltip";
-import {
-  barPath,
-  finite,
-  formatCompact,
-  labelEvery,
-  niceScale,
-  round,
-  seriesColor,
-  textWidth,
-  truncateLabel,
-  widestLabel,
-  type RoundedSide,
-} from "./scale";
+import { barPath, finite, niceScale, round, seriesColor, type RoundedSide } from "./scale";
+import { fitText, pickLabels, useTextMeasure, widestText, type TextMeasure } from "./text-measure";
+import { useChartDir } from "./use-chart-dir";
+import { useCompactFormat, useListJoin } from "./use-chart-text";
 import { useMeasure } from "./use-measure";
 import styles from "./chart.module.css";
 
@@ -27,46 +19,73 @@ export interface BarChartProps {
   format?: (n: number) => string;
   stacked?: boolean;
   horizontal?: boolean;
+  /**
+   * A horizontal chart in a right-to-left page puts the category names at the right and grows the bars from there
+   * (the names follow the page, the way the reference mockups draw it). Set false to keep them at the left. Vertical
+   * charts never mirror: their x axis is the category order, which reads left to right like time.
+   */
+  mirror?: boolean;
+  /** Force the bottom or the top of the value axis. Default: the data, always including 0. */
+  min?: number;
+  max?: number;
+  /** The chart's name for assistive technology; the generated summary follows it. */
+  label?: string;
+  /** Replaces the browser's text measurement (tests, or a screen that knows its fonts). */
+  measureText?: TextMeasure;
 }
 
 const RADIUS = 3;
-/** Vertical bars: category labels are only skipped when bands are narrower than this. */
+/** Vertical bars: category labels are only skipped when bands are narrower than this, px. */
 const MIN_LABEL_BAND = 28;
-/** Approximate glyph width of an 11px axis label, used to fit labels to their band. */
-const LABEL_CHAR_WIDTH = 6.2;
-
-function fitLabel(text: string, maxWidth: number): string {
-  const maxChars = Math.max(1, Math.floor(maxWidth / LABEL_CHAR_WIDTH));
-  if (text.length <= maxChars) return text;
-  return `${text.slice(0, Math.max(1, maxChars - 1))}…`;
-}
+/** Horizontal bars: category rows narrower than this only get every nth label, px. */
+const MIN_ROW_BAND = 14;
+/** Longest category label on a vertical chart, px. */
+const MAX_CATEGORY_LABEL = 120;
+/** Space kept between two value axis labels, px. */
+const TICK_GAP = 12;
 
 interface BarShape {
   key: string;
   d: string;
 }
 
+/** The corner to round on the other side of a bar in a mirrored chart. */
+function mirrorSide(side: RoundedSide): RoundedSide {
+  return side === "left" ? "right" : side === "right" ? "left" : side;
+}
+
 export function BarChart({
   data,
   series,
   height = 240,
-  format = formatCompact,
+  format: formatProp,
   stacked = false,
   horizontal = false,
+  mirror = true,
+  min,
+  max,
+  label,
+  measureText,
 }: BarChartProps) {
+  const t = useLabels();
+  const compact = useCompactFormat();
+  const join = useListJoin();
+  const format = formatProp ?? compact;
   const [ref, width] = useMeasure<HTMLDivElement>();
+  const { ref: rootRef, dir } = useChartDir();
+  const { measure, probes } = useTextMeasure(measureText);
   const [active, setActive] = useState<number | null>(null);
 
   const colors = series.map((s, i) => seriesColor(i, s.color));
   const legend =
-    series.length > 1 ? <ChartLegend items={series.map((s, i) => ({ label: s.name, color: seriesColor(i, s.color) }))} /> : null;
+    series.length > 1 ? <ChartLegend items={series.map((s, i) => ({ label: s.name, color: colors[i] ?? seriesColor(i) }))} /> : null;
 
   if (data.length === 0 || series.length === 0) {
     return (
-      <div className={styles.root}>
+      <div ref={rootRef} className={styles.root}>
         {legend}
         <div className={styles.empty} style={{ height }}>
-          No data
+          {t("chart.noData")}
         </div>
       </div>
     );
@@ -74,12 +93,13 @@ export function BarChart({
 
   const S = series.length;
   const n = data.length;
+  const mirrored = horizontal && mirror && dir === "rtl";
   const value = (row: number, s: number) => {
     const v = data[row]?.values[s];
     return finite(v) ? v : 0;
   };
 
-  // Domain (always includes 0)
+  // Domain (always includes 0 unless the screen forces the ends)
   let lo = 0;
   let hi = 0;
   for (let r = 0; r < n; r++) {
@@ -100,7 +120,7 @@ export function BarChart({
       }
     }
   }
-  const scale = niceScale(lo, hi);
+  const scale = niceScale(min ?? lo, max ?? hi);
   const span = scale.max - scale.min || 1;
   const tickLabels = scale.ticks.map(format);
 
@@ -111,7 +131,7 @@ export function BarChart({
   let highlight: ReactNode = null;
   let anchor = { x: 0, y: 0 };
 
-  /** Lay out one category's bars along the value axis. `toPx` maps value → px on that axis. */
+  /** Lay out one category's bars along the value axis. `toPx` maps value -> px on that axis. */
   const layoutCategory = (
     r: number,
     bandStart: number,
@@ -144,14 +164,14 @@ export function BarChart({
         else neg = next;
         const outer = v > 0 ? s === lastPos : s === lastNeg;
         const side: RoundedSide = !outer ? "none" : horizontal ? (v > 0 ? "right" : "left") : v > 0 ? "top" : "bottom";
-        place(s, groupStart, thickness, toPx(base), toPx(next), side);
+        place(s, groupStart, thickness, toPx(base), toPx(next), mirrored ? mirrorSide(side) : side);
       }
     } else {
       for (let s = 0; s < S; s++) {
         const v = value(r, s);
         if (v === 0) continue;
         const side: RoundedSide = horizontal ? (v > 0 ? "right" : "left") : v > 0 ? "top" : "bottom";
-        place(s, groupStart + s * (thickness + gap), thickness, zero, toPx(v), side);
+        place(s, groupStart + s * (thickness + gap), thickness, zero, toPx(v), mirrored ? mirrorSide(side) : side);
       }
     }
   };
@@ -160,14 +180,14 @@ export function BarChart({
     const top = 10;
     const bottom = 26;
     const right = 8;
-    const left = Math.ceil(widestLabel(tickLabels)) + 10;
+    const left = Math.ceil(widestText(tickLabels, measure)) + 10;
     const plotW = Math.max(1, width - left - right);
     const plotH = Math.max(1, height - top - bottom);
     const y = (v: number) => top + ((scale.max - v) / span) * plotH;
     const band = plotW / n;
 
-    scale.ticks.forEach((t, i) => {
-      const ty = round(y(t));
+    scale.ticks.forEach((tick, i) => {
+      const ty = round(y(tick));
       gridLines.push(
         <line
           key={`g${i}`}
@@ -176,7 +196,7 @@ export function BarChart({
           y1={ty}
           y2={ty}
           fill="none"
-          stroke={t === 0 ? "var(--chart-axis)" : "var(--chart-grid)"}
+          stroke={tick === 0 ? "var(--chart-axis)" : "var(--chart-grid)"}
           strokeWidth={1}
           shapeRendering="crispEdges"
         />,
@@ -192,11 +212,11 @@ export function BarChart({
     const every = band >= MIN_LABEL_BAND ? 1 : Math.ceil(MIN_LABEL_BAND / band);
     data.forEach((d, r) => {
       const bandStart = left + r * band;
-      if (r % every === 0) {
+      if (r % every === 0 && d.label !== "") {
         axisLabels.push(
           <text key={`x${r}`} className={styles.axisLabel} x={round(bandStart + band / 2)} y={height - 8} textAnchor="middle">
             <title>{d.label}</title>
-            {fitLabel(d.label, Math.min(band * every, 120) - 6)}
+            {fitText(d.label, Math.min(band * every, MAX_CATEGORY_LABEL) - 6, measure)}
           </text>,
         );
       }
@@ -229,62 +249,68 @@ export function BarChart({
   } else {
     const top = 4;
     const bottom = 22;
-    const catLabelW = Math.min(widestLabel(data.map((d) => d.label)), width * 0.35);
-    const left = Math.ceil(Math.max(catLabelW + 12, textWidth(tickLabels[0] ?? "") / 2 + 2));
-    const right = Math.ceil(Math.max(8, textWidth(tickLabels[tickLabels.length - 1] ?? "") / 2 + 2));
+    const categoryRoom = Math.min(widestText(data.map((d) => d.label), measure, true), width * 0.35);
+    const namesSide = Math.ceil(categoryRoom + 12);
+    const firstHalf = measure(tickLabels[0] ?? "") / 2 + 2;
+    const lastHalf = measure(tickLabels[tickLabels.length - 1] ?? "") / 2 + 2;
+    // The names sit at the inline start of the chart: the left edge, or the right edge when the chart is mirrored.
+    const left = Math.ceil(mirrored ? Math.max(8, lastHalf) : Math.max(namesSide, firstHalf));
+    const right = Math.ceil(mirrored ? Math.max(namesSide, firstHalf) : Math.max(8, lastHalf));
     const plotW = Math.max(1, width - left - right);
     const plotH = Math.max(1, height - top - bottom);
-    const x = (v: number) => left + ((v - scale.min) / span) * plotW;
+    const x = (v: number) => (mirrored ? left + plotW - ((v - scale.min) / span) * plotW : left + ((v - scale.min) / span) * plotW);
     const band = plotH / n;
 
-    const tickEvery = labelEvery(plotW / Math.max(1, scale.ticks.length - 1), widestLabel(tickLabels), 12);
-    scale.ticks.forEach((t, i) => {
-      const tx = round(x(t));
+    scale.ticks.forEach((tick) => {
+      const tx = round(x(tick));
       gridLines.push(
         <line
-          key={`g${i}`}
+          key={`g${tick}`}
           x1={tx}
           x2={tx}
           y1={top}
           y2={top + plotH}
           fill="none"
-          stroke={t === 0 ? "var(--chart-axis)" : "var(--chart-grid)"}
+          stroke={tick === 0 ? "var(--chart-axis)" : "var(--chart-grid)"}
           strokeWidth={1}
           shapeRendering="crispEdges"
         />,
       );
-      if (i % tickEvery === 0) {
-        axisLabels.push(
-          <text key={`t${i}`} className={styles.axisLabel} x={tx} y={height - 6} textAnchor="middle">
-            {tickLabels[i]}
-          </text>,
-        );
-      }
     });
+    const tickCandidates = scale.ticks
+      .map((tick, i) => ({ x: x(tick), text: tickLabels[i] ?? "" }))
+      .sort((a, b) => a.x - b.x);
+    for (const tick of pickLabels(tickCandidates, measure, TICK_GAP, width)) {
+      axisLabels.push(
+        <text key={`t${round(tick.x)}`} className={styles.axisLabel} x={round(tick.x)} y={height - 6} textAnchor="middle">
+          {tick.text}
+        </text>,
+      );
+    }
 
-    const every = labelEvery(band, 12, 2);
+    const every = band >= MIN_ROW_BAND ? 1 : Math.ceil(MIN_ROW_BAND / band);
     data.forEach((d, r) => {
       const bandStart = top + r * band;
-      if (r % every === 0) {
+      if (r % every === 0 && d.label !== "") {
         axisLabels.push(
           <text
             key={`y${r}`}
-            className={styles.axisLabel}
-            x={left - 10}
+            className={cn(styles.axisLabel, styles.axisStrong)}
+            x={mirrored ? width - 2 : 2}
             y={round(bandStart + band / 2)}
-            textAnchor="end"
+            textAnchor={mirrored ? "end" : "start"}
             dominantBaseline="middle"
           >
             <title>{d.label}</title>
-            {truncateLabel(d.label, catLabelW)}
+            {fitText(d.label, categoryRoom, measure, true)}
           </text>,
         );
       }
-      let maxX = x(0);
+      let reach = x(0);
       layoutCategory(r, bandStart, band, x, (s, offset, thickness, from, to, side) => {
         const x0 = Math.min(from, to);
         const w = Math.max(1, Math.abs(to - from));
-        maxX = Math.max(maxX, x0 + w);
+        reach = mirrored ? Math.min(reach, x0) : Math.max(reach, x0 + w);
         bars[s]?.push({ key: `${r}`, d: barPath(x0, offset, w, thickness, RADIUS, side) });
       });
       hitAreas.push(
@@ -303,31 +329,40 @@ export function BarChart({
         highlight = (
           <rect x={left} y={round(bandStart)} width={plotW} height={round(band)} fill="var(--bg-hover)" stroke="none" />
         );
-        anchor = { x: maxX, y: bandStart + band / 2 };
+        anchor = { x: reach, y: bandStart + band / 2 };
       }
     });
   }
 
-  const svgLabel = `${stacked ? "Stacked" : "Grouped"} ${horizontal ? "horizontal " : ""}bar chart of ${n} categories${
-    S > 1 ? ` and ${S} series (${series.map((s) => s.name).join(", ")})` : ` for ${series[0]?.name ?? ""}`
-  }, values from ${format(lo)} to ${format(hi)}.`;
+  const summary = t("barChart.summary", {
+    stacked: stacked ? 1 : 0,
+    horizontal: horizontal ? 1 : 0,
+    categories: n,
+    seriesCount: S,
+    names: join(series.map((s) => s.name)),
+    min: format(lo),
+    max: format(hi),
+  });
+  const accessibleName = label ? t("chart.titled", { title: label, summary }) : summary;
 
   const activeIndex = active !== null && active < n ? active : null;
   const activeRow = activeIndex !== null ? data[activeIndex] : null;
 
   return (
-    <div className={styles.root}>
+    <div ref={rootRef} className={styles.root}>
       {legend}
-      <div ref={ref} className={styles.plot} style={{ height }}>
+      <div ref={ref} className={styles.plot} dir="ltr" style={{ height }}>
         <svg
           className={styles.svg}
           width={width}
           height={height}
           viewBox={`0 0 ${width} ${height}`}
           role="img"
-          aria-label={svgLabel}
+          aria-label={accessibleName}
+          data-mirrored={mirrored ? "true" : undefined}
           onPointerLeave={() => setActive(null)}
         >
+          {probes}
           {highlight}
           {gridLines}
           {bars.map((shapes, s) => (
@@ -349,14 +384,14 @@ export function BarChart({
           {hitAreas}
         </svg>
         {activeRow && activeIndex !== null ? (
-          <ChartTooltip x={anchor.x} y={anchor.y} containerWidth={width} containerHeight={height}>
+          <ChartTooltip x={anchor.x} y={anchor.y} containerWidth={width} containerHeight={height} dir={dir}>
             <TooltipTitle>{activeRow.label}</TooltipTitle>
             {series.map((s, i) => (
               <TooltipRow key={`${s.name}-${i}`} color={colors[i]} label={s.name} value={format(value(activeIndex, i))} />
             ))}
             {stacked && S > 1 ? (
               <TooltipRow
-                label="Total"
+                label={t("barChart.total")}
                 value={format(series.reduce((sum, _s, i) => sum + value(activeIndex, i), 0))}
               />
             ) : null}

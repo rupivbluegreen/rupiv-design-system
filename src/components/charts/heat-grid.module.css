@@ -1,52 +1,71 @@
-/* Positioning context for the tooltip, which is a sibling of the role="table" grid. */
+/*
+ * Row names at the inline start of the page, the scrolling grid beside them. The row names are OUTSIDE the scrolling
+ * box so they stay in view while the columns scroll, and so the grid can be left to right (time never flips) while
+ * the names follow the page (the right in Arabic).
+ * The root is also the positioning context of the tooltip, which sits in its own left-to-right layer.
+ * --heat-cols and --heat-min are set inline by the component.
+ */
 .root {
   position: relative;
-  inline-size: 100%;
-  min-inline-size: 0;
-}
-
-.scroll {
-  inline-size: 100%;
-  min-inline-size: 0;
-  overflow: auto;
-}
-
-.grid {
-  position: relative;
   display: grid;
-  gap: var(--space-2);
-  min-inline-size: max-content;
-  font-variant-numeric: tabular-nums;
-}
-
-.row {
-  display: contents;
-}
-
-.corner {
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: var(--space-8);
+  inline-size: 100%;
   min-inline-size: 0;
 }
 
-.colHeader {
-  padding: 0 var(--space-4) var(--space-4);
+/* Lines the names up with the rows: the column header row and the gap under it. */
+.rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-block-start: calc(var(--space-20) + var(--space-2));
+}
+
+.rowHead {
+  display: flex;
+  align-items: center;
+  block-size: var(--control-sm);
+  max-inline-size: 200px;
   overflow: hidden;
   color: var(--text-label);
-  font-size: var(--text-11);
-  font-weight: var(--weight-medium);
+  font-size: var(--text-12);
   line-height: var(--leading-snug);
-  text-align: center;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.rowHeader {
-  display: flex;
-  align-items: center;
-  max-inline-size: 200px;
-  padding-inline-end: var(--space-12);
+/* The only scrolling box. Left to right, so it starts at the first column in every language. */
+.scroll {
+  min-inline-size: 0;
+  overflow: auto hidden;
+  direction: ltr;
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-2);
+  min-inline-size: calc(var(--heat-cols) * var(--heat-min) + (var(--heat-cols) - 1) * var(--space-2));
+  font-variant-numeric: tabular-nums;
+}
+
+/* Each row is its own grid with the same columns, so the rows keep their role="row" element in the layout. */
+.row {
+  display: grid;
+  grid-template-columns: repeat(var(--heat-cols), minmax(var(--heat-min), 1fr));
+  gap: var(--space-2);
+}
+
+.headRow {
+  block-size: var(--space-20);
+}
+
+.colHead {
+  padding-inline-start: var(--space-2);
   overflow: hidden;
   color: var(--text-label);
-  font-size: var(--text-12);
+  font-size: var(--text-11);
+  font-weight: var(--weight-medium);
   line-height: var(--leading-snug);
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -57,8 +76,9 @@
   align-items: center;
   justify-content: center;
   block-size: var(--control-sm);
-  padding: 0 var(--space-4);
+  padding-inline: var(--space-4);
   border-radius: var(--radius-xs);
+  color: var(--text-body);
   font-size: var(--text-11);
   font-weight: var(--weight-medium);
   white-space: nowrap;
@@ -72,9 +92,48 @@
   outline-color: var(--border-strong);
 }
 
-.missing {
+/* A cell is reached with the keyboard; the ring is inside the cell so the scrolling box never clips it. */
+.cell:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.interactive {
+  cursor: pointer;
+}
+
+/* Signed cells: --i is the intensity, 0 to 100, set inline. The tone is mixed into the surface at 0.7% per point. */
+.gap {
+  background: color-mix(in srgb, var(--danger-solid) calc(var(--i, 0) * 0.7%), var(--bg-surface));
+}
+
+.surplus {
+  background: color-mix(in srgb, var(--info-solid) calc(var(--i, 0) * 0.7%), var(--bg-surface));
+}
+
+.strong {
+  color: var(--text-title);
+  font-weight: var(--weight-semibold);
+}
+
+/* Balanced (zero) and empty cells. */
+.ok {
   background: var(--bg-subtle);
   color: var(--text-muted);
+}
+
+.missing {
+  cursor: default;
+}
+
+/* Many narrow columns: no text in the cells, and a column header may run past its column. */
+.compact .cell {
+  padding-inline: 0;
+}
+
+.compact .colHead {
+  padding-inline-start: 0;
+  overflow: visible;
 }
 
 .empty {

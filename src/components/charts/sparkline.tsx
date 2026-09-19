@@ -1,8 +1,10 @@
 "use client";
 
 import { useId } from "react";
+import { useLabels } from "../../provider";
 import type { Tone } from "../../lib/types";
 import { finite, round, sanitizeId } from "./scale";
+import { useCompactFormat } from "./use-chart-text";
 import styles from "./sparkline.module.css";
 
 export interface SparklineProps {
@@ -12,19 +14,43 @@ export interface SparklineProps {
   tone?: Tone | "chart-1" | "chart-2" | "chart-3" | "chart-4" | "chart-5" | "chart-6";
   area?: boolean;
   showEnd?: boolean;
+  format?: (n: number) => string;
+  /** The trend's name for assistive technology; the generated summary follows it. */
+  label?: string;
 }
 
 const PAD = 3;
 
-export function Sparkline({ data, width = 120, height = 32, tone = "chart-1", area = false, showEnd = true }: SparklineProps) {
+/** A small trend line. It always runs left to right, like every time axis. */
+export function Sparkline({
+  data,
+  width = 120,
+  height = 32,
+  tone = "chart-1",
+  area = false,
+  showEnd = true,
+  format: formatProp,
+  label,
+}: SparklineProps) {
   const gradientId = `spark-${sanitizeId(useId())}`;
+  const t = useLabels();
+  const compact = useCompactFormat();
+  const format = formatProp ?? compact;
   const color = tone.startsWith("chart-") ? `var(--${tone})` : `var(--${tone}-solid)`;
   const values = data.filter(finite);
 
   if (values.length === 0) {
     const mid = round(height / 2);
+    const name = t("chart.noData");
     return (
-      <svg className={styles.svg} width={width} height={height} viewBox={`0 0 ${width} ${height}`} role="img" aria-label="No data">
+      <svg
+        className={styles.svg}
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        role="img"
+        aria-label={label ? t("chart.titled", { title: label, summary: name }) : name}
+      >
         <line x1={PAD} y1={mid} x2={width - PAD} y2={mid} fill="none" stroke="var(--chart-grid)" strokeWidth={1.5} />
       </svg>
     );
@@ -46,7 +72,14 @@ export function Sparkline({ data, width = 120, height = 32, tone = "chart-1", ar
   const last = points[points.length - 1] ?? first;
   const bottom = height - PAD / 2;
   const areaPath = `${line}L${last[0]} ${bottom}L${first[0]} ${bottom}Z`;
-  const end = values[values.length - 1];
+  const end = values[values.length - 1] ?? only;
+
+  const summary = t("sparkline.summary", {
+    count: values.length,
+    min: format(min),
+    max: format(max),
+    latest: format(end),
+  });
 
   return (
     <svg
@@ -55,7 +88,7 @@ export function Sparkline({ data, width = 120, height = 32, tone = "chart-1", ar
       height={height}
       viewBox={`0 0 ${width} ${height}`}
       role="img"
-      aria-label={`Trend of ${values.length} points, low ${min}, high ${max}, latest ${end}`}
+      aria-label={label ? t("chart.titled", { title: label, summary }) : summary}
     >
       {area ? (
         <>

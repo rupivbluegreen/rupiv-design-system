@@ -9,6 +9,8 @@
 .chart {
   position: relative;
   flex: none;
+  /* The ring and its tooltip layer are always left to right; the centre text and the legend follow the page. */
+  direction: ltr;
 }
 
 .svg {

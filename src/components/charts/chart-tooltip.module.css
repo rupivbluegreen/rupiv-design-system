@@ -1,3 +1,11 @@
+/* Fills the chart container and is always left to right, so the tooltip's offsets are measured from the left edge. */
+.layer {
+  position: absolute;
+  inset: 0;
+  direction: ltr;
+  pointer-events: none;
+}
+
 .tooltip {
   position: absolute;
   inset-block-start: 0;
@@ -14,6 +22,11 @@
   font-size: var(--text-12);
   line-height: var(--leading-snug);
   white-space: nowrap;
+}
+
+/* The words follow the page direction; the box that holds them does not move with it. */
+.content {
+  text-align: start;
 }
 
 .title {

@@ -21,6 +21,9 @@
   inline-size: 100%;
   min-inline-size: 0;
   overflow: clip visible;
+  /* The plot is always left to right: time runs left to right in every language and the axes never flip.
+     The legend, the row labels and the tooltip text stay outside it and follow the page. */
+  direction: ltr;
 }
 
 .svg {
@@ -58,4 +61,28 @@
   border-radius: var(--radius-md);
   color: var(--text-muted);
   font-size: var(--text-12);
+}
+
+/* Heavier axis text: category names of a horizontal bar chart, marker labels. */
+.axisStrong {
+  fill: var(--text-title);
+  font-weight: var(--weight-medium);
+}
+
+/* The two hidden <text> elements the chart measures its labels with. They take room in the layout but paint nothing. */
+.probe {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.marker {
+  stroke: var(--chart-axis);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  shape-rendering: crispEdges;
+}
+
+.band {
+  fill-opacity: 0.14;
+  stroke: none;
 }

@@ -1,4 +1,6 @@
 .svg {
+  /* A trend reads left to right in every language. */
+  direction: ltr;
   display: block;
   flex: none;
   max-inline-size: none;

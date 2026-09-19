@@ -1,22 +1,33 @@
 "use client";
 
 import { useLayoutEffect, useRef, type ReactNode } from "react";
+import { useDir, type Direction } from "../../provider";
 import styles from "./chart-tooltip.module.css";
 
 export interface ChartTooltipProps {
-  /** Anchor point, px relative to the positioned chart container. */
+  /** Anchor point, px from the LEFT edge of the positioned chart container, whatever the page direction. */
   x: number;
   y: number;
   /** Container size used to keep the tooltip inside bounds. */
   containerWidth: number;
   containerHeight: number;
+  /** Direction of the text inside the tooltip. Default: the provider's. The position never depends on it. */
+  dir?: Direction | undefined;
   children: ReactNode;
 }
 
 const OFFSET = 12;
 
-/** Small floating tooltip, clamped inside its (position: relative) container. */
-export function ChartTooltip({ x, y, containerWidth, containerHeight, children }: ChartTooltipProps) {
+/**
+ * Small floating tooltip, clamped inside its (position: relative) container.
+ *
+ * It sits in its own left-to-right layer that fills the container, so `x` is always measured from the left edge and
+ * the same arithmetic holds in a right-to-left page (a plot never flips, so an anchor's x is a physical position).
+ * Only the words inside follow the page direction (`dir`): the swatch and name come first at the inline start. The
+ * positioned box itself stays left to right so its inline start is its left edge.
+ */
+export function ChartTooltip({ x, y, containerWidth, containerHeight, dir, children }: ChartTooltipProps) {
+  const providerDir = useDir();
   const ref = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
@@ -35,8 +46,12 @@ export function ChartTooltip({ x, y, containerWidth, containerHeight, children }
   });
 
   return (
-    <div ref={ref} className={styles.tooltip} aria-hidden="true">
-      {children}
+    <div className={styles.layer} dir="ltr" aria-hidden="true">
+      <div ref={ref} className={styles.tooltip}>
+        <div className={styles.content} dir={dir ?? providerDir}>
+          {children}
+        </div>
+      </div>
     </div>
   );
 }
@@ -50,7 +65,9 @@ export function TooltipRow({ color, label, value }: { color?: string | undefined
     <div className={styles.row}>
       {color ? <span className={styles.swatch} style={{ background: color }} /> : null}
       <span className={styles.name}>{label}</span>
-      <span className={styles.value}>{value}</span>
+      <span className={styles.value}>
+        <bdi>{value}</bdi>
+      </span>
     </div>
   );
 }

@@ -2,9 +2,13 @@
 
 import { useState, type ReactNode } from "react";
 import { cn } from "../../lib/cn";
+import { useFormat } from "../../lib/use-format";
+import { useLabels } from "../../provider";
 import { ChartLegend } from "./chart-legend";
 import { ChartTooltip, TooltipRow, TooltipTitle } from "./chart-tooltip";
-import { finite, formatCompact, round, seriesColor } from "./scale";
+import { finite, round, seriesColor } from "./scale";
+import { useChartDir } from "./use-chart-dir";
+import { useCompactFormat, useListJoin } from "./use-chart-text";
 import styles from "./donut-chart.module.css";
 
 export interface DonutChartProps {
@@ -15,6 +19,8 @@ export interface DonutChartProps {
   centerValue?: ReactNode;
   format?: (n: number) => string;
   showLegend?: boolean;
+  /** The chart's name for assistive technology; the generated summary follows it. */
+  label?: string;
 }
 
 const GROW = 3;
@@ -41,15 +47,27 @@ function ringPath(cx: number, cy: number, outer: number, inner: number): string 
   );
 }
 
+/**
+ * The ring is drawn the same in every language (it starts at the top and runs clockwise, like a clock). The centre
+ * text and the legend follow the page direction; the ring's box is left to right so the tooltip can be placed from
+ * its left edge.
+ */
 export function DonutChart({
   data,
   size = 160,
   thickness = 18,
   centerLabel,
   centerValue,
-  format = formatCompact,
+  format: formatProp,
   showLegend = false,
+  label,
 }: DonutChartProps) {
+  const t = useLabels();
+  const f = useFormat();
+  const compact = useCompactFormat();
+  const join = useListJoin();
+  const format = formatProp ?? compact;
+  const { ref: rootRef, dir } = useChartDir();
   const [active, setActive] = useState<number | null>(null);
 
   const c = size / 2;
@@ -80,7 +98,8 @@ export function DonutChart({
     });
   }
 
-  const pct = (v: number) => (total > 0 ? Math.round((v / total) * 1000) / 10 : 0);
+  /** Share of the total in percent, one decimal at most: "66.5%", "50%". */
+  const percent = (v: number) => `${f.num(total > 0 ? Math.round((v / total) * 1000) / 10 : 0)}%`;
   const activeSeg = active !== null ? segments.find((s) => s.i === active) : undefined;
   const mid = (outer + inner) / 2;
   const anchor = activeSeg
@@ -89,21 +108,27 @@ export function DonutChart({
 
   const summary =
     total > 0
-      ? `Donut chart, total ${format(total)}: ${data
-          .map((d, i) => `${d.label} ${format(values[i] ?? 0)} (${pct(values[i] ?? 0)}%)`)
-          .join(", ")}.`
-      : "Donut chart, no data.";
+      ? t("donutChart.summary", {
+          total: format(total),
+          items: join(
+            data.map((d, i) =>
+              t("donutChart.item", { label: d.label, value: format(values[i] ?? 0), percent: percent(values[i] ?? 0) }),
+            ),
+          ),
+        })
+      : t("donutChart.empty");
+  const accessibleName = label ? t("chart.titled", { title: label, summary }) : summary;
 
   return (
-    <div className={styles.root}>
-      <div className={styles.chart} style={{ width: size, height: size }}>
+    <div ref={rootRef} className={styles.root}>
+      <div className={styles.chart} dir="ltr" style={{ width: size, height: size }}>
         <svg
           className={styles.svg}
           width={size}
           height={size}
           viewBox={`0 0 ${size} ${size}`}
           role="img"
-          aria-label={summary}
+          aria-label={accessibleName}
           onPointerLeave={() => setActive(null)}
         >
           {total > 0 ? (
@@ -123,21 +148,21 @@ export function DonutChart({
           )}
         </svg>
         {centerLabel !== undefined || centerValue !== undefined ? (
-          <div className={styles.center} style={{ padding: inner < outer ? outer - inner + 6 : 6 }}>
+          <div className={styles.center} dir={dir} style={{ padding: inner < outer ? outer - inner + 6 : 6 }}>
             {centerValue !== undefined ? <div className={styles.centerValue}>{centerValue}</div> : null}
             {centerLabel !== undefined ? <div className={styles.centerLabel}>{centerLabel}</div> : null}
           </div>
         ) : null}
         {activeSeg && active !== null ? (
-          <ChartTooltip x={anchor.x} y={anchor.y} containerWidth={size} containerHeight={size}>
+          <ChartTooltip x={anchor.x} y={anchor.y} containerWidth={size} containerHeight={size} dir={dir}>
             <TooltipTitle>{data[active]?.label}</TooltipTitle>
-            <TooltipRow color={colors[active]} label={`${pct(values[active] ?? 0)}%`} value={format(data[active]?.value ?? 0)} />
+            <TooltipRow color={colors[active]} label={percent(values[active] ?? 0)} value={format(data[active]?.value ?? 0)} />
           </ChartTooltip>
         ) : null}
       </div>
       {showLegend && data.length > 0 ? (
         <div className={styles.legend}>
-          <ChartLegend items={data.map((d, i) => ({ label: d.label, color: seriesColor(i, d.color), value: format(d.value) }))} />
+          <ChartLegend items={data.map((d, i) => ({ label: d.label, color: colors[i] ?? seriesColor(i), value: format(d.value) }))} />
         </div>
       ) : null}
     </div>

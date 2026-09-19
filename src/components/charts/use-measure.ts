@@ -8,7 +8,7 @@ import { useCallback, useState } from "react";
  * server / first client render so markup hydrates without mismatch.
  *
  * The observed element must be sized by its container, not by what you render from
- * `width` (e.g. `width: 100%; min-width: 0` with the SVG absolutely positioned inside —
+ * `width` (e.g. `width: 100%; min-width: 0` with the SVG absolutely positioned inside -
  * see `.plot` / `.svg` in chart.module.css). Otherwise it can never get narrower.
  */
 export function useMeasure<T extends Element = HTMLDivElement>(defaultWidth = 600) {
