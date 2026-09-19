@@ -46,3 +46,27 @@
 .omni-icon-button:hover { background: var(--tx-color-surface-subtle); }
 .omni-icon-button:focus-visible { outline: 2px solid var(--tx-color-brand-500); outline-offset: 2px; }
 .omni-icon-button svg { inline-size: 18px; block-size: 18px; }
+
+/* Unavailable: token colours and a not-allowed cursor, never opacity (which would also fade the label's contrast).
+   aria-disabled keeps the button focusable, so it gets the same look; the caller must not act on its click. */
+.omni-button:disabled,
+.omni-button[aria-disabled='true'],
+.omni-icon-button:disabled,
+.omni-icon-button[aria-disabled='true'] {
+  color: var(--tx-color-text-tertiary);
+  cursor: not-allowed;
+  filter: none;
+}
+.omni-button--primary:disabled,
+.omni-button--primary[aria-disabled='true'],
+.omni-button--secondary:disabled,
+.omni-button--secondary[aria-disabled='true'] {
+  background: var(--tx-color-surface-subtle);
+  border-color: var(--tx-color-border-subtle);
+}
+.omni-button--ghost:disabled,
+.omni-button--ghost[aria-disabled='true'],
+.omni-icon-button:disabled,
+.omni-icon-button[aria-disabled='true'] {
+  background: transparent;
+}
