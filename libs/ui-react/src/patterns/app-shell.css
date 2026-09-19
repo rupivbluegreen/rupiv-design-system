@@ -24,11 +24,18 @@
 .omni-shell-group-label {
   margin: 0 0 2px;
   padding-inline: var(--tx-space-1-5);
-  font-size: 10px;
+  font-size: var(--tx-typography-size-caption);
   font-weight: var(--tx-typography-weight-semibold);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   color: var(--tx-color-text-tertiary);
+}
+/* Letter-spacing breaks the joins of cursive Arabic and case does not exist there. */
+.omni-shell-group-label:lang(ar),
+[dir='rtl'] .omni-shell-group-label,
+.omni-shell-group-label[dir='rtl'] {
+  letter-spacing: 0;
+  text-transform: none;
 }
 .omni-shell-nav-item {
   display: flex;
@@ -42,6 +49,8 @@
   font-weight: var(--tx-typography-weight-medium);
 }
 .omni-shell-nav-item:hover { background: var(--tx-color-surface-subtle); }
+/* Inset ring: the scroll container clips anything drawn outside the item. */
+.omni-shell-nav-item:focus-visible { outline: 2px solid var(--tx-color-brand-500); outline-offset: -2px; }
 .omni-shell-nav-item[data-active='true'] { background: var(--tx-color-brand-100); color: var(--tx-color-brand-700); }
 .omni-shell-nav-icon { display: inline-flex; inline-size: 18px; block-size: 18px; flex: none; }
 .omni-shell-nav-icon svg { inline-size: 100%; block-size: 100%; }
@@ -77,11 +86,31 @@
   color: var(--tx-color-text-tertiary);
 }
 .omni-shell-search input { flex: 1; border: none; background: transparent; font: inherit; color: var(--tx-color-text-primary); outline: none; }
-.omni-shell-kbd { font-size: 11px; color: var(--tx-color-text-tertiary); border: 1px solid var(--tx-color-border-default); border-radius: 4px; padding: 1px 5px; }
+/* The input drops its own outline, so the box shows the focus. */
+.omni-shell-search:focus-within { outline: 2px solid var(--tx-color-brand-500); outline-offset: 2px; }
 .omni-shell-topbar-actions { margin-inline-start: auto; display: flex; align-items: center; gap: var(--tx-space-2); }
-.omni-shell-bell { position: relative; display: inline-flex; border: none; background: transparent; color: var(--tx-color-text-secondary); cursor: pointer; padding: var(--tx-space-1); border-radius: var(--tx-radius-xs); }
+.omni-shell-bell { position: relative; display: inline-flex; border: none; background: transparent; color: var(--tx-color-text-secondary); cursor: pointer; padding: var(--tx-space-1); border-radius: var(--tx-radius-xs); text-decoration: none; }
 .omni-shell-bell:hover { background: var(--tx-color-surface-subtle); }
-.omni-shell-bell-dot { position: absolute; top: 4px; inset-inline-end: 4px; inline-size: 7px; block-size: 7px; border-radius: 50%; background: var(--tx-color-status-danger); }
+.omni-shell-bell:focus-visible { outline: 2px solid var(--tx-color-brand-500); outline-offset: 2px; }
+/* Brand fill, not the danger red: white on status-danger is 3.9:1, under the 4.5:1 that 12px text needs. */
+.omni-shell-bell-badge {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-inline-size: 18px;
+  block-size: 18px;
+  padding-inline: var(--tx-space-0-5);
+  border-radius: var(--tx-radius-pill);
+  background: var(--tx-color-brand-700);
+  color: var(--tx-color-text-on-brand);
+  font-size: var(--tx-typography-size-caption);
+  font-weight: var(--tx-typography-weight-semibold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
 .omni-shell-user { display: flex; align-items: center; gap: var(--tx-space-1); cursor: pointer; }
 .omni-shell-avatar {
   display: inline-flex;
