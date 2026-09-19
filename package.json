@@ -2,7 +2,9 @@
   "name": "omniappsuiux",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "stylelint": "stylelint \"libs/**/*.css\""
+  },
   "private": true,
   "repository": {
     "type": "git",
@@ -48,6 +50,7 @@
     "jsdom": "^27.1.0",
     "nx": "23.2.0",
     "prettier": "^3.8.1",
+    "stylelint": "17.15.0",
     "tslib": "^2.3.0",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.58.0",
