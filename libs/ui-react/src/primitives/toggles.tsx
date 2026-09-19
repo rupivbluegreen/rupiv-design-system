@@ -1,7 +1,7 @@
 import * as RadixCheckbox from '@radix-ui/react-checkbox';
 import * as RadixRadio from '@radix-ui/react-radio-group';
 import * as RadixSwitch from '@radix-ui/react-switch';
-import { cn } from '../lib/cn.js';
+import { cn } from '../lib/cn';
 import './toggles.css';
 
 export interface CheckboxProps {

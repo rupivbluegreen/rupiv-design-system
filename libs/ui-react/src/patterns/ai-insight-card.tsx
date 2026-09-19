@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Sparkles } from 'lucide-react';
-import { Button } from '../foundations/button.js';
+import { Button } from '../foundations/button';
 import './ai-insight-card.css';
 
 export interface AIInsightCardProps {

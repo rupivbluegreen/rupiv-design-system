@@ -1,1 +1,1 @@
-export { tokens, rawTokens } from './generated/tokens.js';
+export { tokens, rawTokens } from './generated/tokens';

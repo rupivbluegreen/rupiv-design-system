@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
-import { Card } from '../foundations/surface.js';
-import { MetricDelta } from '../foundations/status-badge.js';
+import { Card } from '../foundations/surface';
+import { MetricDelta } from '../foundations/status-badge';
 import './kpi-card.css';
 
 export type KPITone = 'brand' | 'blue' | 'orange' | 'red';

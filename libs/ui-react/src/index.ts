@@ -1,13 +1,13 @@
 
-export * from './foundations/surface.js';
-export * from './foundations/button.js';
-export * from './foundations/status-badge.js';
-export * from './patterns/kpi-card.js';
-export * from './patterns/ai-insight-card.js';
-export * from './patterns/app-shell.js';
-export * from './patterns/data-table.js';
-export * from './primitives/field.js';
-export * from './primitives/input.js';
-export * from './primitives/select.js';
-export * from './primitives/toggles.js';
+export * from './foundations/surface';
+export * from './foundations/button';
+export * from './foundations/status-badge';
+export * from './patterns/kpi-card';
+export * from './patterns/ai-insight-card';
+export * from './patterns/app-shell';
+export * from './patterns/data-table';
+export * from './primitives/field';
+export * from './primitives/input';
+export * from './primitives/select';
+export * from './primitives/toggles';
 

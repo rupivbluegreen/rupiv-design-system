@@ -1,5 +1,5 @@
 import * as RadixSelect from '@radix-ui/react-select';
-import { cn } from '../lib/cn.js';
+import { cn } from '../lib/cn';
 import './select.css';
 
 export interface SelectOption {

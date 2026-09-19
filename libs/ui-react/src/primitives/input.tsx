@@ -1,5 +1,5 @@
 import { forwardRef, type InputHTMLAttributes, type TextareaHTMLAttributes } from 'react';
-import { cn } from '../lib/cn.js';
+import { cn } from '../lib/cn';
 import './input.css';
 
 export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
