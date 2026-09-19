@@ -35,8 +35,9 @@
   cursor: not-allowed;
 }
 
-/* Numerics are tabular and right-aligned in BOTH directions: numerals read left-to-right even inside Arabic text. */
+/* Numerics are tabular and right-aligned in BOTH directions: numerals read left-to-right even inside Arabic text.
+   Input forces dir="ltr" when numeric, so `end` is the right edge in either page direction. */
 .omni-input[data-numeric='true'] {
   font-variant-numeric: tabular-nums lining-nums;
-  text-align: right;
+  text-align: end;
 }
