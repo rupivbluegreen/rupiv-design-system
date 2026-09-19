@@ -1,0 +1,55 @@
+{
+  "name": "@rupiv/design-system",
+  "version": "0.0.0",
+  "description": "The rupiv-design system: semantic tokens, CSS Modules components and SVG charts for data-heavy web applications. Published as TypeScript source.",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.12.1",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "exports": {
+    ".": "./src/components/ui/index.ts",
+    "./charts": "./src/components/charts/index.ts",
+    "./tokens.css": "./src/styles/tokens.css",
+    "./styles.css": "./src/styles/base.css",
+    "./format": "./src/lib/format.ts",
+    "./tokens": "./src/lib/tokens.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "test": "vitest run",
+    "check:exports": "node scripts/check-exports.mjs"
+  },
+  "dependencies": {
+    "clsx": "2.1.1"
+  },
+  "peerDependencies": {
+    "lucide-react": "^1.47.0",
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "devDependencies": {
+    "@testing-library/dom": "10.4.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
+    "@types/node": "22.20.4",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "6.1.1",
+    "jsdom": "27.4.0",
+    "lucide-react": "1.47.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "stylelint": "17.15.0",
+    "stylelint-plugin-logical-css": "2.1.0",
+    "typescript": "6.0.3",
+    "vite": "8.3.0",
+    "vitest": "4.1.11"
+  }
+}
