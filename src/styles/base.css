@@ -1,4 +1,11 @@
-@import "../styles/tokens.css";
+/* ==========================================================================
+   rupiv-design system: base styles (reset, type utilities, Arabic type).
+
+   Import after tokens.css, as a separate file. There is no @import here:
+   the app imports Fontsource CSS, then tokens.css, then this file.
+   Logical CSS properties only. lang and dir come from the server on <html>;
+   nothing here sets them.
+   ========================================================================== */
 
 /* ---------- Reset ---------- */
 *,
@@ -14,7 +21,7 @@ html {
 
 body {
   margin: 0;
-  min-height: 100dvh;
+  min-block-size: 100dvb;
   background: var(--bg-app);
   color: var(--text-body);
   font-family: var(--font-ui);
@@ -23,6 +30,21 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+}
+
+/* ---------- Arabic (html lang="ar") ----------
+   IBM Plex Sans Arabic, 6% larger (every text size is a rem, every space a px,
+   so only text scales), taller leading (Arabic marks need the room), and no
+   letter spacing or uppercase on the text roles further down. */
+:root:lang(ar) {
+  --font-ui: var(--font-arabic);
+  --font-display: var(--font-arabic);
+  --leading-tight: 1.3;
+  --leading-snug: 1.5;
+  --leading-ui: 1.65;
+  --leading-read: 1.9;
+
+  font-size: 106.25%;
 }
 
 h1, h2, h3, h4, h5, h6, p, figure, blockquote, dl, dd {
@@ -34,15 +56,16 @@ h1, h2, h3, h4 {
   text-wrap: balance;
 }
 
-ul[role="list"], ol[role="list"] {
-  list-style: none;
+ul[role="list"],
+ol[role="list"] {
   margin: 0;
   padding: 0;
+  list-style: none;
 }
 
 img, svg, video, canvas {
   display: block;
-  max-width: 100%;
+  max-inline-size: 100%;
 }
 
 input, button, textarea, select {
@@ -81,9 +104,14 @@ table {
   outline-offset: 2px;
 }
 
+/* An element with the hidden attribute stays hidden even when a class sets display. */
+[hidden] {
+  display: none !important;
+}
+
 /* ---------- Typography utilities (named styles) ---------- */
-.t-display-xl { font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, var(--text-60)); line-height: 1.02; font-weight: var(--weight-semibold); letter-spacing: -0.03em; }
-.t-display-l  { font-family: var(--font-display); font-size: clamp(2rem, 4vw, var(--text-48)); line-height: 1.06; font-weight: var(--weight-semibold); letter-spacing: -0.025em; }
+.t-display-xl { font-family: var(--font-display); font-size: clamp(2.5rem, 5vi, var(--text-60)); line-height: 1.02; font-weight: var(--weight-semibold); letter-spacing: -0.03em; }
+.t-display-l  { font-family: var(--font-display); font-size: clamp(2rem, 4vi, var(--text-48)); line-height: 1.06; font-weight: var(--weight-semibold); letter-spacing: -0.025em; }
 .t-display-m  { font-family: var(--font-display); font-size: var(--text-36); line-height: 1.1; font-weight: var(--weight-semibold); letter-spacing: -0.02em; }
 .t-heading-xl { font-family: var(--font-display); font-size: var(--text-24); line-height: 1.3; font-weight: var(--weight-bold); }
 .t-heading-l  { font-family: var(--font-display); font-size: var(--text-20); line-height: 1.3; font-weight: var(--weight-bold); }
@@ -98,6 +126,22 @@ table {
 .t-mono       { font-variant-numeric: tabular-nums; } /* minimal: document numbers use the UI face */
 .t-num        { font-variant-numeric: tabular-nums; }
 
+/* Arabic joins its letters, so letter spacing breaks words, and it has no case.
+   Targeted on the roles that set them (no blanket rule, no !important); a component
+   that sets its own letter-spacing does the same in its own CSS Module.
+   The display roles also get the taller Arabic leading: 1.02 clips Arabic marks. */
+.t-display-xl:lang(ar),
+.t-display-l:lang(ar),
+.t-display-m:lang(ar) {
+  letter-spacing: 0;
+  line-height: var(--leading-tight);
+}
+
+.t-overline:lang(ar) {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .text-title   { color: var(--text-title); }
 .text-body    { color: var(--text-body); }
 .text-label   { color: var(--text-label); }
@@ -109,12 +153,12 @@ table {
 
 .sr-only {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  inline-size: 1px;
+  block-size: 1px;
   padding: 0;
   margin: -1px;
   overflow: hidden;
-  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -123,6 +167,12 @@ table {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* Directional icons (chevrons, arrows, log-out) mirror in right-to-left.
+   Put the class on the svg or on the element that holds it. */
+.icon-flip:dir(rtl) {
+  transform: scaleX(-1);
 }
 
 /* ---------- Scrollbars ---------- */
@@ -143,11 +193,13 @@ table {
   }
 }
 
-/* ---------- Print (invoices, challans, packing lists) ---------- */
+/* ---------- Print ----------
+   Black on white whatever the theme, so the layer 1 primitives are read here on purpose:
+   layer 2 tokens follow the theme (the frozen dark theme would print light text). */
 @media print {
   body {
-    background: #fff;
-    color: #000;
+    background: var(--p-neutral-0);
+    color: var(--p-neutral-950);
   }
   [data-print="hide"] {
     display: none !important;
