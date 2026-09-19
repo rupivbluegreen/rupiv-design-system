@@ -1,0 +1,117 @@
+/* The search box with results under it (kit: .rd-topbar__search, .rd-search-results).
+   The results are anchored to the box, not fixed to the window, and hang from its inline-start edge, so they line up
+   with it in both directions. */
+
+.root {
+  position: relative;
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  block-size: var(--control-md);
+  padding-block: 0;
+  padding-inline: var(--space-16) var(--space-12);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  color: var(--text-label);
+}
+
+.field:hover {
+  border-color: var(--border-control-hover);
+}
+
+.field:focus-within {
+  border-color: var(--border-focus);
+}
+
+.icon {
+  flex: none;
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+  color: var(--icon-muted);
+}
+
+.input {
+  flex: 1;
+  min-inline-size: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  color: var(--text-body);
+  font-size: var(--text-14);
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
+}
+
+.kbd {
+  flex: none;
+}
+
+/* ---------- Results ---------- */
+.popup {
+  position: absolute;
+  inset-block-start: calc(100% + var(--space-6));
+  inset-inline-start: 0;
+  z-index: var(--z-dropdown);
+  inline-size: 360px;
+  max-inline-size: calc(100vi - var(--space-16));
+  max-block-size: 60dvb;
+  overflow: hidden auto;
+  padding: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface-raised);
+  box-shadow: var(--shadow-md);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+}
+
+.option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  padding: var(--space-8);
+  border-radius: var(--radius-sm);
+  color: var(--text-body);
+  font-size: var(--text-13);
+  text-decoration: none;
+}
+
+.option[data-active="true"] {
+  background: var(--bg-hover);
+  color: var(--text-title);
+}
+
+.optionLabel {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.meta {
+  flex: none;
+  color: var(--text-muted);
+  font-size: var(--text-12);
+  line-height: 1.35;
+}
+
+.empty {
+  padding-block: var(--space-12);
+  padding-inline: var(--space-8);
+  color: var(--text-muted);
+  font-size: var(--text-13);
+  text-align: center;
+}
