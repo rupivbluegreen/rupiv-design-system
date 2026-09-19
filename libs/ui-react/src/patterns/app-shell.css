@@ -63,7 +63,6 @@
 .omni-shell-nav-item[data-active='true'] { background: var(--tx-color-brand-100); color: var(--tx-color-brand-700); }
 .omni-shell-nav-icon { display: inline-flex; inline-size: 18px; block-size: 18px; flex: none; }
 .omni-shell-nav-icon svg { inline-size: 100%; block-size: 100%; }
-.omni-shell-sidebar-spacer { flex: 1; }
 .omni-shell-nav--footer { border-block-start: var(--tx-border-width-hairline) solid var(--tx-color-border-subtle); padding-block-start: var(--tx-space-2); }
 .omni-shell-tagline {
   margin: var(--tx-space-2) var(--tx-space-1) 0;
@@ -95,7 +94,7 @@
   background: var(--tx-color-surface-subtle);
   color: var(--tx-color-text-tertiary);
 }
-.omni-shell-search input { flex: 1; border: none; background: transparent; font: inherit; color: var(--tx-color-text-primary); outline: none; }
+.omni-shell-search input { flex: 1; min-inline-size: 0; border: none; background: transparent; font: inherit; color: var(--tx-color-text-primary); outline: none; }
 /* The input drops its own outline, so the box shows the focus. */
 .omni-shell-search:focus-within { outline: 2px solid var(--tx-color-brand-500); outline-offset: 2px; }
 .omni-shell-topbar-actions { margin-inline-start: auto; display: flex; align-items: center; gap: var(--tx-space-2); }

@@ -241,7 +241,6 @@ function SidebarBody({ logo, navItems, navGroups, footerNav, tagline, text, Link
           </nav>
         ))}
       </div>
-      <div className="omni-shell-sidebar-spacer" />
       {footerNav ? (
         <nav className="omni-shell-nav omni-shell-nav--footer" aria-label={text.settings}>
           {footerNav.map((item) => (

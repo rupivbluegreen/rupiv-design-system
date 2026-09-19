@@ -530,4 +530,14 @@ describe('app-shell.css', () => {
     expect(phone).toMatch(/\.omni-shell-header-extra \{[^}]*flex: 1 1 100%;/);
     expect(phone).toMatch(/\.omni-shell-topbar \{[^}]*flex-wrap: wrap;/);
   });
+
+  it('lets the default search input shrink inside its box, so the topbar cannot overflow at 390px', () => {
+    expect(css).toMatch(/\.omni-shell-search input \{[^}]*min-inline-size: 0;/);
+  });
+
+  it('gives the free sidebar height to the nav alone, with no competing flex spacer', () => {
+    expect(css).not.toMatch(/omni-shell-sidebar-spacer/);
+    const { container } = render(<AppShell {...base} />);
+    expect(container.querySelector('.omni-shell-sidebar-spacer')).toBeNull();
+  });
 });
