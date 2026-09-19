@@ -5,11 +5,20 @@
   background: var(--tx-color-surface-page);
 }
 
-.omni-shell-sidebar {
+.omni-shell-sidebar,
+.omni-shell-drawer {
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
   padding: var(--tx-space-3) var(--tx-space-2);
   border-inline-end: var(--tx-border-width-hairline) solid var(--tx-color-border-subtle);
+}
+/* Stays in view while the page scrolls; the nav scrolls inside it (.omni-shell-scroll). */
+.omni-shell-sidebar {
+  position: sticky;
+  inset-block-start: 0;
+  align-self: start;
+  block-size: 100vh;
 }
 .omni-shell-logo {
   font-family: var(--tx-typography-font-display);
@@ -69,12 +78,13 @@
   display: flex;
   align-items: center;
   gap: var(--tx-space-3);
-  height: 64px;
+  min-block-size: 64px;
   padding-inline: var(--tx-space-3);
   border-block-end: var(--tx-border-width-hairline) solid var(--tx-color-border-subtle);
 }
 .omni-shell-search {
   flex: 1;
+  min-inline-size: 0;
   max-inline-size: 420px;
   display: flex;
   align-items: center;
@@ -89,14 +99,17 @@
 /* The input drops its own outline, so the box shows the focus. */
 .omni-shell-search:focus-within { outline: 2px solid var(--tx-color-brand-500); outline-offset: 2px; }
 .omni-shell-topbar-actions { margin-inline-start: auto; display: flex; align-items: center; gap: var(--tx-space-2); }
+.omni-shell-header-extra { display: flex; align-items: center; gap: var(--tx-space-2); min-inline-size: 0; }
+/* Only shown below 1024px, where the sidebar is a drawer. */
+.omni-shell-topbar .omni-shell-menu-button { display: none; flex: none; }
 .omni-shell-bell { position: relative; display: inline-flex; border: none; background: transparent; color: var(--tx-color-text-secondary); cursor: pointer; padding: var(--tx-space-1); border-radius: var(--tx-radius-xs); text-decoration: none; }
 .omni-shell-bell:hover { background: var(--tx-color-surface-subtle); }
 .omni-shell-bell:focus-visible { outline: 2px solid var(--tx-color-brand-500); outline-offset: 2px; }
 /* Brand fill, not the danger red: white on status-danger is 3.9:1, under the 4.5:1 that 12px text needs. */
 .omni-shell-bell-badge {
   position: absolute;
-  inset-block-start: 0;
-  inset-inline-end: 0;
+  inset-block-start: calc(var(--tx-space-0-5) * -1);
+  inset-inline-end: calc(var(--tx-space-0-5) * -1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -130,7 +143,60 @@
 
 .omni-shell-content { flex: 1; padding: var(--tx-space-3); max-inline-size: 1440px; }
 
-@media (max-width: 1024px) {
+/* Drawer (below 1024px). Fixed to the start edge; it slides on inset-inline-start rather than translateX, so RTL needs no override. */
+.omni-shell-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: var(--tx-z-index-drawer);
+  background: color-mix(in srgb, var(--tx-color-text-primary) 40%, transparent);
+}
+.omni-shell-drawer {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  z-index: var(--tx-z-index-drawer);
+  inline-size: min(18rem, 85vw);
+  background: var(--tx-color-surface-page);
+  box-shadow: var(--tx-shadow-overlay);
+}
+.omni-shell-drawer-close { position: absolute; inset-block-start: var(--tx-space-1); inset-inline-end: var(--tx-space-1); }
+.omni-shell-drawer .omni-shell-logo { padding-inline-end: var(--tx-space-5); }
+.omni-shell-visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.omni-shell-scrim[data-state='open'] { animation: omni-shell-fade-in var(--tx-motion-duration-normal) var(--tx-motion-easing-standard); }
+.omni-shell-scrim[data-state='closed'] { animation: omni-shell-fade-out var(--tx-motion-duration-fast) var(--tx-motion-easing-standard) forwards; }
+.omni-shell-drawer[data-state='open'] { animation: omni-shell-drawer-in var(--tx-motion-duration-normal) var(--tx-motion-easing-standard); }
+.omni-shell-drawer[data-state='closed'] { animation: omni-shell-drawer-out var(--tx-motion-duration-fast) var(--tx-motion-easing-standard) forwards; }
+@keyframes omni-shell-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes omni-shell-fade-out { from { opacity: 1; } to { opacity: 0; } }
+/* -18rem is the drawer's maximum width, so it always starts fully off-screen. */
+@keyframes omni-shell-drawer-in { from { inset-inline-start: -18rem; } to { inset-inline-start: 0; } }
+@keyframes omni-shell-drawer-out { from { inset-inline-start: 0; } to { inset-inline-start: -18rem; } }
+@media (prefers-reduced-motion: reduce) {
+  .omni-shell-scrim[data-state],
+  .omni-shell-drawer[data-state] { animation: none; }
+}
+
+/* 1023.98px, not 1024px: a viewport of exactly 1024px keeps the desktop layout. Keep in sync with DRAWER_QUERY in app-shell.tsx. */
+@media (max-width: 1023.98px) {
   .omni-shell { grid-template-columns: 1fr; }
   .omni-shell-sidebar { display: none; }
+  .omni-shell-topbar .omni-shell-menu-button { display: inline-flex; }
+}
+
+/* Phones (390px is the design width). The search shrinks, the user name and role go, and the header extra
+   drops to a row of its own so a selector or switcher is never hidden or pushed off-screen. */
+@media (max-width: 599.98px) {
+  .omni-shell-topbar { flex-wrap: wrap; gap: var(--tx-space-1); padding-block: var(--tx-space-1); padding-inline: var(--tx-space-2); }
+  .omni-shell-topbar-actions { display: contents; }
+  .omni-shell-header-extra { order: 1; flex: 1 1 100%; }
+  .omni-shell-bell { margin-inline-start: auto; }
+  .omni-shell-user-meta { display: none; }
 }

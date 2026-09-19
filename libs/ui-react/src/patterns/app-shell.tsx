@@ -1,11 +1,17 @@
+'use client';
+
 import {
+  useEffect,
   useId,
+  useState,
   type AnchorHTMLAttributes,
   type ComponentType,
   type ElementType,
   type ReactNode,
 } from 'react';
-import { Bell } from 'lucide-react';
+import * as Dialog from '@radix-ui/react-dialog';
+import { Bell, Menu, X } from 'lucide-react';
+import { IconButton } from '../foundations/button';
 import './app-shell.css';
 
 export interface SidebarItemData {
@@ -42,6 +48,12 @@ export interface AppShellLabels {
    * build the whole string on your side ("5 unread notifications") and pass it here.
    */
   notifications: string;
+  /** aria-label of the menu button that opens the navigation below 1024px. */
+  openNavigation: string;
+  /** aria-label of the drawer's close button. */
+  closeNavigation: string;
+  /** Accessible name of the navigation drawer (the dialog). */
+  navigationDrawer: string;
 }
 
 const DEFAULT_LABELS: AppShellLabels = {
@@ -50,7 +62,13 @@ const DEFAULT_LABELS: AppShellLabels = {
   searchPlaceholder: 'Search…',
   searchLabel: 'Global search',
   notifications: 'Notifications',
+  openNavigation: 'Open navigation',
+  closeNavigation: 'Close navigation',
+  navigationDrawer: 'Navigation',
 };
+
+/** Below this the sidebar is a drawer. Keep in sync with the media queries in app-shell.css (1023.98px so exactly 1024px stays desktop). */
+const DRAWER_QUERY = '(max-width: 1023.98px)';
 
 function resolveLabels(overrides?: Partial<AppShellLabels>): AppShellLabels {
   const labels = { ...DEFAULT_LABELS };
@@ -85,7 +103,10 @@ export interface AppShellProps {
   children: ReactNode;
 }
 
-/** The desktop shell: sidebar, top search/notifications/user bar, scrollable content. */
+/**
+ * The app shell: a sticky sidebar and a topbar (search, notifications, user) around scrollable content.
+ * Below 1024px the sidebar becomes a drawer opened from a menu button in the topbar.
+ */
 export function AppShell({
   logo,
   navItems,
@@ -104,80 +125,151 @@ export function AppShell({
 }: AppShellProps) {
   const text = resolveLabels(labels);
   const Link: ElementType<ShellLinkProps> = linkComponent ?? 'a';
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  // The drawer is portalled into the shell (not <body>) so it inherits a `dir`/`lang` set on an ancestor of the shell.
+  const [shellElement, setShellElement] = useState<HTMLDivElement | null>(null);
+
+  // A drawer left open across a resize to desktop would keep its focus trap and scroll lock with nothing visible.
+  useEffect(() => {
+    if (!drawerOpen || typeof window.matchMedia !== 'function') return;
+    const query = window.matchMedia(DRAWER_QUERY);
+    const closeWhenWide = (event: MediaQueryListEvent) => {
+      if (!event.matches) setDrawerOpen(false);
+    };
+    query.addEventListener('change', closeWhenWide);
+    return () => query.removeEventListener('change', closeWhenWide);
+  }, [drawerOpen]);
+
+  const sidebar = { logo, navItems, navGroups, footerNav, tagline, text, Link };
 
   return (
-    <div className="omni-shell">
-      <aside className="omni-shell-sidebar">
-        <div className="omni-shell-logo">{logo}</div>
-        <div className="omni-shell-scroll">
-          {navItems && navItems.length > 0 ? (
-            <nav className="omni-shell-nav" aria-label={text.mainNavigation}>
-              {navItems.map((item) => (
-                <SidebarItem key={item.key} item={item} Link={Link} />
-              ))}
-            </nav>
-          ) : null}
+    <div className="omni-shell" ref={setShellElement}>
+      <Dialog.Root open={drawerOpen} onOpenChange={setDrawerOpen}>
+        <aside className="omni-shell-sidebar">
+          <SidebarBody {...sidebar} />
+        </aside>
 
-          {navGroups?.map((group) => (
-            <nav key={group.key} className="omni-shell-nav omni-shell-nav--group" aria-label={group.label}>
-              <p className="omni-shell-group-label">{group.label}</p>
-              {group.items.map((item) => (
-                <SidebarItem key={item.key} item={item} Link={Link} />
-              ))}
-            </nav>
-          ))}
+        <div className="omni-shell-main">
+          <header className="omni-shell-topbar">
+            <Dialog.Trigger asChild>
+              <IconButton
+                className="omni-shell-menu-button"
+                label={text.openNavigation}
+                icon={<Menu aria-hidden="true" />}
+              />
+            </Dialog.Trigger>
+            {search ?? (
+              <div className="omni-shell-search">
+                <input type="text" placeholder={text.searchPlaceholder} aria-label={text.searchLabel} disabled />
+              </div>
+            )}
+            <div className="omni-shell-topbar-actions">
+              {headerExtra ? <div className="omni-shell-header-extra">{headerExtra}</div> : null}
+              <NotificationsBell
+                label={text.notifications}
+                unreadCount={unreadCount}
+                onClick={onNotificationsClick}
+                href={notificationsHref}
+                Link={Link}
+              />
+              <div className="omni-shell-user">
+                <span className="omni-shell-avatar" aria-hidden="true">
+                  {user.initials}
+                </span>
+                <span className="omni-shell-user-meta">
+                  <span className="omni-shell-user-name">{user.name}</span>
+                  <span className="omni-shell-user-role">{user.role}</span>
+                </span>
+              </div>
+            </div>
+          </header>
+          <main className="omni-shell-content">{children}</main>
         </div>
-        <div className="omni-shell-sidebar-spacer" />
-        {footerNav ? (
-          <nav className="omni-shell-nav omni-shell-nav--footer" aria-label={text.settings}>
-            {footerNav.map((item) => (
-              <SidebarItem key={item.key} item={item} Link={Link} />
-            ))}
-          </nav>
-        ) : null}
-        {tagline ? <p className="omni-shell-tagline">{tagline}</p> : null}
-      </aside>
 
-      <div className="omni-shell-main">
-        <header className="omni-shell-topbar">
-          {search ?? (
-            <div className="omni-shell-search">
-              <input type="text" placeholder={text.searchPlaceholder} aria-label={text.searchLabel} disabled />
-            </div>
-          )}
-          <div className="omni-shell-topbar-actions">
-            {headerExtra}
-            <NotificationsBell
-              label={text.notifications}
-              unreadCount={unreadCount}
-              onClick={onNotificationsClick}
-              href={notificationsHref}
-              Link={Link}
-            />
-            <div className="omni-shell-user">
-              <span className="omni-shell-avatar" aria-hidden="true">
-                {user.initials}
-              </span>
-              <span className="omni-shell-user-meta">
-                <span className="omni-shell-user-name">{user.name}</span>
-                <span className="omni-shell-user-role">{user.role}</span>
-              </span>
-            </div>
-          </div>
-        </header>
-        <main className="omni-shell-content">{children}</main>
-      </div>
+        <Dialog.Portal container={shellElement}>
+          <Dialog.Overlay className="omni-shell-scrim" />
+          <Dialog.Content className="omni-shell-drawer" aria-describedby={undefined}>
+            <Dialog.Title className="omni-shell-visually-hidden">{text.navigationDrawer}</Dialog.Title>
+            <Dialog.Close asChild>
+              <IconButton
+                className="omni-shell-drawer-close"
+                size="sm"
+                label={text.closeNavigation}
+                icon={<X aria-hidden="true" />}
+              />
+            </Dialog.Close>
+            <SidebarBody {...sidebar} onNavigate={() => setDrawerOpen(false)} />
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
     </div>
   );
 }
 
-function SidebarItem({ item, Link }: { item: SidebarItemData; Link: ElementType<ShellLinkProps> }) {
+interface SidebarBodyProps {
+  logo: ReactNode;
+  navItems: SidebarItemData[] | undefined;
+  navGroups: SidebarNavGroup[] | undefined;
+  footerNav: SidebarItemData[] | undefined;
+  tagline: string | undefined;
+  text: AppShellLabels;
+  Link: ElementType<ShellLinkProps>;
+  /** Called after any nav item is activated; the drawer uses it to close. */
+  onNavigate?: () => void;
+}
+
+/** The sidebar's content, rendered once in the desktop sidebar and once inside the drawer. */
+function SidebarBody({ logo, navItems, navGroups, footerNav, tagline, text, Link, onNavigate }: SidebarBodyProps) {
+  return (
+    <>
+      <div className="omni-shell-logo">{logo}</div>
+      <div className="omni-shell-scroll">
+        {navItems && navItems.length > 0 ? (
+          <nav className="omni-shell-nav" aria-label={text.mainNavigation}>
+            {navItems.map((item) => (
+              <SidebarItem key={item.key} item={item} Link={Link} onNavigate={onNavigate} />
+            ))}
+          </nav>
+        ) : null}
+
+        {navGroups?.map((group) => (
+          <nav key={group.key} className="omni-shell-nav omni-shell-nav--group" aria-label={group.label}>
+            <p className="omni-shell-group-label">{group.label}</p>
+            {group.items.map((item) => (
+              <SidebarItem key={item.key} item={item} Link={Link} onNavigate={onNavigate} />
+            ))}
+          </nav>
+        ))}
+      </div>
+      <div className="omni-shell-sidebar-spacer" />
+      {footerNav ? (
+        <nav className="omni-shell-nav omni-shell-nav--footer" aria-label={text.settings}>
+          {footerNav.map((item) => (
+            <SidebarItem key={item.key} item={item} Link={Link} onNavigate={onNavigate} />
+          ))}
+        </nav>
+      ) : null}
+      {tagline ? <p className="omni-shell-tagline">{tagline}</p> : null}
+    </>
+  );
+}
+
+function SidebarItem({
+  item,
+  Link,
+  onNavigate,
+}: {
+  item: SidebarItemData;
+  Link: ElementType<ShellLinkProps>;
+  onNavigate: (() => void) | undefined;
+}) {
   return (
     <Link
       href={item.href}
       className="omni-shell-nav-item"
       data-active={item.active ? 'true' : 'false'}
       aria-current={item.active ? 'page' : undefined}
+      onClick={onNavigate}
     >
       <span className="omni-shell-nav-icon">{item.icon}</span>
       <span>{item.label}</span>
