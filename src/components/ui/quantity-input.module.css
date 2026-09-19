@@ -1,0 +1,136 @@
+.root {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  min-width: 0;
+  height: var(--control-md);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  font-size: var(--text-13);
+  overflow: hidden;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.sm {
+  height: var(--control-sm);
+  font-size: var(--text-12);
+}
+
+.lg {
+  height: var(--control-lg);
+  font-size: var(--text-14);
+}
+
+.root:hover {
+  border-color: var(--border-control-hover);
+}
+
+.root:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.invalid,
+.invalid:hover {
+  border-color: var(--danger-solid);
+}
+
+.invalid:focus-within {
+  border-color: var(--danger-solid);
+  box-shadow: var(--focus-ring-danger);
+}
+
+.disabled,
+.disabled:hover {
+  border-color: var(--border-default);
+  background: var(--bg-subtle);
+}
+
+.stepper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--control-sm);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--icon-default);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.stepper:first-child {
+  border-right: 1px solid var(--border-subtle);
+}
+
+.stepper:last-child {
+  border-left: 1px solid var(--border-subtle);
+}
+
+.lg .stepper {
+  width: var(--control-md);
+}
+
+.stepper > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.stepper:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--icon-strong);
+}
+
+.stepper:active:not(:disabled) {
+  background: var(--bg-pressed);
+}
+
+.stepper:disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 0 var(--space-8);
+  gap: var(--space-4);
+}
+
+.input {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-title);
+  font-size: inherit;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+}
+
+.input:disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.uom {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  white-space: nowrap;
+  user-select: none;
+}
+
+.disabled .uom {
+  color: var(--text-disabled);
+}

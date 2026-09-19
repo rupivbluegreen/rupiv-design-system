@@ -1,0 +1,134 @@
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: var(--space-16);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-body);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.link {
+  cursor: pointer;
+}
+
+.link:hover {
+  border-color: var(--border-control-hover);
+  color: var(--text-body);
+}
+
+.link:focus-visible {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-height: 20px;
+}
+
+.label {
+  font-weight: var(--weight-medium);
+  padding-top: var(--space-2);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) calc(var(--space-8) * -1) 0;
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  color: var(--icon-default);
+}
+
+.icon svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.valueRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.value {
+  color: var(--text-title);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.unit {
+  font-size: var(--text-13);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+}
+
+.deltaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.delta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 20px;
+  padding: 0 var(--space-6) 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-12);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.delta svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.good {
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.bad {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+.flat {
+  background: var(--neutral-bg);
+  color: var(--neutral-text);
+}
+
+.deltaLabel {
+  color: var(--text-muted);
+}
+
+.hint {
+  color: var(--text-muted);
+}
+
+.footer {
+  margin-top: var(--space-8);
+  padding-top: var(--space-12);
+  border-top: 1px solid var(--border-subtle);
+}

@@ -1,0 +1,101 @@
+.root {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 32px;
+  height: 18px;
+  margin-top: 1px;
+  padding: 0 2px;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: var(--border-control);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* enlarge hit target to 28px without changing the visual */
+.track::before {
+  content: "";
+  position: absolute;
+  inset: -5px -2px;
+}
+
+.track:hover {
+  background: var(--border-control-hover);
+}
+
+.track:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: var(--radius-full);
+  background: var(--text-on-accent);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.on {
+  background: var(--bg-accent);
+}
+
+.on:hover {
+  background: var(--bg-accent-hover);
+}
+
+.on .thumb {
+  transform: translateX(14px);
+}
+
+.track:disabled {
+  background: var(--bg-muted);
+  cursor: not-allowed;
+}
+
+.track:disabled .thumb {
+  background: var(--bg-subtle);
+  box-shadow: none;
+}
+
+.track.on:disabled {
+  background: var(--accent-border);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.label {
+  color: var(--text-body);
+  font-size: var(--text-13);
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.description {
+  color: var(--text-muted);
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+}
+
+.disabled .label,
+.disabled .description {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}

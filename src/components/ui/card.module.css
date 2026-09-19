@@ -1,0 +1,147 @@
+.card {
+  --card-pad: var(--space-16);
+  --card-inner: var(--space-16);
+  display: block;
+  position: relative;
+  min-width: 0;
+  padding: var(--card-pad);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  color: var(--text-body);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+/* Cards composed of sections: the sections own the padding. */
+.card:has(> .section) {
+  padding: 0;
+}
+
+.padNone {
+  --card-pad: 0;
+  --card-inner: var(--space-16);
+  overflow: clip;
+}
+
+.padSm {
+  --card-pad: var(--space-12);
+  --card-inner: var(--space-12);
+}
+
+.padMd {
+  --card-pad: var(--space-16);
+  --card-inner: var(--space-16);
+}
+
+.padLg {
+  --card-pad: var(--space-24);
+  --card-inner: var(--space-24);
+}
+
+.subtle {
+  background: var(--bg-subtle);
+}
+
+.interactive {
+  cursor: pointer;
+  color: inherit;
+}
+
+.interactive:hover {
+  border-color: var(--border-control-hover);
+  color: inherit;
+}
+
+.interactive:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+  border-color: var(--border-focus);
+}
+
+/* ---------- Sections ---------- */
+.section {
+  padding: var(--card-inner);
+  min-width: 0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  min-height: 52px;
+  padding-block: var(--space-12);
+}
+
+.header.bordered {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.header:not(.bordered) + .body {
+  padding-top: 0;
+}
+
+.headerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  color: var(--icon-default);
+}
+
+.headerIcon svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.headerText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1;
+}
+
+.title {
+  color: var(--text-title);
+}
+
+.subtitle {
+  color: var(--text-muted);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex: none;
+  margin-left: auto;
+}
+
+.body {
+  display: block;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  padding-block: var(--space-12);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.alignStart {
+  justify-content: flex-start;
+}
+
+.alignBetween {
+  justify-content: space-between;
+}

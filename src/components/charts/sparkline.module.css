@@ -1,0 +1,6 @@
+.svg {
+  display: block;
+  flex: none;
+  max-width: none;
+  overflow: visible;
+}

@@ -1,0 +1,124 @@
+.root {
+  display: flex;
+  min-width: 0;
+}
+
+.vertical {
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  column-gap: var(--space-20);
+  row-gap: var(--space-8);
+}
+
+.item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.control {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 16px;
+  height: calc(var(--text-13) * 1.45);
+}
+
+.input {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-full);
+  background: var(--bg-surface);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.circle::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-accent);
+  transform: scale(0);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.input:hover + .circle {
+  border-color: var(--border-control-hover);
+}
+
+.input:focus-visible + .circle {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.input:checked + .circle {
+  border-color: var(--border-selected);
+}
+
+.input:checked + .circle::after {
+  transform: scale(1);
+}
+
+.input:disabled + .circle {
+  border-color: var(--border-default);
+  background: var(--bg-subtle);
+}
+
+.input:disabled + .circle::after {
+  background: var(--text-disabled);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.label {
+  color: var(--text-body);
+  font-size: var(--text-13);
+  line-height: var(--leading-ui);
+  cursor: pointer;
+}
+
+.description {
+  color: var(--text-muted);
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+}
+
+.disabled .label,
+.disabled .description {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}

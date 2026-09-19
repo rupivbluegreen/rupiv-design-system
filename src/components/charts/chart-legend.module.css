@@ -1,0 +1,58 @@
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6) var(--space-16);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.swatch {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.label {
+  color: var(--text-label);
+}
+
+.value {
+  margin-left: var(--space-2);
+  color: var(--text-title);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Stacked list when values are present */
+.list {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: var(--space-8);
+}
+
+.list .item {
+  display: flex;
+}
+
+.list .label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.list .value {
+  margin-left: var(--space-12);
+}

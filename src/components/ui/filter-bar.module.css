@@ -1,0 +1,227 @@
+.bar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--space-12) var(--space-16);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.search {
+  flex: 0 1 280px;
+  min-width: 180px;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  margin-left: auto;
+}
+
+/* ---------- Active filters row ---------- */
+.activeRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.activeLabel {
+  font-size: var(--text-12);
+  color: var(--text-muted);
+}
+
+.chips {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: 24px;
+  padding: 0 var(--space-2) 0 var(--space-8);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-full);
+  background: var(--bg-subtle);
+  color: var(--text-body);
+  font-size: var(--text-12);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.chipLabel {
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chipRemove {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--icon-default);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.chipRemove::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+
+.chipRemove svg {
+  width: 12px;
+  height: 12px;
+}
+
+.chipRemove:hover {
+  background: var(--bg-muted);
+  color: var(--icon-strong);
+}
+
+.chipRemove:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.clearAll {
+  height: 24px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-link);
+  font-size: var(--text-12);
+  font-weight: var(--weight-medium);
+  transition: color var(--dur-fast) var(--ease-out);
+}
+
+.clearAll:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+}
+
+.clearAll:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* ---------- FilterChip ---------- */
+.filterChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+  height: var(--control-sm);
+  max-width: 100%;
+  padding: 0 var(--space-12) 0 var(--space-8);
+  border: 1px dashed var(--border-control);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-label);
+  font-size: var(--text-12);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.filterChip:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-control-hover);
+  color: var(--text-body);
+}
+
+.filterChip:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.filterChip[aria-expanded="true"] {
+  background: var(--bg-hover);
+  border-color: var(--border-control-hover);
+}
+
+.filterChipSet {
+  padding: 0 var(--space-8) 0 var(--space-12);
+  border-style: solid;
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-body);
+}
+
+.filterIcon {
+  flex: none;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: var(--icon-default);
+}
+
+.filterName {
+  color: inherit;
+}
+
+.filterChipSet .filterName {
+  color: var(--text-label);
+}
+
+.filterSep {
+  margin-left: -2px;
+  color: var(--text-label);
+}
+
+.filterValue {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-accent);
+  font-weight: var(--weight-semibold);
+}
+
+.checkSpacer {
+  display: block;
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+@media (max-width: 639px) {
+  .search {
+    flex: 1 1 100%;
+  }
+  .actions {
+    margin-left: 0;
+  }
+}

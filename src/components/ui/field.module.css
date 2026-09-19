@@ -1,0 +1,67 @@
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.label {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--space-4);
+  min-width: 0;
+  color: var(--text-label);
+  font-size: var(--text-13);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-snug);
+}
+
+.required {
+  color: var(--danger-text);
+  font-weight: var(--weight-semibold);
+}
+
+.optional {
+  color: var(--text-muted);
+  font-weight: var(--weight-regular);
+  font-size: var(--text-12);
+}
+
+.labelAction {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  font-size: var(--text-12);
+}
+
+.hint,
+.error {
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+}
+
+.hint {
+  color: var(--text-muted);
+}
+
+.error {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  color: var(--danger-text);
+}
+
+.errorIcon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}

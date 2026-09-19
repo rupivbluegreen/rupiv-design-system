@@ -1,0 +1,76 @@
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  border-radius: var(--radius-full);
+  background: var(--cat-slate-bg);
+  color: var(--cat-slate-fg);
+  font-weight: var(--weight-semibold);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  user-select: none;
+  vertical-align: middle;
+}
+
+.xs {
+  width: 20px;
+  height: 20px;
+  font-size: var(--text-11);
+}
+
+.sm {
+  width: 24px;
+  height: 24px;
+  font-size: var(--text-11);
+  letter-spacing: 0;
+}
+
+.md {
+  width: 32px;
+  height: 32px;
+  font-size: var(--text-12);
+}
+
+.lg {
+  width: 40px;
+  height: 40px;
+  font-size: var(--text-14);
+}
+
+.indigo { background: var(--cat-indigo-bg); color: var(--cat-indigo-fg); }
+.madder { background: var(--cat-madder-bg); color: var(--cat-madder-fg); }
+.turmeric { background: var(--cat-turmeric-bg); color: var(--cat-turmeric-fg); }
+.neem { background: var(--cat-neem-bg); color: var(--cat-neem-fg); }
+.lac { background: var(--cat-lac-bg); color: var(--cat-lac-fg); }
+.kattha { background: var(--cat-kattha-bg); color: var(--cat-kattha-fg); }
+.slate { background: var(--cat-slate-bg); color: var(--cat-slate-fg); }
+
+.more {
+  background: var(--bg-muted);
+  color: var(--text-label);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Group ---------- */
+.group {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+}
+
+.stacked {
+  outline: 2px solid var(--bg-surface);
+}
+
+.group-xs .stacked + .stacked {
+  margin-left: -6px;
+}
+
+.group-sm .stacked + .stacked {
+  margin-left: -6px;
+}
+
+.group-md .stacked + .stacked {
+  margin-left: -8px;
+}

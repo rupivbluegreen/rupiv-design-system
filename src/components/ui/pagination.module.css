@@ -1,0 +1,120 @@
+.root {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-8) var(--space-16);
+  min-width: 0;
+  font-size: var(--text-13);
+}
+
+.left,
+.right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  min-width: 0;
+}
+
+.right {
+  gap: var(--space-4);
+  margin-left: auto;
+}
+
+.summary {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.pageSize {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.pageSizeLabel {
+  font-size: var(--text-12);
+}
+
+.pageSizeSelect {
+  width: auto;
+  min-width: 64px;
+}
+
+.pages {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--control-sm);
+  height: var(--control-sm);
+  padding: 0 var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-body);
+  font-size: var(--text-13);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.page:hover {
+  background: var(--bg-hover);
+  color: var(--text-title);
+}
+
+.page:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.current,
+.current:hover {
+  border-color: var(--accent-border);
+  background: var(--bg-selected);
+  color: var(--text-accent);
+  cursor: default;
+}
+
+.gap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  color: var(--text-muted);
+  user-select: none;
+}
+
+.compact {
+  display: none;
+  padding: 0 var(--space-8);
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 639px) {
+  .pages,
+  .pageSizeLabel {
+    display: none;
+  }
+
+  .compact {
+    display: inline;
+  }
+}

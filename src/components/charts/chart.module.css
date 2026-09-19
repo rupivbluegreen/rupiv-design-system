@@ -1,0 +1,61 @@
+/* Shared styles for axis-based charts (bar, line). */
+
+.root {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-12);
+  width: 100%;
+  min-width: 0;
+}
+
+/*
+ * The measured element. Its size must never be driven by the SVG, otherwise the
+ * ResizeObserver never sees it shrink (min-content of the SVG props up every ancestor).
+ * So the SVG is taken out of flow (absolute) and capped at 100%; the plot's height comes
+ * from the inline `height` style. `overflow-x: clip` stops a stale, wider SVG from
+ * causing page scroll without clipping tooltips vertically or creating a scroll container.
+ */
+.plot {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+
+.svg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+}
+
+.axisLabel {
+  fill: var(--chart-label);
+  font-family: var(--font-ui);
+  font-size: var(--text-11);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+
+.bar {
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.dim {
+  opacity: 0.45;
+}
+
+.empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  border: 1px dashed var(--border-default);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: var(--text-12);
+}

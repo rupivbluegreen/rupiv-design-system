@@ -1,0 +1,73 @@
+.root {
+  display: inline-flex;
+  align-items: stretch;
+  gap: var(--space-2);
+  max-width: 100%;
+  padding: var(--space-2);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-subtle);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.md {
+  height: var(--control-md);
+}
+
+.sm {
+  height: var(--control-sm);
+}
+
+.item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  flex-shrink: 0;
+  padding: 0 var(--space-12);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--text-13);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.sm .item {
+  padding: 0 var(--space-8);
+  font-size: var(--text-12);
+}
+
+.item:hover {
+  color: var(--text-title);
+}
+
+.item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.selected,
+.selected:hover {
+  border-color: var(--border-default);
+  background: var(--bg-surface);
+  color: var(--text-title);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}

@@ -1,0 +1,134 @@
+.root {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  min-width: 0;
+  vertical-align: middle;
+}
+
+.bare {
+  align-items: center;
+}
+
+.control {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+  width: 16px;
+  height: calc(var(--text-13) * 1.45);
+  align-items: center;
+}
+
+.bare .control {
+  height: 16px;
+}
+
+.input {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  width: 28px;
+  height: 28px;
+  margin: 0;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.input:disabled {
+  cursor: not-allowed;
+}
+
+.box {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-sm);
+  background: var(--bg-surface);
+  color: var(--text-on-accent);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.checkIcon,
+.minusIcon {
+  display: none;
+  width: 12px;
+  height: 12px;
+}
+
+.input:hover + .box {
+  border-color: var(--border-control-hover);
+}
+
+.input:focus-visible + .box {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.input:checked + .box,
+.input:indeterminate + .box {
+  border-color: var(--bg-accent);
+  background: var(--bg-accent);
+}
+
+.input:checked:hover + .box,
+.input:indeterminate:hover + .box {
+  border-color: var(--bg-accent-hover);
+  background: var(--bg-accent-hover);
+}
+
+.input:checked:not(:indeterminate) + .box .checkIcon {
+  display: block;
+}
+
+.input:indeterminate + .box .minusIcon {
+  display: block;
+}
+
+.input:disabled + .box {
+  border-color: var(--border-default);
+  background: var(--bg-subtle);
+  color: var(--text-disabled);
+}
+
+.input:disabled:checked + .box,
+.input:disabled:indeterminate + .box {
+  border-color: var(--border-default);
+  background: var(--bg-muted);
+}
+
+.input[aria-invalid="true"] + .box {
+  border-color: var(--danger-solid);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.label {
+  color: var(--text-body);
+  font-size: var(--text-13);
+  line-height: var(--leading-ui);
+  cursor: pointer;
+}
+
+.description {
+  color: var(--text-muted);
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+}
+
+.disabled .label,
+.disabled .description {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}

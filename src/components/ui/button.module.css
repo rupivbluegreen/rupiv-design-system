@@ -1,0 +1,240 @@
+.root {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-6);
+  flex-shrink: 0;
+  margin: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  font-family: var(--font-ui);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    filter var(--dur-fast) var(--ease-out);
+}
+
+.root:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.icon > svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+/* ---------- sizes ---------- */
+.sm {
+  height: var(--control-sm);
+  padding: 0 var(--space-8);
+  font-size: var(--text-12);
+}
+
+.md {
+  height: var(--control-md);
+  padding: 0 var(--space-12);
+  font-size: var(--text-13);
+}
+
+.lg {
+  height: var(--control-lg);
+  padding: 0 var(--space-16);
+  font-size: var(--text-14);
+}
+
+.fullWidth {
+  display: flex;
+  width: 100%;
+}
+
+/* ---------- variants ---------- */
+.primary {
+  background: var(--bg-primary);
+  color: var(--text-on-primary);
+}
+.primary:hover {
+  background: var(--bg-primary-hover);
+  color: var(--text-on-primary);
+}
+.primary:active {
+  background: var(--bg-primary-pressed);
+}
+
+.secondary {
+  background: var(--bg-surface);
+  border-color: var(--border-control);
+  color: var(--text-title);
+}
+.secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-control-hover);
+  color: var(--text-title);
+}
+.secondary:active {
+  background: var(--bg-pressed);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--text-body);
+}
+.ghost:hover {
+  background: var(--bg-hover);
+  color: var(--text-title);
+}
+.ghost:active {
+  background: var(--bg-pressed);
+}
+
+.accent {
+  background: var(--bg-accent);
+  color: var(--text-on-accent);
+}
+.accent:hover {
+  background: var(--bg-accent-hover);
+  color: var(--text-on-accent);
+}
+.accent:active {
+  filter: brightness(0.92);
+}
+
+.danger {
+  background: var(--danger-solid);
+  color: var(--text-on-accent);
+}
+.danger:hover {
+  filter: brightness(0.93);
+  color: var(--text-on-accent);
+}
+.danger:active {
+  filter: brightness(0.86);
+}
+.danger:focus-visible {
+  box-shadow: var(--focus-ring-danger);
+}
+
+.link {
+  height: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-link);
+  border-radius: var(--radius-xs);
+}
+.link:hover {
+  color: var(--text-link-hover);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ---------- icon-only ---------- */
+.iconOnly {
+  padding: 0;
+}
+.iconOnly.sm {
+  width: var(--control-sm);
+}
+.iconOnly.md {
+  width: var(--control-md);
+}
+.iconOnly.lg {
+  width: var(--control-lg);
+}
+.iconOnly.ghost {
+  color: var(--icon-default);
+}
+.iconOnly.ghost:hover {
+  color: var(--icon-strong);
+}
+
+/* ---------- disabled / loading ---------- */
+.root:disabled {
+  cursor: not-allowed;
+  filter: none;
+  background: var(--bg-subtle);
+  border-color: var(--border-subtle);
+  color: var(--text-disabled);
+}
+
+.ghost:disabled,
+.link:disabled {
+  background: transparent;
+  border-color: transparent;
+}
+
+.loading:disabled {
+  cursor: progress;
+}
+
+.spinner {
+  animation: spin 700ms linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ---------- group ---------- */
+.group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.attached {
+  gap: 0;
+  flex-wrap: nowrap;
+}
+
+.attached > * {
+  position: relative;
+}
+
+.attached > *:not(:first-child) {
+  margin-left: -1px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.attached > *:not(:last-child) {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.attached > *:hover {
+  z-index: 1;
+}
+
+.attached > *:focus-visible {
+  z-index: 2;
+}

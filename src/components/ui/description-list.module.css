@@ -1,0 +1,123 @@
+.list {
+  display: grid;
+  grid-template-columns: repeat(var(--dl-cols, 2), minmax(0, 1fr));
+  column-gap: var(--space-24);
+  row-gap: var(--space-16);
+  margin: 0;
+}
+
+.cols1 { --dl-cols: 1; }
+.cols2 { --dl-cols: 2; }
+.cols3 { --dl-cols: 3; }
+.cols4 { --dl-cols: 4; }
+
+.dense {
+  column-gap: var(--space-16);
+  row-gap: var(--space-8);
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.span2 { grid-column: span 2; }
+.span3 { grid-column: span 3; }
+.span4 { grid-column: span 4; }
+
+.label {
+  font-size: var(--text-12);
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.value {
+  margin: 0;
+  font-size: var(--text-13);
+  line-height: var(--leading-ui);
+  color: var(--text-body);
+  overflow-wrap: anywhere;
+}
+
+.dense .item {
+  flex-direction: row;
+  align-items: baseline;
+  gap: var(--space-8);
+}
+
+.dense .label {
+  flex: 0 0 40%;
+  max-width: 160px;
+}
+
+.dense .value {
+  flex: 1;
+}
+
+.empty {
+  color: var(--text-placeholder);
+}
+
+@media (max-width: 1023px) {
+  .cols3,
+  .cols4 {
+    --dl-cols: 2;
+  }
+  .cols3 .span3,
+  .cols4 .span3,
+  .cols4 .span4 {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 639px) {
+  .list {
+    --dl-cols: 1;
+  }
+  .span2,
+  .span3,
+  .span4,
+  .cols3 .span3,
+  .cols4 .span3,
+  .cols4 .span4 {
+    grid-column: span 1;
+  }
+}
+
+/* ---------- KeyValue ---------- */
+.kv {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding: var(--space-6) 0;
+  font-size: var(--text-13);
+  line-height: var(--leading-ui);
+}
+
+.kvLabel {
+  color: var(--text-label);
+  min-width: 0;
+}
+
+.kvValue {
+  color: var(--text-body);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.emphasis {
+  margin-top: var(--space-4);
+  padding-top: var(--space-12);
+  border-top: 1px solid var(--border-default);
+  font-size: var(--text-14);
+}
+
+.emphasis .kvLabel,
+.emphasis .kvValue {
+  color: var(--text-title);
+  font-weight: var(--weight-semibold);
+}

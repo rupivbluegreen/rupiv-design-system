@@ -1,0 +1,80 @@
+.root {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  height: var(--control-md);
+  margin: 0;
+  padding: 0 var(--space-8) 0 var(--space-12);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  color: var(--text-title);
+  font-size: var(--text-13);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--leading-ui);
+  outline: none;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.sm {
+  height: var(--control-sm);
+  padding-left: var(--space-8);
+  font-size: var(--text-12);
+}
+
+.lg {
+  height: var(--control-lg);
+  font-size: var(--text-14);
+}
+
+.root:hover {
+  border-color: var(--border-control-hover);
+}
+
+.root:focus {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.root::-webkit-datetime-edit {
+  padding: 0;
+}
+
+.root::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.root::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.55;
+  border-radius: var(--radius-xs);
+  padding: var(--space-2);
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.root::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.9;
+}
+
+.invalid,
+.invalid:hover {
+  border-color: var(--danger-solid);
+}
+
+.invalid:focus {
+  border-color: var(--danger-solid);
+  box-shadow: var(--focus-ring-danger);
+}
+
+.root:disabled {
+  border-color: var(--border-default);
+  background: var(--bg-subtle);
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.root:read-only {
+  background: var(--bg-subtle);
+}

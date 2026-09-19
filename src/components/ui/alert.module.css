@@ -1,0 +1,96 @@
+.alert {
+  --tone-bg: var(--info-bg);
+  --tone-border: var(--info-border);
+  --tone-text: var(--info-text);
+  --tone-solid: var(--info-solid);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--tone-border);
+  border-radius: var(--radius-lg);
+  background: var(--tone-bg);
+  color: var(--text-body);
+}
+
+.neutral { --tone-bg: var(--bg-subtle); --tone-border: var(--border-default); --tone-text: var(--text-title); --tone-solid: var(--icon-default); }
+.accent { --tone-bg: var(--accent-bg); --tone-border: var(--accent-border); --tone-text: var(--accent-text); --tone-solid: var(--accent-solid); }
+.success { --tone-bg: var(--success-bg); --tone-border: var(--success-border); --tone-text: var(--success-text); --tone-solid: var(--success-solid); }
+.warning { --tone-bg: var(--warning-bg); --tone-border: var(--warning-border); --tone-text: var(--warning-text); --tone-solid: var(--warning-solid); }
+.danger { --tone-bg: var(--danger-bg); --tone-border: var(--danger-border); --tone-text: var(--danger-text); --tone-solid: var(--danger-solid); }
+.info { --tone-bg: var(--info-bg); --tone-border: var(--info-border); --tone-text: var(--info-text); --tone-solid: var(--info-solid); }
+
+.icon {
+  display: inline-flex;
+  flex: none;
+  padding-top: 2px;
+  color: var(--tone-solid);
+}
+
+.icon svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--text-13);
+  line-height: var(--leading-ui);
+  font-weight: var(--weight-semibold);
+  color: var(--tone-text);
+}
+
+.body {
+  font-size: var(--text-13);
+  line-height: var(--leading-ui);
+  color: var(--text-body);
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--control-sm);
+  height: var(--control-sm);
+  margin: calc(var(--space-4) * -1) calc(var(--space-8) * -1) calc(var(--space-4) * -1) 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--icon-default);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.close svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.close:hover {
+  background: color-mix(in srgb, var(--tone-solid) 12%, transparent);
+  color: var(--icon-strong);
+}
+
+.close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

@@ -1,0 +1,52 @@
+.tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--z-tooltip);
+  visibility: hidden;
+  pointer-events: none;
+  padding: var(--space-6) var(--space-8);
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-body);
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+  white-space: nowrap;
+}
+
+.title {
+  margin-bottom: var(--space-4);
+  color: var(--text-title);
+  font-weight: var(--weight-semibold);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.row + .row {
+  margin-top: var(--space-2);
+}
+
+.swatch {
+  flex: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.name {
+  flex: 1;
+  color: var(--text-label);
+}
+
+.value {
+  margin-left: var(--space-12);
+  color: var(--text-title);
+  font-weight: var(--weight-medium);
+  font-variant-numeric: tabular-nums;
+}

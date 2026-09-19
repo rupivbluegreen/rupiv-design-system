@@ -1,0 +1,215 @@
+.root {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: var(--control-md);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  font-size: var(--text-13);
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.sm {
+  height: var(--control-sm);
+  font-size: var(--text-12);
+}
+
+.lg {
+  height: var(--control-lg);
+  font-size: var(--text-14);
+}
+
+.root:hover {
+  border-color: var(--border-control-hover);
+}
+
+.root:focus-within,
+.open {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.invalid,
+.invalid:hover {
+  border-color: var(--danger-solid);
+}
+
+.invalid:focus-within,
+.invalid.open {
+  border-color: var(--danger-solid);
+  box-shadow: var(--focus-ring-danger);
+}
+
+.disabled,
+.disabled:hover {
+  border-color: var(--border-default);
+  background: var(--bg-subtle);
+  box-shadow: none;
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0 var(--space-4) 0 var(--space-12);
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: var(--text-title);
+  font-size: inherit;
+  text-overflow: ellipsis;
+  outline: none;
+}
+
+.sm .input {
+  padding-left: var(--space-8);
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
+}
+
+.open .input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:disabled {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  height: 100%;
+  padding: 0 var(--space-8) 0 var(--space-4);
+  border: 0;
+  background: transparent;
+  color: var(--icon-default);
+}
+
+.toggle:disabled {
+  color: var(--text-disabled);
+}
+
+.chevron {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+
+.open .chevron {
+  transform: rotate(180deg);
+}
+
+/* ---------- listbox (portalled) ---------- */
+.list {
+  position: fixed;
+  z-index: var(--z-dropdown);
+  margin: 0;
+  padding: var(--space-4);
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface-raised);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-ui);
+  font-size: var(--text-13);
+  animation: listIn var(--dur-base) var(--ease-out);
+}
+
+@keyframes listIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  min-height: var(--control-sm);
+  padding: var(--space-6) var(--space-8) var(--space-6) var(--space-6);
+  border-radius: var(--radius-sm);
+  color: var(--text-body);
+  cursor: pointer;
+  user-select: none;
+}
+
+.active {
+  background: var(--bg-hover);
+  color: var(--text-title);
+}
+
+.selected .label {
+  color: var(--text-title);
+  font-weight: var(--weight-medium);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: var(--icon-md);
+  height: calc(var(--text-13) * 1.45);
+  color: var(--icon-accent);
+}
+
+.check > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: var(--leading-ui);
+}
+
+.description {
+  color: var(--text-muted);
+  font-size: var(--text-12);
+  line-height: var(--leading-snug);
+}
+
+.meta {
+  flex-shrink: 0;
+  margin-left: auto;
+  padding-left: var(--space-8);
+  color: var(--text-muted);
+  font-size: var(--text-12);
+  font-variant-numeric: tabular-nums;
+  line-height: calc(var(--text-13) * 1.45);
+  white-space: nowrap;
+}
+
+.empty {
+  padding: var(--space-12) var(--space-8);
+  color: var(--text-muted);
+  font-size: var(--text-13);
+  text-align: center;
+}

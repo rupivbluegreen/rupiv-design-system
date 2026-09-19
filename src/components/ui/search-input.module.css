@@ -1,0 +1,131 @@
+.root {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 0;
+  height: var(--control-md);
+  padding: 0 var(--space-6) 0 var(--space-12);
+  gap: var(--space-8);
+  border: 1px solid var(--border-control);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+  font-size: var(--text-13);
+  cursor: text;
+  transition:
+    border-color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.sm {
+  height: var(--control-sm);
+  padding-left: var(--space-8);
+  padding-right: var(--space-4);
+  gap: var(--space-6);
+  font-size: var(--text-12);
+}
+
+.lg {
+  height: var(--control-lg);
+  font-size: var(--text-14);
+}
+
+.root:hover {
+  border-color: var(--border-control-hover);
+}
+
+.root:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: var(--focus-ring);
+}
+
+.disabled,
+.disabled:hover {
+  border-color: var(--border-default);
+  background: var(--bg-subtle);
+  cursor: not-allowed;
+}
+
+.disabled .icon {
+  color: var(--text-disabled);
+}
+
+.disabled .input {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+}
+
+.disabled .input::placeholder {
+  color: var(--text-disabled);
+}
+
+.icon {
+  flex-shrink: 0;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--icon-muted);
+}
+
+.sm .icon {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-title);
+  font-size: inherit;
+  outline: none;
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--text-placeholder);
+  opacity: 1;
+}
+
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-decoration {
+  appearance: none;
+}
+
+.clear {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--icon-default);
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
+}
+
+.clear:hover {
+  background: var(--bg-hover);
+  color: var(--icon-strong);
+}
+
+.clear:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.clear > svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.kbd {
+  flex-shrink: 0;
+  margin-right: var(--space-2);
+}

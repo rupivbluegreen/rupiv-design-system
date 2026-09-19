@@ -1,0 +1,142 @@
+.anchor {
+  display: contents;
+}
+
+.menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: var(--z-dropdown);
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  max-width: min(320px, calc(100vw - var(--space-16)));
+  max-height: min(420px, calc(100dvh - var(--space-16)));
+  overflow-y: auto;
+  padding: var(--space-4);
+  background: var(--bg-surface-raised);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-md);
+  outline: none;
+  animation: enterDown var(--dur-base) var(--ease-out);
+}
+
+.menu[data-side="top"] {
+  animation-name: enterUp;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex: none;
+  width: 100%;
+  height: 32px;
+  padding: 0 var(--space-8);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-body);
+  font-size: var(--text-13);
+  line-height: 1;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  outline: none;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.item:hover,
+.item:focus {
+  background: var(--bg-hover);
+  color: var(--text-body);
+}
+
+.item:focus-visible {
+  box-shadow: inset 0 0 0 1px var(--border-focus);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--icon-md);
+  color: var(--icon-default);
+}
+
+.icon svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shortcut {
+  flex: none;
+  margin-left: var(--space-16);
+  font-size: var(--text-12);
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.danger,
+.danger:hover,
+.danger:focus {
+  color: var(--danger-text);
+}
+
+.danger .icon {
+  color: var(--danger-text);
+}
+
+.danger:hover,
+.danger:focus {
+  background: var(--danger-bg);
+}
+
+.item[aria-disabled="true"] {
+  color: var(--text-disabled);
+  cursor: not-allowed;
+  background: transparent;
+}
+
+.item[aria-disabled="true"] .icon {
+  color: var(--text-disabled);
+}
+
+.separator {
+  flex: none;
+  height: 1px;
+  margin: var(--space-4) calc(var(--space-4) * -1);
+  background: var(--border-subtle);
+}
+
+@keyframes enterDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes enterUp {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

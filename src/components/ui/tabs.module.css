@@ -1,0 +1,136 @@
+.list {
+  display: flex;
+  align-items: stretch;
+  min-width: 0;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.list::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  flex-shrink: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--text-13);
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+
+.tab:hover {
+  color: var(--text-title);
+}
+
+.tab:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.active,
+.active:hover {
+  color: var(--text-title);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.icon > svg {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}
+
+.count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-full);
+  background: var(--bg-muted);
+  color: var(--text-label);
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.active .count {
+  background: var(--bg-selected);
+  color: var(--text-accent);
+}
+
+/* ---------- line ---------- */
+.line {
+  gap: var(--space-20);
+  border-bottom: 1px solid var(--border-default);
+}
+
+.line .tab {
+  height: var(--control-lg);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
+}
+
+.line .tab::after {
+  content: "";
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.line .active::after {
+  background: var(--border-selected);
+}
+
+.line .tab:focus-visible {
+  box-shadow: inset var(--focus-ring);
+}
+
+/* ---------- pill ---------- */
+.pill {
+  gap: var(--space-4);
+}
+
+.pill .tab {
+  height: var(--control-sm);
+  padding: 0 var(--space-12);
+  border-radius: var(--radius-md);
+}
+
+.pill .tab:hover {
+  background: var(--bg-hover);
+}
+
+.pill .active,
+.pill .active:hover {
+  background: var(--bg-muted);
+}
+
+.pill .active .count {
+  background: var(--bg-surface);
+}

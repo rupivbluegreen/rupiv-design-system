@@ -1,0 +1,144 @@
+.badge,
+.count {
+  --tone-bg: var(--neutral-bg);
+  --tone-border: var(--neutral-border);
+  --tone-text: var(--neutral-text);
+  --tone-solid: var(--neutral-solid);
+  display: inline-flex;
+  align-items: center;
+  flex: none;
+  max-width: 100%;
+  vertical-align: middle;
+  white-space: nowrap;
+  font-weight: var(--weight-medium);
+  line-height: 1;
+  border: 1px solid transparent;
+}
+
+.badge {
+  gap: var(--space-4);
+  border-radius: var(--radius-sm);
+}
+
+.label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ---------- Tones ---------- */
+.neutral {
+  --tone-bg: var(--neutral-bg);
+  --tone-border: var(--neutral-border);
+  --tone-text: var(--neutral-text);
+  --tone-solid: var(--neutral-solid);
+}
+.accent {
+  --tone-bg: var(--accent-bg);
+  --tone-border: var(--accent-border);
+  --tone-text: var(--accent-text);
+  --tone-solid: var(--accent-solid);
+}
+.success {
+  --tone-bg: var(--success-bg);
+  --tone-border: var(--success-border);
+  --tone-text: var(--success-text);
+  --tone-solid: var(--success-solid);
+}
+.warning {
+  --tone-bg: var(--warning-bg);
+  --tone-border: var(--warning-border);
+  --tone-text: var(--warning-text);
+  --tone-solid: var(--warning-solid);
+}
+.danger {
+  --tone-bg: var(--danger-bg);
+  --tone-border: var(--danger-border);
+  --tone-text: var(--danger-text);
+  --tone-solid: var(--danger-solid);
+}
+.info {
+  --tone-bg: var(--info-bg);
+  --tone-border: var(--info-border);
+  --tone-text: var(--info-text);
+  --tone-solid: var(--info-solid);
+}
+
+/* ---------- Variants ---------- */
+.soft {
+  background: var(--tone-bg);
+  color: var(--text-title);
+}
+
+.solid {
+  background: var(--tone-solid);
+  color: var(--text-on-accent);
+}
+
+.outline {
+  background: transparent;
+  border-color: var(--tone-border);
+  color: var(--tone-text);
+}
+
+/* ---------- Sizes ---------- */
+.sm {
+  height: 20px;
+  padding: 0 var(--space-6);
+  font-size: var(--text-11);
+}
+
+.md {
+  height: 22px;
+  padding: 0 var(--space-8);
+  font-size: var(--text-12);
+}
+
+.dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--radius-full);
+  background: var(--tone-solid);
+}
+
+.solid .dot {
+  background: currentColor;
+}
+
+.icon {
+  display: inline-flex;
+  flex: none;
+}
+
+/* sm badges (20px tall, 11px text) use 12px icons — 14px crowds the label; md uses --icon-sm. */
+.icon svg {
+  width: calc(var(--icon-sm) - var(--space-2));
+  height: calc(var(--icon-sm) - var(--space-2));
+}
+
+.md .icon svg {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+
+.sm:has(.dot),
+.sm:has(.icon) {
+  padding-left: var(--space-4);
+}
+
+.md:has(.dot),
+.md:has(.icon) {
+  padding-left: var(--space-6);
+}
+
+/* ---------- Count ---------- */
+.count {
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-6);
+  border-radius: var(--radius-full);
+  font-size: var(--text-11);
+  font-weight: var(--weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
