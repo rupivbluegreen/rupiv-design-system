@@ -1,0 +1,39 @@
+/* Pastel tile (the kit's rd-tile): an icon on a category tint, never a status. */
+.tile {
+  display: grid;
+  place-items: center;
+  flex: none;
+  inline-size: 40px;
+  block-size: 40px;
+  border-radius: var(--radius-full);
+  background: var(--tile-mint);
+  color: var(--text-body);
+}
+
+.tile svg {
+  inline-size: var(--icon-lg);
+  block-size: var(--icon-lg);
+}
+
+.rose { background: var(--tile-rose); }
+.sky { background: var(--tile-sky); }
+.sand { background: var(--tile-sand); }
+.lilac { background: var(--tile-lilac); }
+.mint { background: var(--tile-mint); }
+
+.square {
+  border-radius: var(--radius-lg);
+}
+
+/* After .square: a large tile always has the larger radius, as in the kit. */
+.lg {
+  inline-size: 60px;
+  block-size: 60px;
+  border-radius: var(--radius-xl);
+  color: var(--accent-solid);
+}
+
+.lg svg {
+  inline-size: 26px;
+  block-size: 26px;
+}

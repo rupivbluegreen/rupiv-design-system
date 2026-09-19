@@ -69,3 +69,16 @@
   gap: var(--space-8);
   margin-block-start: var(--space-4);
 }
+
+/* ---------- Tones (the kit's rd-empty__icon--danger and --warning) ---------- */
+.iconDanger {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-solid);
+}
+
+.iconWarning {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-solid);
+}

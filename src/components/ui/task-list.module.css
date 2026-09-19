@@ -1,0 +1,86 @@
+/* Task rows (the kit's rd-task-list): icon tile, title with chip, meta line, chevron. */
+.list {
+  margin-block: 0;
+  margin-inline: calc(var(--space-8) * -1);
+  padding: 0;
+  list-style: none;
+}
+
+.list > li + li {
+  border-block-start: 1px solid var(--border-default);
+}
+
+.task {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  padding-block: 14px;
+  padding-inline: var(--space-8);
+  color: inherit;
+  text-decoration: none;
+}
+
+.link {
+  cursor: pointer;
+}
+
+.link:hover {
+  color: inherit;
+  background: var(--bg-subtle);
+}
+
+.link:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  flex: 1;
+  min-inline-size: 0;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+
+.title {
+  font-size: var(--text-14);
+  font-weight: var(--weight-medium);
+  color: var(--text-title);
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  font-size: var(--text-12);
+  color: var(--text-label);
+}
+
+.chevron {
+  display: inline-flex;
+  flex: none;
+  color: var(--text-label);
+}
+
+.chevron svg {
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+}
+
+/* The chevron points to the inline end: left in Arabic. */
+.chevron:dir(rtl) svg {
+  transform: scaleX(-1);
+}

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import { cn } from "../../lib/cn";
-import { formatDelta } from "../../lib/format";
+import { useFormat } from "../../lib/use-format";
 import { useLink } from "../../provider";
 import styles from "./stat.module.css";
 
@@ -21,6 +21,7 @@ export interface StatProps {
 
 export function Stat({ label, value, unit, delta, icon, hint, href, footer, className }: StatProps) {
   const Link = useLink();
+  const format = useFormat();
   let deltaNode: ReactNode = null;
   if (delta) {
     const goodWhen = delta.goodWhen ?? "up";
@@ -31,7 +32,7 @@ export function Stat({ label, value, unit, delta, icon, hint, href, footer, clas
       <div className={styles.deltaRow}>
         <span className={cn(styles.delta, tone)}>
           <Icon aria-hidden="true" />
-          {formatDelta(delta.value)}
+          {format.delta(delta.value)}
         </span>
         {delta.label ? <span className={cn("t-caption", styles.deltaLabel)}>{delta.label}</span> : null}
       </div>

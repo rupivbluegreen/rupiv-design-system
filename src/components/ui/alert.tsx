@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { CircleAlert, CircleCheck, Info, TriangleAlert, X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import type { Tone } from "../../lib/types";
+import { useLabels } from "../../provider";
 import styles from "./alert.module.css";
 
 export interface AlertProps {
@@ -26,6 +27,7 @@ const DEFAULT_ICONS: Record<Tone, ReactNode> = {
 };
 
 export function Alert({ tone = "info", title, children, icon, action, onDismiss, className }: AlertProps) {
+  const label = useLabels();
   const urgent = tone === "danger" || tone === "warning";
   return (
     <div className={cn(styles.alert, styles[tone], className)} role={urgent ? "alert" : "status"}>
@@ -38,7 +40,13 @@ export function Alert({ tone = "info", title, children, icon, action, onDismiss,
         {action ? <div className={styles.action}>{action}</div> : null}
       </div>
       {onDismiss ? (
-        <button type="button" className={styles.close} onClick={onDismiss} aria-label="Dismiss" title="Dismiss">
+        <button
+          type="button"
+          className={styles.close}
+          onClick={onDismiss}
+          aria-label={label("alert.dismiss")}
+          title={label("alert.dismiss")}
+        >
           <X aria-hidden="true" />
         </button>
       ) : null}

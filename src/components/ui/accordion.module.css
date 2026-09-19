@@ -1,0 +1,68 @@
+/* Accordion (the kit's rd-accordion): a bordered stack of disclosure sections. */
+.accordion {
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  background: var(--bg-surface);
+  overflow: clip;
+}
+
+.item + .item {
+  border-block-start: 1px solid var(--border-subtle);
+}
+
+.trigger {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  inline-size: 100%;
+  min-block-size: var(--control-lg);
+  padding-block: var(--space-8);
+  padding-inline: var(--space-16);
+  border: 0;
+  background: transparent;
+  color: var(--text-title);
+  font-size: var(--text-13);
+  font-weight: var(--weight-semibold);
+  text-align: start;
+  cursor: pointer;
+}
+
+.trigger:hover {
+  background: var(--bg-hover);
+}
+
+.trigger:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: -2px;
+}
+
+.trigger:disabled {
+  color: var(--text-disabled);
+  background: transparent;
+  cursor: not-allowed;
+}
+
+.label {
+  flex: 1;
+  min-inline-size: 0;
+}
+
+/* The chevron turns over vertically, so it means the same in both directions. */
+.chevron {
+  flex: none;
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+  color: var(--icon-default);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.trigger[aria-expanded="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+.panel {
+  padding-block: var(--space-4) var(--space-16);
+  padding-inline: var(--space-16);
+  font-size: var(--text-13);
+  color: var(--text-body);
+}

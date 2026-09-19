@@ -1,7 +1,10 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import type { CategoryColor } from "../../lib/types";
+import { useLabels } from "../../provider";
 import styles from "./tag.module.css";
 
 export interface TagProps {
@@ -13,6 +16,7 @@ export interface TagProps {
 }
 
 export function Tag({ color = "slate", onRemove, icon, className, children }: TagProps) {
+  const label = useLabels();
   return (
     <span className={cn(styles.tag, styles[color], className)}>
       {icon ? (
@@ -26,7 +30,7 @@ export function Tag({ color = "slate", onRemove, icon, className, children }: Ta
           type="button"
           className={styles.remove}
           onClick={onRemove}
-          aria-label={typeof children === "string" ? `Remove ${children}` : "Remove"}
+          aria-label={typeof children === "string" ? label("tag.remove", { name: children }) : label("tag.removeGeneric")}
         >
           <X aria-hidden="true" />
         </button>

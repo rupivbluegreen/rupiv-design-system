@@ -46,7 +46,7 @@
   block-size: 100%;
   border-radius: var(--radius-full);
   background: var(--accent-solid);
-  transition: width var(--dur-slow) var(--ease-out);
+  transition: inline-size var(--dur-slow) var(--ease-out);
 }
 
 .neutral { background: var(--neutral-solid); }

@@ -1,6 +1,9 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useId, type ReactNode } from "react";
 import { cn } from "../../lib/cn";
 import type { Tone } from "../../lib/types";
+import { useFormat } from "../../lib/use-format";
 import styles from "./progress.module.css";
 
 export interface ProgressProps {
@@ -8,9 +11,10 @@ export interface ProgressProps {
   max?: number;
   tone?: Tone;
   size?: "sm" | "md";
+  /** Names the bar for assistive technology, and is shown above it. */
   label?: ReactNode;
   showValue?: boolean;
-  /** Replaces the default "62%" text when `showValue` is on. */
+  /** Replaces the default "62%" text when `showValue` is on. It is also the spoken value. */
   valueLabel?: string;
   className?: string | undefined;
 }
@@ -25,13 +29,21 @@ export function Progress({
   valueLabel,
   className,
 }: ProgressProps) {
-  const pct = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
-  const text = valueLabel ?? `${Math.round(pct)}%`;
+  const { pct } = useFormat();
+  const labelId = useId();
+  const percent = max > 0 ? Math.max(0, Math.min(100, (value / max) * 100)) : 0;
+  const text = valueLabel ?? pct(Math.round(percent));
   return (
     <div className={cn(styles.progress, className)}>
       {label || showValue ? (
         <div className={styles.header}>
-          {label ? <span className={styles.label}>{label}</span> : <span />}
+          {label ? (
+            <span id={labelId} className={styles.label}>
+              {label}
+            </span>
+          ) : (
+            <span />
+          )}
           {showValue ? <span className={styles.value}>{text}</span> : null}
         </div>
       ) : null}
@@ -40,11 +52,11 @@ export function Progress({
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={max}
-        aria-valuenow={value}
+        aria-valuenow={Math.max(0, Math.min(max, value))}
         aria-valuetext={text}
-        aria-label={typeof label === "string" ? label : undefined}
+        aria-labelledby={label ? labelId : undefined}
       >
-        <div className={cn(styles.fill, styles[tone])} style={{ width: `${pct}%` }} />
+        <div className={cn(styles.fill, styles[tone])} style={{ inlineSize: `${percent}%` }} />
       </div>
     </div>
   );
@@ -60,6 +72,7 @@ export interface SegmentBarSegment {
 
 export interface SegmentBarProps {
   segments: SegmentBarSegment[];
+  /** Thickness of the bar in pixels. */
   height?: number;
   showLegend?: boolean;
   className?: string | undefined;
@@ -73,14 +86,18 @@ function segmentColor(seg: SegmentBarSegment, index: number): string {
   return CHART_SEQUENCE[index % CHART_SEQUENCE.length] ?? "var(--chart-1)";
 }
 
+/** Parts of a whole. The segments follow the reading direction: the first starts at the inline start. */
 export function SegmentBar({ segments, height = 8, showLegend = false, className }: SegmentBarProps) {
+  const { locale, pct } = useFormat();
   const total = segments.reduce((sum, s) => sum + Math.max(0, s.value), 0);
-  const pctOf = (v: number) => (total > 0 ? (Math.max(0, v) / total) * 100 : 0);
-  const summary = segments.map((s) => `${s.label} ${Math.round(pctOf(s.value))}%`).join(", ");
+  const share = (v: number) => pct(Math.round(total > 0 ? (Math.max(0, v) / total) * 100 : 0));
+  const summary = new Intl.ListFormat(locale, { style: "narrow", type: "conjunction" }).format(
+    segments.map((s) => `${s.label} ${share(s.value)}`),
+  );
 
   return (
     <div className={cn(styles.segmentWrap, className)}>
-      <div className={styles.segments} style={{ height }} role="img" aria-label={summary}>
+      <div className={styles.segments} style={{ blockSize: height }} role="img" aria-label={summary}>
         {total === 0 ? <div className={styles.segmentEmpty} /> : null}
         {segments.map((s, i) =>
           s.value > 0 ? (
@@ -88,7 +105,7 @@ export function SegmentBar({ segments, height = 8, showLegend = false, className
               key={`${s.label}-${i}`}
               className={styles.segment}
               style={{ flexGrow: s.value, background: segmentColor(s, i) }}
-              title={`${s.label}: ${Math.round(pctOf(s.value))}%`}
+              title={`${s.label}: ${share(s.value)}`}
             />
           ) : null,
         )}
@@ -99,7 +116,7 @@ export function SegmentBar({ segments, height = 8, showLegend = false, className
             <li key={`${s.label}-${i}`} className={styles.legendItem}>
               <span className={styles.swatch} style={{ background: segmentColor(s, i) }} aria-hidden="true" />
               <span className={styles.legendLabel}>{s.label}</span>
-              <span className={styles.legendValue}>{Math.round(pctOf(s.value))}%</span>
+              <span className={styles.legendValue}>{share(s.value)}</span>
             </li>
           ))}
         </ul>

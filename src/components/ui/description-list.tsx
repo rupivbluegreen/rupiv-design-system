@@ -1,5 +1,8 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { cn } from "../../lib/cn";
+import { useLabels } from "../../provider";
 import styles from "./description-list.module.css";
 
 export interface DescriptionListItem {
@@ -16,6 +19,7 @@ export interface DescriptionListProps {
 }
 
 export function DescriptionList({ items, columns = 2, dense = false, className }: DescriptionListProps) {
+  const label = useLabels();
   return (
     <dl className={cn(styles.list, styles[`cols${columns}`], dense && styles.dense, className)}>
       {items.map((item, i) => {
@@ -24,7 +28,7 @@ export function DescriptionList({ items, columns = 2, dense = false, className }
         return (
           <div key={`${item.label}-${i}`} className={cn(styles.item, span > 1 && styles[`span${span}`])}>
             <dt className={styles.label}>{item.label}</dt>
-            <dd className={cn(styles.value, empty && styles.empty)}>{empty ? "—" : item.value}</dd>
+            <dd className={cn(styles.value, empty && styles.empty)}>{empty ? label("descriptionList.empty") : item.value}</dd>
           </div>
         );
       })}

@@ -18,8 +18,10 @@ type AnchorProps = Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href">;
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary" | "ghost" | "accent" | "danger" | "link";
   size?: Size;
-  leftIcon?: ReactNode;
-  rightIcon?: ReactNode;
+  /** Icon before the label, on the inline-start side: left in English, right in Arabic. */
+  startIcon?: ReactNode;
+  /** Icon after the label, on the inline-end side. Hidden while `loading`. */
+  endIcon?: ReactNode;
   /** Shows a spinner and disables the button. */
   loading?: boolean;
   fullWidth?: boolean;
@@ -31,8 +33,8 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 export function Button({
   variant = "secondary",
   size = "md",
-  leftIcon,
-  rightIcon,
+  startIcon,
+  endIcon,
   loading = false,
   fullWidth = false,
   href,
@@ -60,15 +62,15 @@ export function Button({
         <span className={styles.icon} aria-hidden="true">
           <LoaderCircle className={styles.spinner} />
         </span>
-      ) : leftIcon ? (
+      ) : startIcon ? (
         <span className={styles.icon} aria-hidden="true">
-          {leftIcon}
+          {startIcon}
         </span>
       ) : null}
       {children != null && children !== false && <span className={styles.label}>{children}</span>}
-      {rightIcon && !loading && (
+      {endIcon && !loading && (
         <span className={styles.icon} aria-hidden="true">
-          {rightIcon}
+          {endIcon}
         </span>
       )}
     </>

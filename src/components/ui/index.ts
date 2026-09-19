@@ -47,6 +47,9 @@ export * from "./empty-state";
 export * from "./skeleton";
 export * from "./kbd";
 export * from "./section";
+export * from "./accordion";
+export * from "./tile";
+export * from "./task-list";
 
 // feedback & overlays
 export * from "./alert";
@@ -57,3 +60,11 @@ export * from "./menu";
 export * from "./popover";
 export * from "./tooltip";
 export * from "./filter-bar";
+
+// shell: rail, navigation drawer, search box with results
+export { RailShell, NotificationsBell } from "./rail-shell";
+export type { RailShellProps, NotificationsBellProps } from "./rail-shell";
+export { NavDrawer } from "./nav-drawer";
+export type { NavDrawerProps, NavGroup, NavItem, NavBrand } from "./nav-drawer";
+export { CommandPalette, normalizeSearchText } from "./command-palette";
+export type { CommandPaletteProps, CommandPaletteItem } from "./command-palette";

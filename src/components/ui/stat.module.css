@@ -134,3 +134,8 @@
   padding-block-start: var(--space-12);
   border-block-start: 1px solid var(--border-subtle);
 }
+
+/* The trend arrows point up-right and down-right: mirrored in right-to-left, as the kit's rd-icon--flip does. */
+.delta:dir(rtl) svg {
+  transform: scaleX(-1);
+}

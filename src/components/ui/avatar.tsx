@@ -1,6 +1,10 @@
+"use client";
+
 import { cn } from "../../lib/cn";
 import { initials } from "../../lib/format";
 import type { CategoryColor } from "../../lib/types";
+import { useFormat } from "../../lib/use-format";
+import { useLabels } from "../../provider";
 import styles from "./avatar.module.css";
 
 const COLORS: CategoryColor[] = ["indigo", "madder", "turmeric", "neem", "lac", "kattha", "slate"];
@@ -39,21 +43,25 @@ export interface AvatarGroupProps {
 }
 
 export function AvatarGroup({ names, max = 4, size = "sm", className }: AvatarGroupProps) {
+  const { locale, int } = useFormat();
+  const label = useLabels();
   const visible = names.length > max ? names.slice(0, Math.max(max - 1, 1)) : names;
   const hidden = names.slice(visible.length);
+  // Names are joined the way the language joins a list ("a, b, c" in English, "a وb وc" in Arabic).
+  const join = (list: string[]) => new Intl.ListFormat(locale, { style: "narrow", type: "conjunction" }).format(list);
   return (
-    <span className={cn(styles.group, styles[`group-${size}`], className)} role="group" aria-label={names.join(", ")}>
+    <span className={cn(styles.group, styles[`group-${size}`], className)} role="group" aria-label={join(names)}>
       {visible.map((name, i) => (
         <Avatar key={`${name}-${i}`} name={name} size={size} className={styles.stacked} />
       ))}
       {hidden.length > 0 ? (
         <span
           className={cn(styles.avatar, styles[size], styles.more, styles.stacked)}
-          title={hidden.join(", ")}
-          aria-label={`${hidden.length} more`}
+          title={join(hidden)}
+          aria-label={label("avatar.more", { n: hidden.length })}
           role="img"
         >
-          <span aria-hidden="true">+{hidden.length}</span>
+          <span aria-hidden="true">+{int(hidden.length)}</span>
         </span>
       ) : null}
     </span>

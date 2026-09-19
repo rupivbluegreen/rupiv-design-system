@@ -1,6 +1,9 @@
+"use client";
+
 import type { ReactNode } from "react";
 import { cn } from "../../lib/cn";
 import type { Tone } from "../../lib/types";
+import { useFormat } from "../../lib/use-format";
 import styles from "./badge.module.css";
 
 export interface BadgeProps {
@@ -38,12 +41,15 @@ export function Badge({
 export interface CountBadgeProps {
   count: number;
   tone?: Tone;
+  /** Counts above this show as "99+". */
   max?: number;
   className?: string | undefined;
 }
 
+/** A number in a pill. The number is written for the provider's language (Western digits, grouped). */
 export function CountBadge({ count, tone = "neutral", max = 99, className }: CountBadgeProps) {
-  const text = count > max ? `${max}+` : String(count);
+  const { int } = useFormat();
+  const text = count > max ? `${int(max)}+` : int(count);
   return (
     <span className={cn(styles.count, styles[tone], tone === "neutral" ? styles.soft : styles.solid, className)}>
       {text}

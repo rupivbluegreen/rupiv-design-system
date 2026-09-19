@@ -1,6 +1,8 @@
-import { describe, expect, it } from "vitest";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+import { hasModuleClass } from "../../../test/css-modules";
 import { CustomLink, LOCALE_CASES, renderBoth, renderIn } from "../../../test/harness";
-import { Button, IconButton } from "./button";
+import { Button, ButtonGroup, IconButton } from "./button";
 
 describe("Button with href", () => {
   it("renders a plain <a href> by default, in English and Arabic", () => {
@@ -19,7 +21,7 @@ describe("Button with href", () => {
 
   it("uses the provider's link component and keeps its class and anchor props", () => {
     const views = renderBoth(
-      <Button href="/orders" variant="primary" title="tip" id="go" leftIcon={<i data-icon />}>
+      <Button href="/orders" variant="primary" title="tip" id="go" startIcon={<i data-icon />}>
         الطلبات
       </Button>,
       { linkComponent: CustomLink },
@@ -80,5 +82,143 @@ describe("IconButton with href", () => {
     const view = renderIn(locale, <IconButton href="/back" icon={<i />} label="Back" disabled />);
     expect(view.queryByRole("link")).toBeNull();
     expect(view.getByRole("button", { name: "Back" })).toHaveProperty("disabled", true);
+  });
+});
+
+describe("Button icons follow the reading direction", () => {
+  it("puts startIcon before the label and endIcon after it in the DOM, in English and Arabic (CSS flips them in right-to-left)", () => {
+    const views = renderBoth(
+      <Button startIcon={<i data-testid="start" />} endIcon={<i data-testid="end" />}>
+        Save
+      </Button>,
+    );
+    for (const view of [views.en, views.ar]) {
+      const button = view.getByRole("button", { name: "Save" });
+      const parts = Array.from(button.children).map((child) => child.querySelector("i")?.getAttribute("data-testid") ?? child.textContent);
+      expect(parts).toEqual(["start", "Save", "end"]);
+      // The icons are decoration: hidden from assistive technology.
+      for (const icon of button.querySelectorAll("i")) expect(icon.parentElement?.getAttribute("aria-hidden")).toBe("true");
+    }
+    expect(views.ar.container.dir).toBe("rtl");
+  });
+
+  it("renders no icon wrapper when there is no icon", () => {
+    const views = renderBoth(<Button>Plain</Button>);
+    for (const view of [views.en, views.ar]) {
+      expect(view.getByRole("button", { name: "Plain" }).children).toHaveLength(1);
+    }
+  });
+});
+
+describe("Button states and variants", () => {
+  it("maps variant and size to their classes, and fullWidth", () => {
+    const views = renderBoth(
+      <Button variant="danger" size="lg" fullWidth>
+        Delete
+      </Button>,
+    );
+    for (const view of [views.en, views.ar]) {
+      const button = view.getByRole("button", { name: "Delete" });
+      expect(hasModuleClass(button, "danger")).toBe(true);
+      expect(hasModuleClass(button, "lg")).toBe(true);
+      expect(hasModuleClass(button, "fullWidth")).toBe(true);
+    }
+  });
+
+  it("defaults to a secondary, medium button", () => {
+    const views = renderBoth(<Button>Default</Button>);
+    for (const view of [views.en, views.ar]) {
+      const button = view.getByRole("button", { name: "Default" });
+      expect(hasModuleClass(button, "secondary")).toBe(true);
+      expect(hasModuleClass(button, "md")).toBe(true);
+    }
+  });
+
+  it("loading shows a spinner instead of the start icon, hides the end icon, disables and marks the button busy", async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+    const views = renderBoth(
+      <Button loading onClick={onClick} startIcon={<i data-testid="start" />} endIcon={<i data-testid="end" />}>
+        Saving
+      </Button>,
+    );
+    for (const view of [views.en, views.ar]) {
+      const button = view.getByRole("button", { name: "Saving" });
+      expect(button).toHaveProperty("disabled", true);
+      expect(button.getAttribute("aria-busy")).toBe("true");
+      expect(button.querySelector("[data-testid=start]")).toBeNull();
+      expect(button.querySelector("[data-testid=end]")).toBeNull();
+      expect(button.querySelector("svg")).not.toBeNull();
+      await user.click(button);
+    }
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("disabled does not fire onClick and is not busy", async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+    const views = renderBoth(
+      <Button disabled onClick={onClick}>
+        Off
+      </Button>,
+    );
+    for (const view of [views.en, views.ar]) {
+      const button = view.getByRole("button", { name: "Off" });
+      expect(button).toHaveProperty("disabled", true);
+      expect(button.hasAttribute("aria-busy")).toBe(false);
+      await user.click(button);
+    }
+    expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it("fires onClick and works from the keyboard (Enter and Space)", async () => {
+    const onClick = vi.fn();
+    const user = userEvent.setup();
+    const views = renderBoth(<Button onClick={onClick}>Press</Button>);
+    for (const view of [views.en, views.ar]) {
+      const button = view.getByRole("button", { name: "Press" });
+      await user.click(button);
+      button.focus();
+      await user.keyboard("{Enter}");
+      await user.keyboard(" ");
+    }
+    expect(onClick).toHaveBeenCalledTimes(6);
+  });
+
+  it("forwards a ref to the button", () => {
+    let node: HTMLButtonElement | null = null;
+    renderBoth(
+      <Button
+        ref={(el) => {
+          node = el;
+        }}
+      >
+        Ref
+      </Button>,
+    );
+    expect(node).not.toBeNull();
+  });
+});
+
+describe("IconButton and ButtonGroup", () => {
+  it.each(LOCALE_CASES)("IconButton names itself from `label` and keeps the icon out of the name ($locale)", ({ locale }) => {
+    const name = locale === "ar" ? "حذف" : "Delete";
+    const view = renderIn(locale, <IconButton icon={<i data-testid="glyph" />} label={name} />);
+    const button = view.getByRole("button", { name });
+    expect(button.getAttribute("title")).toBe(name);
+    expect(button.querySelector("[data-testid=glyph]")?.parentElement?.getAttribute("aria-hidden")).toBe("true");
+  });
+
+  it.each(LOCALE_CASES)("ButtonGroup groups its buttons and can be attached ($locale)", ({ locale }) => {
+    const view = renderIn(
+      locale,
+      <ButtonGroup attached>
+        <Button>One</Button>
+        <Button>Two</Button>
+      </ButtonGroup>,
+    );
+    const group = view.getByRole("group");
+    expect(hasModuleClass(group, "attached")).toBe(true);
+    expect(view.getAllByRole("button")).toHaveLength(2);
   });
 });
