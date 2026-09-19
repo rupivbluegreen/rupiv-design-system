@@ -8,6 +8,12 @@ import { QuantityInput } from "./quantity-input";
 // jsdom has no layout: these tests prove the value handling, the keys, the labels and the number format, not how the
 // steppers and the unit sit in right-to-left.
 
+/**
+ * The input selects its text one animation frame after it gets focus (a mouse-up right after focus would undo an
+ * immediate select). Typing before that frame lets the late select() replace what was typed, so tests wait for it.
+ */
+const focusSettled = (): Promise<void> => new Promise((resolve) => requestAnimationFrame(() => resolve()));
+
 /** Holds the value the way an application does, so the input can be typed into. */
 function Held(props: { start?: number; min?: number; max?: number; step?: number; onChange?: (n: number) => void; uom?: string }) {
   const [value, setValue] = useState(props.start ?? 0);
@@ -106,6 +112,7 @@ describe("QuantityInput", () => {
     const view = renderIn("en", <Held start={1} min={0} max={100} onChange={onChange} />);
     const input = view.getByRole("spinbutton") as HTMLInputElement;
     await user.click(input);
+    await focusSettled();
     await user.keyboard("{Control>}a{/Control}42");
     expect(input.value).toBe("42");
     expect(onChange).not.toHaveBeenCalled(); // still typing
@@ -125,6 +132,7 @@ describe("QuantityInput", () => {
     const view = renderIn("ar", <Held start={0} onChange={onChange} />);
     const input = view.getByRole("spinbutton") as HTMLInputElement;
     await user.click(input);
+    await focusSettled();
     await user.keyboard("{Control>}a{/Control}١٢٣");
     expect(input.value).toBe("123");
     await user.keyboard("{Control>}a{/Control}٣٫٥");
@@ -142,6 +150,7 @@ describe("QuantityInput", () => {
     const view = renderIn("en", <Held start={5} onChange={onChange} />);
     const input = view.getByRole("spinbutton") as HTMLInputElement;
     await user.click(input);
+    await focusSettled();
     await user.keyboard("{Control>}a{/Control}{Backspace}abc");
     expect(input.value).toBe("");
     await user.keyboard("-");
