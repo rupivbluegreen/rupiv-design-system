@@ -9,7 +9,7 @@
 .step {
   position: relative;
   display: flex;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .marker {
@@ -22,8 +22,8 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: var(--circle);
-  height: var(--circle);
+  inline-size: var(--circle);
+  block-size: var(--circle);
   border-radius: var(--radius-full);
   border: 1px solid var(--border-default);
   background: var(--bg-surface);
@@ -39,8 +39,8 @@
 }
 
 .circle svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
 }
 
 .connector {
@@ -52,7 +52,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .label {
@@ -112,12 +112,12 @@
 
 .horizontal .connector {
   flex: 1;
-  height: 1px;
+  block-size: 1px;
   margin: 0 var(--space-8);
 }
 
 .horizontal .text {
-  padding-right: var(--space-12);
+  padding-inline-end: var(--space-12);
 }
 
 /* ---------- Vertical ---------- */
@@ -128,11 +128,11 @@
 .vertical .step {
   flex-direction: row;
   gap: var(--space-12);
-  padding-bottom: var(--space-20);
+  padding-block-end: var(--space-20);
 }
 
 .vertical .step:last-child {
-  padding-bottom: 0;
+  padding-block-end: 0;
 }
 
 .vertical .marker {
@@ -142,13 +142,13 @@
 
 .vertical .connector {
   flex: 1;
-  width: 1px;
-  margin-top: var(--space-4);
-  margin-bottom: calc(var(--space-16) * -1);
+  inline-size: 1px;
+  margin-block-start: var(--space-4);
+  margin-block-end: calc(var(--space-16) * -1);
 }
 
 .vertical .text {
-  padding-top: var(--space-2);
+  padding-block-start: var(--space-2);
 }
 
 @media (max-width: 639px) {

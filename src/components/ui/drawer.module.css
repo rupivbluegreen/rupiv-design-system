@@ -13,14 +13,14 @@
 
 .panel {
   position: absolute;
-  top: 0;
-  right: 0;
-  bottom: 0;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  inset-block-end: 0;
   display: flex;
   flex-direction: column;
-  max-width: 100vw;
+  max-inline-size: 100vi;
   background: var(--bg-surface-raised);
-  border-left: 1px solid var(--border-default);
+  border-inline-start: 1px solid var(--border-default);
   box-shadow: var(--shadow-lg);
   color: var(--text-body);
   outline: none;
@@ -32,7 +32,7 @@
   align-items: flex-start;
   gap: var(--space-12);
   padding: var(--space-16) var(--space-20);
-  border-bottom: 1px solid var(--border-subtle);
+  border-block-end: 1px solid var(--border-subtle);
 }
 
 .headerText {
@@ -40,7 +40,7 @@
   flex-direction: column;
   gap: var(--space-2);
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .title {
@@ -56,8 +56,8 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: var(--control-sm);
-  height: var(--control-sm);
+  inline-size: var(--control-sm);
+  block-size: var(--control-sm);
   margin: calc(var(--space-2) * -1) calc(var(--space-6) * -1) 0 0;
   padding: 0;
   border: 0;
@@ -71,8 +71,8 @@
 }
 
 .close svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .close:hover {
@@ -87,8 +87,8 @@
 
 .body {
   flex: 1;
-  min-height: 0;
-  overflow-y: auto;
+  min-block-size: 0;
+  overflow-block: auto;
   padding: var(--space-20);
   font-size: var(--text-14);
   line-height: var(--leading-ui);
@@ -101,7 +101,7 @@
   flex-wrap: wrap;
   gap: var(--space-8);
   padding: var(--space-12) var(--space-20);
-  border-top: 1px solid var(--border-subtle);
+  border-block-start: 1px solid var(--border-subtle);
 }
 
 @keyframes fadeIn {

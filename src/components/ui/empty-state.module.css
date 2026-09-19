@@ -17,8 +17,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  inline-size: 40px;
+  block-size: 40px;
   border-radius: var(--radius-lg);
   background: var(--bg-subtle);
   border: 1px solid var(--border-subtle);
@@ -26,18 +26,18 @@
 }
 
 .icon svg {
-  width: var(--icon-lg);
-  height: var(--icon-lg);
+  inline-size: var(--icon-lg);
+  block-size: var(--icon-lg);
 }
 
 .compact .icon {
-  width: 32px;
-  height: 32px;
+  inline-size: 32px;
+  block-size: 32px;
 }
 
 .compact .icon svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .text {
@@ -45,7 +45,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--space-4);
-  max-width: 380px;
+  max-inline-size: 380px;
 }
 
 .title {
@@ -67,5 +67,5 @@
   justify-content: center;
   flex-wrap: wrap;
   gap: var(--space-8);
-  margin-top: var(--space-4);
+  margin-block-start: var(--space-4);
 }

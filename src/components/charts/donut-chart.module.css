@@ -3,7 +3,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-24);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .chart {
@@ -13,7 +13,7 @@
 
 .svg {
   display: block;
-  max-width: none;
+  max-inline-size: none;
   overflow: visible;
 }
 
@@ -53,5 +53,5 @@
 
 .legend {
   flex: 1 1 160px;
-  min-width: 0;
+  min-inline-size: 0;
 }

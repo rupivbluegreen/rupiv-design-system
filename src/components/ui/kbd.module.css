@@ -2,11 +2,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
+  min-inline-size: 20px;
+  block-size: 20px;
   padding: 0 var(--space-4);
   border: 1px solid var(--border-default);
-  border-bottom-width: 2px;
+  border-block-end-width: 2px;
   border-radius: var(--radius-xs);
   background: var(--bg-subtle);
   color: var(--text-muted);

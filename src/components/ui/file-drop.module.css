@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-8);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .zone {
@@ -44,8 +44,8 @@
 
 .input {
   position: absolute;
-  width: 1px;
-  height: 1px;
+  inline-size: 1px;
+  block-size: 1px;
   padding: 0;
   margin: -1px;
   overflow: hidden;
@@ -58,9 +58,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--control-md);
-  height: var(--control-md);
-  margin-bottom: var(--space-4);
+  inline-size: var(--control-md);
+  block-size: var(--control-md);
+  margin-block-end: var(--space-4);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -68,8 +68,8 @@
 }
 
 .iconWrap > svg {
-  width: var(--icon-lg);
-  height: var(--icon-lg);
+  inline-size: var(--icon-lg);
+  block-size: var(--icon-lg);
 }
 
 .dragging .iconWrap {
@@ -109,7 +109,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-8);
-  min-height: var(--control-md);
+  min-block-size: var(--control-md);
   padding: 0 var(--space-4) 0 var(--space-12);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
@@ -119,14 +119,14 @@
 
 .fileIcon {
   flex-shrink: 0;
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
   color: var(--icon-default);
 }
 
 .fileName {
   flex: 1 1 auto;
-  min-width: 0;
+  min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -145,8 +145,8 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  width: var(--control-sm);
-  height: var(--control-sm);
+  inline-size: var(--control-sm);
+  block-size: var(--control-sm);
   padding: 0;
   border: 0;
   border-radius: var(--radius-sm);
@@ -168,6 +168,6 @@
 }
 
 .remove > svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
 }

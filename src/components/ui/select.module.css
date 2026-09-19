@@ -1,15 +1,15 @@
 .root {
   position: relative;
   display: inline-flex;
-  width: 100%;
-  min-width: 0;
+  inline-size: 100%;
+  min-inline-size: 0;
 }
 
 .select {
   appearance: none;
-  width: 100%;
-  min-width: 0;
-  height: var(--control-md);
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: var(--control-md);
   margin: 0;
   padding: 0 calc(var(--space-12) + var(--icon-md) + var(--space-6)) 0 var(--space-12);
   border: 1px solid var(--border-control);
@@ -28,14 +28,14 @@
 }
 
 .sm .select {
-  height: var(--control-sm);
-  padding-left: var(--space-8);
-  padding-right: calc(var(--space-8) + var(--icon-md) + var(--space-4));
+  block-size: var(--control-sm);
+  padding-inline-start: var(--space-8);
+  padding-inline-end: calc(var(--space-8) + var(--icon-md) + var(--space-4));
   font-size: var(--text-12);
 }
 
 .lg .select {
-  height: var(--control-lg);
+  block-size: var(--control-lg);
   font-size: var(--text-14);
 }
 
@@ -78,17 +78,17 @@
 
 .chevron {
   position: absolute;
-  top: 50%;
-  right: var(--space-12);
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inset-block-start: 50%;
+  inset-inline-end: var(--space-12);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
   transform: translateY(-50%);
   color: var(--icon-default);
   pointer-events: none;
 }
 
 .sm .chevron {
-  right: var(--space-8);
+  inset-inline-end: var(--space-8);
 }
 
 .select:disabled + .chevron {

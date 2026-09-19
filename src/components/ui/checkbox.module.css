@@ -2,7 +2,7 @@
   display: inline-flex;
   align-items: flex-start;
   gap: var(--space-8);
-  min-width: 0;
+  min-inline-size: 0;
   vertical-align: middle;
 }
 
@@ -14,20 +14,20 @@
   position: relative;
   display: inline-flex;
   flex-shrink: 0;
-  width: 16px;
-  height: calc(var(--text-13) * 1.45);
+  inline-size: 16px;
+  block-size: calc(var(--text-13) * 1.45);
   align-items: center;
 }
 
 .bare .control {
-  height: 16px;
+  block-size: 16px;
 }
 
 .input {
   position: absolute;
   inset: 50% auto auto 50%;
-  width: 28px;
-  height: 28px;
+  inline-size: 28px;
+  block-size: 28px;
   margin: 0;
   transform: translate(-50%, -50%);
   opacity: 0;
@@ -43,8 +43,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  inline-size: 16px;
+  block-size: 16px;
   border: 1px solid var(--border-control);
   border-radius: var(--radius-sm);
   background: var(--bg-surface);
@@ -58,8 +58,8 @@
 .checkIcon,
 .minusIcon {
   display: none;
-  width: 12px;
-  height: 12px;
+  inline-size: 12px;
+  block-size: 12px;
 }
 
 .input:hover + .box {
@@ -111,7 +111,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .label {

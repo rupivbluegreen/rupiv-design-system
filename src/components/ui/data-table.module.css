@@ -3,7 +3,7 @@
   --dt-head-h: 36px;
   --dt-select-w: 44px;
   position: relative;
-  min-width: 0;
+  min-inline-size: 0;
   background: var(--bg-surface);
 }
 
@@ -13,18 +13,18 @@
 
 .scroll {
   position: relative;
-  width: 100%;
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
+  inline-size: 100%;
+  overflow-inline: auto;
+  overscroll-behavior-inline: contain;
 }
 
 .stickyHeader {
   overflow: auto;
-  max-height: min(70vh, 760px);
+  max-block-size: min(70vb, 760px);
 }
 
 .table {
-  width: 100%;
+  inline-size: 100%;
   border-collapse: separate;
   border-spacing: 0;
   font-size: var(--text-13);
@@ -34,23 +34,23 @@
 
 /* ---------- Header ---------- */
 .table thead th {
-  height: var(--dt-head-h);
+  block-size: var(--dt-head-h);
   padding: 0 var(--space-12);
   background: var(--bg-table-header);
-  border-bottom: 1px solid var(--border-default);
+  border-block-end: 1px solid var(--border-default);
   color: var(--text-title);
   font-size: var(--text-13);
   font-weight: var(--weight-semibold);
   letter-spacing: 0;
   line-height: 1.2;
-  text-align: left;
+  text-align: start;
   white-space: nowrap;
   vertical-align: middle;
 }
 
 .stickyHeader thead th {
   position: sticky;
-  top: 0;
+  inset-block-start: 0;
   z-index: var(--z-sticky);
 }
 
@@ -63,8 +63,8 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-4);
-  max-width: 100%;
-  height: 24px;
+  max-inline-size: 100%;
+  block-size: 24px;
   margin: 0 calc(var(--space-6) * -1);
   padding: 0 var(--space-6);
   border: 0;
@@ -103,8 +103,8 @@
 }
 
 .sortIcon svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
 }
 
 .sortButton:hover .sortIcon,
@@ -121,7 +121,7 @@
 .table tbody td,
 .table tfoot td,
 .table tfoot th {
-  height: var(--dt-row-h);
+  block-size: var(--dt-row-h);
   padding: var(--space-4) var(--space-12);
   background: var(--bg-surface);
   vertical-align: middle;
@@ -130,21 +130,21 @@
 }
 
 .table tbody td {
-  border-bottom: 1px solid var(--border-subtle);
+  border-block-end: 1px solid var(--border-subtle);
 }
 
 .table tbody tr:last-child td {
-  border-bottom: 0;
+  border-block-end: 0;
 }
 
 .table th:first-child,
 .table td:first-child {
-  padding-left: var(--space-16);
+  padding-inline-start: var(--space-16);
 }
 
 .table th:last-child,
 .table td:last-child {
-  padding-right: var(--space-16);
+  padding-inline-end: var(--space-16);
 }
 
 /* Row tone (rowTone prop). Mixed with the surface rather than transparent so sticky cells stay opaque.
@@ -186,12 +186,12 @@
 }
 
 .emptyRow td {
-  height: auto;
+  block-size: auto;
   white-space: normal;
 }
 
 .alignRight {
-  text-align: right !important;
+  text-align: end !important;
   font-variant-numeric: tabular-nums;
 }
 
@@ -205,11 +205,11 @@
 
 /* ---------- Selection column ---------- */
 .table .selectCell {
-  width: var(--dt-select-w);
-  min-width: var(--dt-select-w);
-  max-width: var(--dt-select-w);
-  padding-right: 0;
-  padding-left: var(--space-16);
+  inline-size: var(--dt-select-w);
+  min-inline-size: var(--dt-select-w);
+  max-inline-size: var(--dt-select-w);
+  padding-inline-end: 0;
+  padding-inline-start: var(--space-16);
   cursor: default;
 }
 
@@ -217,12 +217,12 @@
 .stickySelect,
 .stickyCol {
   position: sticky;
-  left: 0;
+  inset-inline-start: 0;
   z-index: 1;
 }
 
 .stickyAfterSelect {
-  left: var(--dt-select-w);
+  inset-inline-start: var(--dt-select-w);
 }
 
 .table thead .stickySelect,
@@ -233,26 +233,26 @@
 .stickyCol::after {
   content: "";
   position: absolute;
-  top: 0;
-  right: -1px;
-  bottom: 0;
-  width: 1px;
+  inset-block-start: 0;
+  inset-inline-end: -1px;
+  inset-block-end: 0;
+  inline-size: 1px;
   background: var(--border-subtle);
 }
 
 /* ---------- Footer ---------- */
 .tfoot td,
 .tfoot th {
-  border-top: 1px solid var(--border-default);
+  border-block-start: 1px solid var(--border-default);
   background: var(--bg-subtle) !important;
   color: var(--text-title);
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
-  text-align: left;
+  text-align: start;
 }
 
 .tfoot [data-align="right"] {
-  text-align: right;
+  text-align: end;
 }
 
 .tfoot [data-align="center"] {
@@ -262,24 +262,24 @@
 /* ---------- Bulk action bar (overlays the header row) ---------- */
 .bulkBar {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
   z-index: calc(var(--z-sticky) + 2);
   display: flex;
   align-items: center;
   gap: var(--space-12);
-  height: var(--dt-head-h);
+  block-size: var(--dt-head-h);
   padding: 0 var(--space-12) 0 var(--space-16);
   background: var(--bg-selected);
-  border-bottom: 1px solid var(--border-default);
+  border-block-end: 1px solid var(--border-default);
   animation: bulkIn var(--dur-fast) var(--ease-out);
 }
 
 .bulkCheck {
   display: inline-flex;
   align-items: center;
-  width: calc(var(--dt-select-w) - var(--space-16) - var(--space-12));
+  inline-size: calc(var(--dt-select-w) - var(--space-16) - var(--space-12));
 }
 
 .bulkCount {
@@ -294,13 +294,13 @@
   display: flex;
   align-items: center;
   gap: var(--space-6);
-  min-width: 0;
-  overflow-x: auto;
+  min-inline-size: 0;
+  overflow-inline: auto;
 }
 
 .bulkClear {
-  height: 24px;
-  margin-left: auto;
+  block-size: 24px;
+  margin-inline-start: auto;
   padding: 0 var(--space-8);
   border: 0;
   border-radius: var(--radius-sm);
@@ -327,7 +327,7 @@
 /* ---------- Pagination ---------- */
 .pagination {
   padding: var(--space-8) var(--space-16);
-  border-top: 1px solid var(--border-subtle);
+  border-block-start: 1px solid var(--border-subtle);
 }
 
 /* ---------- Responsive column hiding ---------- */

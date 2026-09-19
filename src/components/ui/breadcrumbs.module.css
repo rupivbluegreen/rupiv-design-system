@@ -1,5 +1,5 @@
 .root {
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .list {
@@ -16,8 +16,8 @@
 
 .item {
   display: inline-flex;
-  min-width: 0;
-  max-width: 28ch;
+  min-inline-size: 0;
+  max-inline-size: 28ch;
 }
 
 .link,
@@ -59,6 +59,6 @@
 }
 
 .separator > svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
 }

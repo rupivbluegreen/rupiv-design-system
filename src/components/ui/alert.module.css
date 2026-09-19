@@ -23,13 +23,13 @@
 .icon {
   display: inline-flex;
   flex: none;
-  padding-top: 2px;
+  padding-block-start: 2px;
   color: var(--tone-solid);
 }
 
 .icon svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .content {
@@ -37,7 +37,7 @@
   flex-direction: column;
   gap: var(--space-2);
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .title {
@@ -58,7 +58,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--space-8);
-  margin-top: var(--space-8);
+  margin-block-start: var(--space-8);
 }
 
 .close {
@@ -66,8 +66,8 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: var(--control-sm);
-  height: var(--control-sm);
+  inline-size: var(--control-sm);
+  block-size: var(--control-sm);
   margin: calc(var(--space-4) * -1) calc(var(--space-8) * -1) calc(var(--space-4) * -1) 0;
   padding: 0;
   border: 0;
@@ -81,8 +81,8 @@
 }
 
 .close svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .close:hover {

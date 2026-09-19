@@ -14,27 +14,27 @@
 }
 
 .xs {
-  width: 20px;
-  height: 20px;
+  inline-size: 20px;
+  block-size: 20px;
   font-size: var(--text-11);
 }
 
 .sm {
-  width: 24px;
-  height: 24px;
+  inline-size: 24px;
+  block-size: 24px;
   font-size: var(--text-11);
   letter-spacing: 0;
 }
 
 .md {
-  width: 32px;
-  height: 32px;
+  inline-size: 32px;
+  block-size: 32px;
   font-size: var(--text-12);
 }
 
 .lg {
-  width: 40px;
-  height: 40px;
+  inline-size: 40px;
+  block-size: 40px;
   font-size: var(--text-14);
 }
 
@@ -64,13 +64,13 @@
 }
 
 .group-xs .stacked + .stacked {
-  margin-left: -6px;
+  margin-inline-start: -6px;
 }
 
 .group-sm .stacked + .stacked {
-  margin-left: -6px;
+  margin-inline-start: -6px;
 }
 
 .group-md .stacked + .stacked {
-  margin-left: -8px;
+  margin-inline-start: -8px;
 }

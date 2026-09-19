@@ -2,21 +2,21 @@
   display: inline-flex;
   align-items: stretch;
   gap: var(--space-2);
-  max-width: 100%;
+  max-inline-size: 100%;
   padding: var(--space-2);
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
   background: var(--bg-subtle);
-  overflow-x: auto;
+  overflow-inline: auto;
   scrollbar-width: none;
 }
 
 .md {
-  height: var(--control-md);
+  block-size: var(--control-md);
 }
 
 .sm {
-  height: var(--control-sm);
+  block-size: var(--control-sm);
 }
 
 .item {
@@ -68,6 +68,6 @@
 }
 
 .icon > svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
 }

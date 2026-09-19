@@ -1,13 +1,13 @@
 .stack {
   display: flex;
   flex-direction: column;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .inline {
   display: flex;
   flex-direction: row;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .wrap {
@@ -43,11 +43,11 @@
 /* grid */
 .grid {
   display: grid;
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .grid > * {
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .cols1 { grid-template-columns: minmax(0, 1fr); }
@@ -79,16 +79,16 @@
 /* divider */
 .horizontal {
   border: 0;
-  border-top: 1px solid var(--border-default);
+  border-block-start: 1px solid var(--border-default);
   margin: 0;
-  width: 100%;
+  inline-size: 100%;
 }
 
 .vertical {
   display: inline-block;
   align-self: stretch;
-  width: 1px;
-  min-height: 1em;
+  inline-size: 1px;
+  min-block-size: 1em;
   background: var(--border-default);
   flex-shrink: 0;
 }
@@ -97,7 +97,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-12);
-  width: 100%;
+  inline-size: 100%;
   color: var(--text-muted);
   font-size: var(--text-12);
   font-weight: var(--weight-medium);
@@ -108,7 +108,7 @@
 .labelled::after {
   content: "";
   flex: 1 1 0;
-  border-top: 1px solid var(--border-default);
+  border-block-start: 1px solid var(--border-default);
 }
 
 .labelText {

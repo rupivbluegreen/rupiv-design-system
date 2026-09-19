@@ -13,13 +13,13 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-6);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .swatch {
   flex: none;
-  width: 8px;
-  height: 8px;
+  inline-size: 8px;
+  block-size: 8px;
   border-radius: 2px;
 }
 
@@ -28,7 +28,7 @@
 }
 
 .value {
-  margin-left: var(--space-2);
+  margin-inline-start: var(--space-2);
   color: var(--text-title);
   font-weight: var(--weight-medium);
   font-variant-numeric: tabular-nums;
@@ -47,12 +47,12 @@
 
 .list .label {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .list .value {
-  margin-left: var(--space-12);
+  margin-inline-start: var(--space-12);
 }

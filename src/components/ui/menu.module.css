@@ -4,15 +4,15 @@
 
 .menu {
   position: fixed;
-  top: 0;
-  left: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
   z-index: var(--z-dropdown);
   display: flex;
   flex-direction: column;
-  min-width: 180px;
-  max-width: min(320px, calc(100vw - var(--space-16)));
-  max-height: min(420px, calc(100dvh - var(--space-16)));
-  overflow-y: auto;
+  min-inline-size: 180px;
+  max-inline-size: min(320px, calc(100vi - var(--space-16)));
+  max-block-size: min(420px, calc(100dvb - var(--space-16)));
+  overflow-block: auto;
   padding: var(--space-4);
   background: var(--bg-surface-raised);
   border: 1px solid var(--border-default);
@@ -31,8 +31,8 @@
   align-items: center;
   gap: var(--space-8);
   flex: none;
-  width: 100%;
-  height: 32px;
+  inline-size: 100%;
+  block-size: 32px;
   padding: 0 var(--space-8);
   border: 0;
   border-radius: var(--radius-sm);
@@ -40,7 +40,7 @@
   color: var(--text-body);
   font-size: var(--text-13);
   line-height: 1;
-  text-align: left;
+  text-align: start;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -63,25 +63,25 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: var(--icon-md);
+  inline-size: var(--icon-md);
   color: var(--icon-default);
 }
 
 .icon svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .label {
   flex: 1;
-  min-width: 0;
+  min-inline-size: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .shortcut {
   flex: none;
-  margin-left: var(--space-16);
+  margin-inline-start: var(--space-16);
   font-size: var(--text-12);
   color: var(--text-muted);
   letter-spacing: 0.02em;
@@ -114,7 +114,7 @@
 
 .separator {
   flex: none;
-  height: 1px;
+  block-size: 1px;
   margin: var(--space-4) calc(var(--space-4) * -1);
   background: var(--border-subtle);
 }

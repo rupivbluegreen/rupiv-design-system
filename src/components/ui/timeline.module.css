@@ -20,21 +20,21 @@
   display: grid;
   grid-template-columns: var(--node) minmax(0, 1fr);
   column-gap: var(--space-12);
-  padding-bottom: var(--gap);
+  padding-block-end: var(--gap);
 }
 
 .item:last-child {
-  padding-bottom: 0;
+  padding-block-end: 0;
 }
 
 /* Connecting line */
 .item:not(:last-child)::before {
   content: "";
   position: absolute;
-  top: calc(var(--node) + 2px);
-  bottom: 2px;
-  left: calc(var(--node) / 2 - 0.5px);
-  width: 1px;
+  inset-block-start: calc(var(--node) + 2px);
+  inset-block-end: 2px;
+  inset-inline-start: calc(var(--node) / 2 - 0.5px);
+  inline-size: 1px;
   background: var(--border-default);
 }
 
@@ -54,13 +54,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--node);
-  height: 20px;
+  inline-size: var(--node);
+  block-size: 20px;
 }
 
 .dot {
-  width: 10px;
-  height: 10px;
+  inline-size: 10px;
+  block-size: 10px;
   border-radius: var(--radius-full);
   background: var(--tone-solid);
   outline: 3px solid var(--tone-bg);
@@ -70,24 +70,24 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: var(--node);
-  height: var(--node);
-  margin-top: -2px;
+  inline-size: var(--node);
+  block-size: var(--node);
+  margin-block-start: -2px;
   border-radius: var(--radius-full);
   background: var(--tone-bg);
   color: var(--tone-text);
 }
 
 .iconNode svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
 }
 
 .content {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .head {
@@ -97,7 +97,7 @@
   flex-wrap: wrap;
   column-gap: var(--space-12);
   row-gap: 0;
-  min-height: 20px;
+  min-block-size: 20px;
 }
 
 .title {
@@ -105,7 +105,7 @@
   line-height: var(--leading-ui);
   font-weight: var(--weight-medium);
   color: var(--text-title);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .time {
@@ -126,7 +126,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-6);
-  margin-top: var(--space-2);
+  margin-block-start: var(--space-2);
   font-size: var(--text-12);
   line-height: 1.35;
   color: var(--text-label);

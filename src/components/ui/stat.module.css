@@ -2,7 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  min-width: 0;
+  min-inline-size: 0;
   padding: var(--space-16);
   background: var(--bg-surface);
   border: 1px solid var(--border-default);
@@ -33,12 +33,12 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: var(--space-8);
-  min-height: 20px;
+  min-block-size: 20px;
 }
 
 .label {
   font-weight: var(--weight-medium);
-  padding-top: var(--space-2);
+  padding-block-start: var(--space-2);
 }
 
 .icon {
@@ -46,8 +46,8 @@
   align-items: center;
   justify-content: center;
   flex: none;
-  width: 32px;
-  height: 32px;
+  inline-size: 32px;
+  block-size: 32px;
   margin: calc(var(--space-4) * -1) calc(var(--space-4) * -1) calc(var(--space-8) * -1) 0;
   border-radius: var(--radius-md);
   background: var(--bg-subtle);
@@ -55,8 +55,8 @@
 }
 
 .icon svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .valueRow {
@@ -64,7 +64,7 @@
   align-items: baseline;
   flex-wrap: wrap;
   gap: var(--space-4);
-  min-width: 0;
+  min-inline-size: 0;
 }
 
 .value {
@@ -90,7 +90,7 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  height: 20px;
+  block-size: 20px;
   padding: 0 var(--space-6) 0 var(--space-4);
   border-radius: var(--radius-sm);
   font-size: var(--text-12);
@@ -100,8 +100,8 @@
 }
 
 .delta svg {
-  width: var(--icon-sm);
-  height: var(--icon-sm);
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
 }
 
 .good {
@@ -128,7 +128,7 @@
 }
 
 .footer {
-  margin-top: var(--space-8);
-  padding-top: var(--space-12);
-  border-top: 1px solid var(--border-subtle);
+  margin-block-start: var(--space-8);
+  padding-block-start: var(--space-12);
+  border-block-start: 1px solid var(--border-subtle);
 }

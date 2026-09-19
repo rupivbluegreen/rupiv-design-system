@@ -1,10 +1,10 @@
 .list {
   display: flex;
   align-items: stretch;
-  min-width: 0;
-  max-width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  overflow-inline: auto;
+  overflow-block: hidden;
   scrollbar-width: none;
 }
 
@@ -55,16 +55,16 @@
 }
 
 .icon > svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 18px;
-  height: 18px;
+  min-inline-size: 18px;
+  block-size: 18px;
   padding: 0 var(--space-6);
   border-radius: var(--radius-full);
   background: var(--bg-muted);
@@ -82,11 +82,11 @@
 /* ---------- line ---------- */
 .line {
   gap: var(--space-20);
-  border-bottom: 1px solid var(--border-default);
+  border-block-end: 1px solid var(--border-default);
 }
 
 .line .tab {
-  height: var(--control-lg);
+  block-size: var(--control-lg);
   padding: 0 var(--space-2);
   border-radius: var(--radius-xs) var(--radius-xs) 0 0;
 }
@@ -94,10 +94,10 @@
 .line .tab::after {
   content: "";
   position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 2px;
+  inset-inline-end: 0;
+  inset-block-end: 0;
+  inset-inline-start: 0;
+  block-size: 2px;
   border-radius: 2px 2px 0 0;
   background: transparent;
   transition: background-color var(--dur-fast) var(--ease-out);
@@ -117,7 +117,7 @@
 }
 
 .pill .tab {
-  height: var(--control-sm);
+  block-size: var(--control-sm);
   padding: 0 var(--space-12);
   border-radius: var(--radius-md);
 }

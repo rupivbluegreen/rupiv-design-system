@@ -2,8 +2,8 @@
 .control {
   display: flex;
   align-items: center;
-  width: 100%;
-  min-width: 0;
+  inline-size: 100%;
+  min-inline-size: 0;
   border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
   background: var(--bg-surface);
@@ -25,25 +25,25 @@
 }
 
 .sm {
-  height: var(--control-sm);
+  block-size: var(--control-sm);
   font-size: var(--text-12);
 }
 
 .md {
-  height: var(--control-md);
+  block-size: var(--control-md);
   font-size: var(--text-13);
 }
 
 .lg {
-  height: var(--control-lg);
+  block-size: var(--control-lg);
   font-size: var(--text-14);
 }
 
 .input {
   flex: 1 1 auto;
-  width: 100%;
-  min-width: 0;
-  height: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
+  block-size: 100%;
   padding: 0 var(--space-12);
   border: 0;
   border-radius: inherit;
@@ -71,22 +71,22 @@
   display: inline-flex;
   align-items: center;
   flex-shrink: 0;
-  padding-left: var(--space-12);
+  padding-inline-start: var(--space-12);
   color: var(--icon-muted);
 }
 
 .sm .leftIcon {
-  padding-left: var(--space-8);
+  padding-inline-start: var(--space-8);
 }
 
 .leftIcon > svg {
-  width: var(--icon-md);
-  height: var(--icon-md);
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
 }
 
 .leftIcon + .input,
 .leftIcon + .affix {
-  padding-left: var(--space-8);
+  padding-inline-start: var(--space-8);
 }
 
 .affix {
@@ -100,27 +100,27 @@
 }
 
 .prefix {
-  padding-left: var(--space-12);
+  padding-inline-start: var(--space-12);
 }
 
 .prefix + .input {
-  padding-left: var(--space-6);
+  padding-inline-start: var(--space-6);
 }
 
 .suffix {
-  padding-right: var(--space-12);
+  padding-inline-end: var(--space-12);
 }
 
 .input:has(+ .suffix) {
-  padding-right: var(--space-6);
+  padding-inline-end: var(--space-6);
 }
 
 .sm .prefix {
-  padding-left: var(--space-8);
+  padding-inline-start: var(--space-8);
 }
 
 .sm .suffix {
-  padding-right: var(--space-8);
+  padding-inline-end: var(--space-8);
 }
 
 /* ---------- states ---------- */
@@ -162,8 +162,8 @@
 /* ---------- textarea ---------- */
 .textarea {
   display: block;
-  width: 100%;
-  min-height: calc(var(--control-md) * 2);
+  inline-size: 100%;
+  min-block-size: calc(var(--control-md) * 2);
   padding: var(--space-8) var(--space-12);
   border: 1px solid var(--border-control);
   border-radius: var(--radius-md);
@@ -171,7 +171,7 @@
   color: var(--text-title);
   font-size: var(--text-13);
   line-height: var(--leading-ui);
-  resize: vertical;
+  resize: block;
   outline: none;
   transition:
     border-color var(--dur-fast) var(--ease-out),
