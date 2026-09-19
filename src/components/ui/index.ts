@@ -1,4 +1,4 @@
-// Tanabana Design System — generic primitives. See docs/design-system.md §5.
+// rupiv-design system — generic primitives. See docs/design-system.md.
 
 // provider: language, direction, link component, navigation, labels
 export * from "../../provider";
@@ -68,3 +68,4 @@ export { NavDrawer } from "./nav-drawer";
 export type { NavDrawerProps, NavGroup, NavItem, NavBrand } from "./nav-drawer";
 export { CommandPalette, normalizeSearchText } from "./command-palette";
 export type { CommandPaletteProps, CommandPaletteItem } from "./command-palette";
+export type { Tone, CategoryColor } from "../../lib/types";

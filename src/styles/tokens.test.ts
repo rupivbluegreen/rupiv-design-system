@@ -98,7 +98,7 @@ describe("tokens.css", () => {
     expect(light.size).toBeGreaterThanOrEqual(268);
   });
 
-  it("keeps the Cachet-derived category tokens (renaming them is outside A1)", () => {
+  it("keeps the inherited category (--cat-*) tokens (renaming them is outside A1)", () => {
     for (const name of ["--cat-madder-bg", "--cat-neem-fg", "--cat-turmeric-bg", "--cat-lac-fg", "--cat-kattha-bg"]) {
       expect(light.has(name), name).toBe(true);
     }
