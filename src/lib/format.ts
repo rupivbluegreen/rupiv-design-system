@@ -1,200 +1,129 @@
 /**
- * Formatting helpers. Every number, currency, quantity and date shown in the UI
- * goes through here so the whole product reads the same way.
- * Locale is en-IN: lakh/crore grouping (12,34,567) and DD MMM YYYY dates.
+ * Numbers, percentages and small text helpers, plus every date function (re-exported from ./date).
+ * Import from `@rupiv/design-system/format`. No React and no framework import: safe in a Server Component.
+ *
+ * - Digits: Western (0 to 9) in English and Arabic, with en-US style grouping (1,234.5) in both, as in the HTML
+ *   reference kit. Arabic-Indic digits and the Arabic percent sign never appear.
+ * - Missing input (null, undefined, NaN, Infinity) gives `NO_VALUE`, never "NaN" or "∞".
+ * - A negative number is written with a hyphen-minus, and one that rounds to zero has no sign ("0", never "-0").
+ *   In right-to-left text a leading minus can jump to the wrong end of the number: wrap a number that must stay
+ *   left to right in `<bdi>`.
+ * - Nothing here reads the current time or the machine's locale.
+ *
+ * `num`, `int` and `pct` follow the reference kit's `RD.fmt`; `formatNumber` and `formatPercent` keep the signatures of
+ * the temporary helper the first application milestone used (the "A0 helper"). The language is the last argument;
+ * in React, `useFormat()` binds the provider's language.
  */
+import { NO_VALUE, resolveFormatLocale, stripBidiMarks, type FormatLocale } from "./locale";
 
-/** The mock "today" for the whole app. Keep screens deterministic. */
-export const TODAY = "2026-09-15";
-export const FINANCIAL_YEAR = "FY 2026-27";
+export * from "./date";
+export * from "./locale";
 
-const inr0 = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 });
-const inr2 = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const num0 = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 0 });
-const num1 = new Intl.NumberFormat("en-GB", { maximumFractionDigits: 1 });
-const num2 = new Intl.NumberFormat("en-GB", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+/**
+ * How each language writes numbers. Both use Western digits and en-US separators today (the reference kit does the
+ * same). The table is the one place a numeral-system setting would make Arabic differ.
+ */
+const NUMBER_TAGS = {
+  en: "en-US-u-nu-latn",
+  ar: "en-US-u-nu-latn",
+} as const satisfies Record<FormatLocale, string>;
 
-/** ₹12,34,567 — or ₹12,34,567.50 with `decimals: true`. */
-export function formatINR(value: number, opts: { decimals?: boolean } = {}): string {
-  return (opts.decimals ? inr2 : inr0).format(value);
+const numberFormats = new Map<string, Intl.NumberFormat>();
+
+function write(locale: string | undefined, options: Intl.NumberFormatOptions, value: number): string {
+  const tag = NUMBER_TAGS[resolveFormatLocale(locale)];
+  // "negative" keeps the minus on negative numbers only: a value that rounds to zero (or is -0) shows "0".
+  const merged: Intl.NumberFormatOptions = { signDisplay: "negative", ...options };
+  const key = `${tag}|${JSON.stringify(merged)}`;
+  let format = numberFormats.get(key);
+  if (format === undefined) {
+    format = new Intl.NumberFormat(tag, merged);
+    numberFormats.set(key, format);
+  }
+  return stripBidiMarks(format.format(value));
 }
 
-/** Compact Indian notation: ₹8.4 K, ₹12.6 L, ₹3.25 Cr. */
-export function formatINRCompact(value: number): string {
-  const abs = Math.abs(value);
-  const sign = value < 0 ? "−" : "";
-  if (abs >= 1e7) return `${sign}₹${trimZeros((abs / 1e7).toFixed(2))} Cr`;
-  if (abs >= 1e5) return `${sign}₹${trimZeros((abs / 1e5).toFixed(1))} L`;
-  if (abs >= 1e3) return `${sign}₹${trimZeros((abs / 1e3).toFixed(1))} K`;
-  return `${sign}₹${num0.format(abs)}`;
+const isPresent = (value: number | null | undefined): value is number =>
+  value !== null && value !== undefined && Number.isFinite(value);
+
+/** A whole number of fraction digits between 0 and 20; anything else (NaN, undefined) is "not given". */
+function fractionDigits(digits: number | undefined): number | undefined {
+  return digits === undefined || !Number.isFinite(digits) ? undefined : Math.min(20, Math.max(0, Math.trunc(digits)));
 }
 
-/** Compact quantity: 12.4 K m, 1.2 L m. */
-export function formatQtyCompact(value: number, uom: string = "m"): string {
-  const abs = Math.abs(value);
-  if (abs >= 1e5) return `${trimZeros((value / 1e5).toFixed(1))} L ${uom}`;
-  if (abs >= 1e3) return `${trimZeros((value / 1e3).toFixed(1))} K ${uom}`;
-  return `${num0.format(value)} ${uom}`;
+/* ------------------------------------------------------------------ */
+/* The reference kit's RD.fmt: num, int, pct                          */
+/* ------------------------------------------------------------------ */
+
+/**
+ * "1,234.5". Without `digits` at most one decimal is shown; with `digits` exactly that many ("1,234.50").
+ * Rounds half away from zero on the decimal value (2.25 gives "2.3", -2.25 gives "-2.3").
+ */
+export function num(value: number | null | undefined, digits?: number, locale?: string): string {
+  if (!isPresent(value)) return NO_VALUE;
+  const places = fractionDigits(digits);
+  return write(
+    locale,
+    places === undefined ? { maximumFractionDigits: 1 } : { minimumFractionDigits: places, maximumFractionDigits: places },
+    value,
+  );
 }
 
-export function formatNumber(value: number, decimals: 0 | 1 | 2 = 0): string {
-  return (decimals === 2 ? num2 : decimals === 1 ? num1 : num0).format(value);
+/** A whole number with grouping: "1,235". */
+export function int(value: number | null | undefined, locale?: string): string {
+  return num(value, 0, locale);
 }
 
-/** 12,480 m · 1,250.5 kg · 36 pcs */
-export function formatQty(value: number, uom: string = "m", decimals: 0 | 1 | 2 = 0): string {
-  return `${formatNumber(value, decimals)} ${uom}`;
+/**
+ * A percentage that is already in percent: `pct(91)` is "91%", `pct(12.34, 1)` is "12.3%". The sign is the ASCII
+ * percent sign, never the Arabic one, in both languages. For a ratio (0.91) use `formatPercent`.
+ */
+export function pct(value: number | null | undefined, digits = 0, locale?: string): string {
+  const text = num(value, digits, locale);
+  return text === NO_VALUE ? NO_VALUE : `${text}%`;
 }
 
-export function formatMetres(value: number): string {
-  return formatQty(value, "m");
+/* ------------------------------------------------------------------ */
+/* The A0 helper: same names, same results                            */
+/* ------------------------------------------------------------------ */
+
+/** A number in the language's style. `options` are `Intl.NumberFormat` options (default: at most 3 decimals). */
+export function formatNumber(
+  value: number | null | undefined,
+  locale?: string,
+  options?: Intl.NumberFormatOptions,
+): string {
+  if (!isPresent(value)) return NO_VALUE;
+  return write(locale, options ?? {}, value);
 }
 
-export function formatKg(value: number, decimals: 0 | 1 | 2 = 1): string {
-  return formatQty(value, "kg", decimals);
+/** A ratio in [0, 1] as a percentage: `formatPercent(0.91)` is "91%". ASCII percent sign in both languages. */
+export function formatPercent(ratio: number | null | undefined, locale?: string, digits = 0): string {
+  if (!isPresent(ratio)) return NO_VALUE;
+  const places = fractionDigits(digits) ?? 0;
+  return write(locale, { style: "percent", minimumFractionDigits: places, maximumFractionDigits: places }, ratio);
 }
 
-/** ₹142.50/m */
-export function formatRate(value: number, uom: string = "m"): string {
-  return `${inr2.format(value)}/${uom}`;
+/* ------------------------------------------------------------------ */
+/* Small helpers                                                       */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Signed delta for KPI chips: "+12.4%" or "-3.1%" written with a true minus sign (U+2212), not a hyphen. `value` is in
+ * percent, and at most `decimals` decimals are shown. The sign follows the value, so 0.04 with no decimals is "+0%", as before.
+ */
+export function formatDelta(value: number | null | undefined, decimals: 0 | 1 | 2 = 1, locale?: string): string {
+  if (!isPresent(value)) return NO_VALUE;
+  const sign = value > 0 ? "+" : value < 0 ? "\u2212" : "";
+  return `${sign}${write(locale, { maximumFractionDigits: decimals }, Math.abs(value))}%`;
 }
 
-/** 12.4% · −3.1% (true minus sign, like formatDelta; no sign when it rounds to zero) */
-export function formatPercent(value: number, decimals: 0 | 1 | 2 = 1): string {
-  const roundsToZero = Math.round(Math.abs(value) * 10 ** decimals) === 0;
-  const sign = value < 0 && !roundsToZero ? "−" : "";
-  return `${sign}${formatNumber(Math.abs(value), decimals)}%`;
-}
-
-/** Signed delta for KPI chips: +12.4% / −3.1% */
-export function formatDelta(value: number, decimals: 0 | 1 = 1): string {
-  const sign = value > 0 ? "+" : value < 0 ? "−" : "";
-  return `${sign}${formatNumber(Math.abs(value), decimals)}%`;
-}
-
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
-function parts(iso: string) {
-  const [y = NaN, m = NaN, d = NaN] = iso.slice(0, 10).split("-").map(Number);
-  return { y, m, d };
-}
-
-/** 15 Sep 2026 */
-export function formatDate(iso: string): string {
-  const { y, m, d } = parts(iso);
-  return `${d} ${MONTHS[m - 1]} ${y}`;
-}
-
-/** 15 Sep */
-export function formatDateShort(iso: string): string {
-  const { m, d } = parts(iso);
-  return `${d} ${MONTHS[m - 1]}`;
-}
-
-/** 15/09/2026 — for printed documents */
-export function formatDateNumeric(iso: string): string {
-  const { y, m, d } = parts(iso);
-  return `${String(d).padStart(2, "0")}/${String(m).padStart(2, "0")}/${y}`;
-}
-
-/** 15 Sep 2026, 10:42 — input is an ISO datetime */
-export function formatDateTime(isoDateTime: string): string {
-  const time = isoDateTime.slice(11, 16);
-  return time ? `${formatDate(isoDateTime)}, ${time}` : formatDate(isoDateTime);
-}
-
-function toUTC(iso: string): number {
-  const { y, m, d } = parts(iso);
-  return Date.UTC(y, m - 1, d);
-}
-
-/** Whole days from `from` to `to` (positive when `to` is later). */
-export function daysBetween(from: string, to: string = TODAY): number {
-  return Math.round((toUTC(to) - toUTC(from)) / 86_400_000);
-}
-
-/** "in 3 days", "today", "5 days ago", relative to TODAY */
-export function formatRelativeDays(iso: string): string {
-  const diff = daysBetween(TODAY, iso);
-  if (diff === 0) return "today";
-  if (diff === 1) return "tomorrow";
-  if (diff === -1) return "yesterday";
-  return diff > 0 ? `in ${diff} days` : `${-diff} days ago`;
-}
-
-/** "Overdue by 12 days" / "Due in 4 days" / "Due today" */
-export function formatDue(iso: string): string {
-  const diff = daysBetween(TODAY, iso);
-  if (diff === 0) return "Due today";
-  return diff > 0 ? `Due in ${diff} day${diff === 1 ? "" : "s"}` : `Overdue by ${-diff} day${diff === -1 ? "" : "s"}`;
-}
-
-/** "Ravi Shah" -> "RS" */
+/** "Ravi Shah" gives "RS". Takes the first letter of the first two words; works on whole characters, not UTF-16 halves. */
 export function initials(name: string): string {
   return name
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
-    .map((w) => w[0]!.toUpperCase())
+    .map((word) => (Array.from(word)[0] ?? "").toUpperCase())
     .join("");
-}
-
-/** 58″ · 58.5″ (U+2033 double prime; up to 1 decimal) */
-export function formatWidth(inches: number): string {
-  return `${formatNumber(inches, 1)}″`;
-}
-
-function trimZeros(s: string): string {
-  return s.includes(".") ? s.replace(/\.?0+$/, "") : s;
-}
-
-/* ------------------------------------------------------------------ */
-/* Multi-currency (Cachet: EUR · USD · TRY · AED · GBP)                */
-/* ------------------------------------------------------------------ */
-
-export type CurrencyCode = "EUR" | "USD" | "TRY" | "AED" | "GBP";
-
-const moneyFormatters = new Map<string, Intl.NumberFormat>();
-
-function moneyFormatter(currency: CurrencyCode, decimals: number): Intl.NumberFormat {
-  const key = `${currency}:${decimals}`;
-  let f = moneyFormatters.get(key);
-  if (!f) {
-    f = new Intl.NumberFormat("en-GB", {
-      style: "currency",
-      currency,
-      currencyDisplay: currency === "AED" ? "code" : "narrowSymbol",
-      minimumFractionDigits: decimals,
-      maximumFractionDigits: decimals,
-    });
-    moneyFormatters.set(key, f);
-  }
-  return f;
-}
-
-/** €12,480.50 · $7,980.00 · ₺1,245,000 · AED 45,200.00 (decimals default 2) */
-export function formatMoney(value: number, currency: CurrencyCode, opts: { decimals?: 0 | 2 } = {}): string {
-  return moneyFormatter(currency, opts.decimals ?? 2).format(value);
-}
-
-/** €1.24M · $86.4K · ₺3.2M */
-export function formatMoneyCompact(value: number, currency: CurrencyCode): string {
-  const abs = Math.abs(value);
-  const sign = value < 0 ? "−" : "";
-  const symbol = moneyFormatter(currency, 0).formatToParts(0).find((p) => p.type === "currency")?.value ?? currency;
-  const pre = currency === "AED" ? `${symbol} ` : symbol;
-  if (abs >= 1e6) return `${sign}${pre}${trimZeros((abs / 1e6).toFixed(2))}M`;
-  if (abs >= 1e3) return `${sign}${pre}${trimZeros((abs / 1e3).toFixed(1))}K`;
-  return `${sign}${pre}${formatNumber(abs, 0)}`;
-}
-
-/** 25.08.2025 — the dotted date format used on Cachet documents */
-export function formatDateDotted(iso: string): string {
-  const { y, m, d } = parts(iso);
-  return `${String(d).padStart(2, "0")}.${String(m).padStart(2, "0")}.${y}`;
-}
-
-/** 2,400 pcs · 1,250.5 MT */
-export function formatUnits(value: number, unit: string = "PCS"): string {
-  return `${formatNumber(value, Number.isInteger(value) ? 0 : 1)} ${unit.toLowerCase() === "pcs" ? "pcs" : unit}`;
 }

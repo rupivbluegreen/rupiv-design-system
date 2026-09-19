@@ -1,96 +1,44 @@
 import type { Tone } from "./types";
 
 /**
- * Single source of truth for how every document/record status is colored.
- * Rule: tone encodes what the user must do, not the module.
- *  - neutral: nothing to do yet / archived
+ * Generic helpers for turning an application's own statuses into tones. The design system knows no status names:
+ * an application keeps its map (its statuses, its words) and gives it to `createToneResolver`, then passes the result to
+ * `<StatusPill tone>`, `<Badge tone>` and the like.
+ *
+ * Rule for choosing a tone: it says what the person must do, not which module the record came from.
+ *  - neutral: nothing to do yet, or archived
  *  - info:    moving, in someone else's hands
  *  - accent:  confirmed, committed
  *  - warning: needs attention soon
  *  - success: done, good
  *  - danger:  blocked, failed, overdue
  */
-const STATUS_TONES: Record<string, Tone> = {
-  // generic
-  Draft: "neutral",
-  Planned: "neutral",
-  Cancelled: "neutral",
-  Closed: "neutral",
-  Expired: "neutral",
-  Consumed: "neutral",
 
-  // sales / purchase
-  Sent: "info",
-  Negotiation: "warning",
-  Won: "success",
-  Lost: "danger",
-  Confirmed: "accent",
-  "Partially dispatched": "warning",
-  Dispatched: "info",
-  Invoiced: "success",
-  "Partially received": "warning",
-  Received: "success",
-
-  // inventory
-  Available: "success",
-  Reserved: "accent",
-  "QC hold": "warning",
-  Blocked: "danger",
-  "In stock": "success",
-  Packed: "accent",
-  "In transit": "info",
-
-  // goods receipt / quality
-  "Pending QC": "warning",
-  Accepted: "success",
-  "Partially accepted": "warning",
-  Rejected: "danger",
-  Pending: "warning",
-  Pass: "success",
-  Conditional: "warning",
-  Fail: "danger",
-
-  // job work
-  Issued: "info",
-  "In process": "info",
-
-  // dispatch
-  Delivered: "success",
-  Returned: "danger",
-
-  // finance
-  "Partially paid": "warning",
-  Paid: "success",
-  Overdue: "danger",
-  Cleared: "success",
-  Bounced: "danger",
-
-  // GST returns / e-invoice (IRN) / e-way bill
-  Filed: "success",
-  "Not due": "neutral",
-  Generated: "success",
-  "Not generated": "warning",
-
-  // priority
-  Normal: "neutral",
-  High: "warning",
-  Urgent: "danger",
+// A Record over Tone, so adding a tone to the type without adding it here does not compile.
+const TONE_KEYS: Readonly<Record<Tone, true>> = {
+  neutral: true,
+  accent: true,
+  success: true,
+  warning: true,
+  danger: true,
+  info: true,
 };
 
-export function statusTone(status: string): Tone {
-  return STATUS_TONES[status] ?? "neutral";
+/** Every tone. */
+export const TONES: readonly Tone[] = Object.keys(TONE_KEYS).filter(isTone);
+
+/** True when `value` is one of the tones (useful for a value read from settings or a data file). */
+export function isTone(value: unknown): value is Tone {
+  return typeof value === "string" && Object.hasOwn(TONE_KEYS, value);
 }
 
-/** Grade → tone for fabric grading chips */
-export function gradeTone(grade: string): Tone {
-  switch (grade) {
-    case "A":
-      return "success";
-    case "B":
-      return "info";
-    case "C":
-      return "warning";
-    default:
-      return "danger";
-  }
+/**
+ * A function from a status to its tone, built from the application's map. A status that is not in the map gets
+ * `fallback` (default "neutral"); names that exist on every object ("constructor", "toString") count as not in the map.
+ */
+export function createToneResolver(
+  map: Readonly<Record<string, Tone>>,
+  fallback: Tone = "neutral",
+): (status: string) => Tone {
+  return (status) => (Object.hasOwn(map, status) ? (map[status] ?? fallback) : fallback);
 }
