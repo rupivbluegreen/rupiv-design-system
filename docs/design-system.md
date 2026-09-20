@@ -302,8 +302,27 @@ take `className`. Props are shown in short form; the `.tsx` file has the full ty
 - `SegmentedControl` `{ options: { value; label; icon? }[]; value?; defaultValue?; onChange?; size?: "sm"|"md"; ariaLabel?; aria-label?; aria-labelledby? }`. A `radiogroup` of `radio` buttons. Name it, or put it in a `Field`.
 - `DateInput` `{ size?; invalid?; showHijri? } & InputHTMLAttributes` (without `type`). A native `<input type="date">`. The value is always Gregorian `YYYY-MM-DD`; the browser draws the picker. `showHijri` shows the Umm al-Qura date of the chosen day under the field (`dateInput.hijriCaption`), on a line that is always present so the layout does not move. A value outside `min` and `max` is marked invalid.
 - `QuantityInput` `{ value?: number; defaultValue?; onChange?: (n: number) => void; step? /* 1 */; min?; max?; uom?: string; size?; id?; name?; disabled?; invalid?; aria-* }`. A `spinbutton` with minus and plus buttons. Values are rounded to 3 decimals and clamped to `min` and `max`. It accepts Arabic-Indic and Persian digits, the Arabic decimal separator, and drops thousands separators when typed. Shows the number through the formatter.
-- `FileDrop` `{ accept?: string; hint?: string; multiple?; onFiles?: (files: File[]) => void; id? }`. Drag and drop or browse. `onFiles` receives the whole current list after an add or a remove. Files that do not match `accept` are dropped without a message (there is no reject callback yet). Sizes are shown through labels and the formatter.
+- `FileDrop` `{ accept?: string; maxSize?: number /* bytes */; hint?: string; multiple?; onFiles?: (files: File[]) => void; onReject?: (rejected: FileRejection[]) => void; id? }`. Drag and drop or browse. `onFiles` receives the whole current list after an add or a remove, and never a file that was rejected. A file is **rejected** when its type does not match `accept` (`reason: "type"`, same syntax as the native attribute: `.pdf`, `image/*`), or when its size is above `maxSize` (`reason: "size"`; 1 KB is 1024 bytes, and a file of exactly `maxSize` is taken). A file that fails both is reported as `"type"`. The check is the same for a drop and for the file picker (a person can switch the picker's own filter off), and the files of a batch that pass still go through. `FileRejection` is `{ file: File; reason: FileRejectReason }` and `FileRejectReason` is `"type" | "size"`, both exported.
+  - With `onReject`, the component calls it with the rejected files of that drop (in the order offered) and shows nothing: the application decides what to say. Without it, the component shows its own message under the drop area, one line per rejected file, in a `role="alert"` region, with a Dismiss button. The message is inserted again on every rejection (so the same file dropped twice is announced twice), goes away with the next drop that has no rejected file, or with Dismiss (which puts focus back on the file input), and is named in the input's `aria-describedby` while it shows. It is a sibling of the drop area, not inside its label, so it does not change the input's name.
+  - Labels: `fileDrop.rejectType` (`{name}`), `fileDrop.rejectSize` (`{name}`, `{max}`) and `fileDrop.dismiss`. `{max}` is `maxSize` written through the formatter as B, KB or MB with the labels `fileDrop.sizeBytes`, `fileDrop.sizeKb` and `fileDrop.sizeMb`, Western digits, at most one decimal and rounded down (a limit of 1.55 MB reads "1.5 MB", so "larger than 1.5 MB" is never untrue). English defaults ship; give Arabic in the provider's `labels`.
+  - **Behaviour change.** A file of the wrong type used to be dropped without any message; it is now rejected out loud (the message above, or `onReject`). Nothing else changes when neither `maxSize` nor `onReject` is given: no size limit, and the list and `onFiles` behave as before.
+  ```
+  <FileDrop accept=".csv" maxSize={20 * 1024 * 1024} hint="CSV, up to 20 MB" onFiles={setFiles} />            // its own message
+  <FileDrop accept=".csv,text/csv" maxSize={10 * 1024 * 1024} onReject={(rejected) => report(rejected)} />   // your message
+  ```
 - `FormSection` `{ title: string; description?; actions? }`: a label column (one third) and a content column (two thirds); stacks below 768px. `FormGrid` `{ columns?: 1..4 /* 2 */ }`: a grid of `Field`s; 3 or 4 columns become 2 below 1024px and 1 below 640px; a direct child with `data-span="full"` spans all columns.
+- `FormFooter` `{ status?: ReactNode; dirty?: boolean /* false */; label?: string; className? }` with the actions as children. A sticky action bar for a form: `position: sticky` at the block end of its scroll container (`inset-block-end: 0`, `z-index: var(--z-sticky)`), a bordered, rounded row on `--bg-surface` that wraps on a narrow screen. The status is at the inline start and the children (the actions) at the inline end; write them in reading order, the primary action last, and it is at the inline end in both directions (the markup is not reversed for Arabic). It is a `<div role="group">` named by `label`, or by the label `formFooter.label` ("Form actions"): a `<footer>` inside a form has no role, so a group is what a screen reader can name.
+  - `dirty` shows "Unsaved changes" (`formFooter.unsaved`, a small info icon and muted text: the kit's "reason" line) at the start. A status region (`role="status"`, `aria-live="polite"`, `aria-atomic`) is always in the page; while the form is clean it holds "No unsaved changes" (`formFooter.clean`) for screen readers only, so when `dirty` flips either way the text in that region changes and is announced. `status` is shown next to it (both show when both are given) and is not live: wrap it in `role="status"` yourself if it should be announced.
+  - Put it as the last child of the form, or of the scroll container the person scrolls. It does not stick inside an ancestor that clips its overflow (`overflow: hidden`).
+  ```
+  <form onSubmit={save}>
+    <FormSection title="Session">...</FormSection>
+    <FormFooter dirty={dirty} status={dirty ? undefined : "No changes to save"}>
+      <Button onClick={discard} disabled={!dirty}>Discard</Button>
+      <Button variant="primary" type="submit" disabled={!dirty}>Save</Button>
+    </FormFooter>
+  </form>
+  ```
 
 ### Navigation
 
@@ -498,7 +517,8 @@ aside (about one third): a summary Card, related Cards, activity Timeline (at mo
 <PageHeader title actions={cancel, save} />
 <FormSection title description> <FormGrid columns={2}> <Field><Input/></Field> ... </FormGrid> </FormSection>
 ```
-There is no sticky form footer component yet; put the actions in the page header.
+Put the actions in the page header, or in a sticky `FormFooter` at the end of a long form (not in both): the footer
+also shows "Unsaved changes" and is the place for Discard and Save.
 
 The content limits (at most 4 summary figures, 7 table columns, 2 visible header actions, no explanatory text) are in
 [`minimal.md`](minimal.md).
