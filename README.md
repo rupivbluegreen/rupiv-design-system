@@ -120,7 +120,7 @@ Import from the package, never by a file path inside it.
 |---|---|
 | `pnpm typecheck` | `tsc -p tsconfig.json --noEmit`, with strict flags including `noUncheckedIndexedAccess` and `exactOptionalPropertyTypes` |
 | `pnpm lint:css` | Stylelint over `src/**/*.css`: no raw colours, no pixel font sizes, no ad-hoc shadows, no physical direction |
-| `pnpm test` | `vitest run`: component tests rendered in English and Arabic (labels, keys, focus), plus tests of the provider, formatter, tokens and Stylelint config |
+| `pnpm test` | `vitest run`: component tests rendered in English and Arabic (labels, keys, focus), plus tests of the provider, formatter, tokens and Stylelint config, and a run of Stylelint over `src/**/*.css` (`test/lint-css.test.ts`), so physical CSS or a raw colour fails the tests too |
 | `pnpm check:exports` | checks that every target in `package.json` `exports` is a file that exists |
 
 Node 22.13 or newer, pnpm 10.12.1.
@@ -139,6 +139,30 @@ Node 22.13 or newer, pnpm 10.12.1.
 | `scripts/check-exports.mjs` | the `exports` check |
 | `docs/` | see below |
 | `legacy/ui-next/` | the previous main project of this repository, kept for its history. Not part of the package, not tested, not a workspace member. It holds `package.json` files named `@omniappsuiux/*`, so a search for those names across a checkout of this repository finds them: keep such searches out of the folder that holds this repository |
+
+## Browser support
+
+The CSS uses features that set a floor. Nothing here has a build step that lowers them.
+
+| Feature | Used for | Chrome / Edge | Safari | Firefox |
+|---|---|---|---|---|
+| `:dir()` pseudo-class | mirrored arrows and chevrons in right-to-left | 120 | 16.4 | 49 |
+| `:has()` | padding that depends on a child (`Card`, `Badge`, `Input`, `Select`) | 105 | 15.4 | 121 |
+| `translate` property | direction-aware slides and the switch knob | 104 | 14.1 | 72 |
+| `vi`, `vb`, `dvb` units | logical viewport sizes | 108 | 15.4 | 101 |
+| `color-mix()` | heat colours, tag and alert backgrounds | 111 | 16.2 | 113 |
+| `outline` following `border-radius` | focus outlines on rounded controls | 94 | 16.4 | 88 |
+| `Intl.ListFormat` | chart and avatar summaries for screen readers | 72 | 14.1 | 78 |
+
+The practical floor is **Chrome and Edge 120, Safari 16.4, Firefox 121**. Without `:dir()` an arrow is not mirrored in
+Arabic; without `:has()` some paddings are missing; without `color-mix()` the heat grid cells and tag backgrounds have no
+fill. Hijri dates are Umm al-Qura through the browser's ICU data (`Intl.DateTimeFormat`, `islamic-umalqura`), so they
+need a browser whose `Intl` ships that calendar; the formatter's tests run against Node's ICU only.
+
+**What was tested.** The unit tests run in jsdom (Node), which has no layout. The components were rendered in a real
+browser in Chromium only, by the application that adopts the package (its Playwright suite) and by an independent
+review. Nothing was run in Firefox or Safari, and no automated accessibility audit (axe) exists in this repository. The
+versions in the table are from published compatibility tables, not from a run here.
 
 ## Docs
 

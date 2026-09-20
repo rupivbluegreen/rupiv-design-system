@@ -174,14 +174,17 @@ Rules, in both languages:
   the Arabic percent sign never appear. The percent sign is ASCII `%`.
 - **A missing value is `-`** (`NO_VALUE`): `null`, `undefined`, `NaN`, `Infinity` and an invalid date give it, never
   `"NaN"`, `"Invalid Date"` or a thrown error.
-- **Time zone is always `Asia/Riyadh`** (UTC+3, no daylight saving time), whatever the zone of the browser or the
-  server. There is no option to change it. Nothing reads the current time.
+- **Time zone is `Asia/Riyadh` by default** (UTC+3, no daylight saving time), whatever the zone of the browser or the
+  server. `date`, `dateBoth`, `time` and their `useFormat()` versions take an optional `timeZone` (an IANA name such as
+  `"Europe/London"`) for an application that shows another zone; an unknown name gives `-`, not an error. The `format*`
+  helpers below keep Riyadh. Nothing reads the current time.
 - **Hijri is Umm al-Qura** (`islamic-umalqura` through `Intl`). The Hijri day changes at midnight in Riyadh.
 - Arabic dates carry no Unicode direction marks. A negative number uses a hyphen-minus; wrap a number that must stay
   left to right in `<bdi>` where it sits in right-to-left text. A value that rounds to zero has no sign (`0`, never `-0`).
-- **Input** to date functions is a `Date` or an ISO 8601 string. `"2026-09-06"` is a calendar day (read as noon in
-  Riyadh, so no zone moves it to another day). A date and time with no offset (`"2026-09-06T12:00"`) is Riyadh time.
-  Any other text, and impossible dates such as 30 February, are missing.
+- **Input** to date functions is a `Date` or an ISO 8601 string. `"2026-09-06"` is a calendar day (read as noon in the
+  zone in use, so it is the same day when written back in that zone). A date and time with no offset
+  (`"2026-09-06T12:00"`) is a wall-clock time in that zone: Riyadh unless `timeZone` says otherwise. A string with an
+  offset, and a `Date`, name one instant. Any other text, and impossible dates such as 30 February, are missing.
 - **Language** is a tag: `"ar"`, `"ar-SA"` and `"AR_sa"` are Arabic, everything else is English.
 
 | Function | Result |
@@ -192,20 +195,21 @@ Rules, in both languages:
 | `formatPercent(ratio, locale?, digits = 0)` | a ratio: `formatPercent(0.91)` is `"91%"` |
 | `formatNumber(value, locale?, options?)` | `Intl.NumberFormat` options; at most 3 decimals by default |
 | `formatDelta(value, decimals = 1, locale?)` | `"+12.4%"` or `"−3.1%"`, with a true minus sign (U+2212) |
-| `time(value)` | a number is minutes since midnight (`time(755)` is `"12:35"`, `time(1500)` is `"01:00"`); a date or ISO string is its Riyadh clock time (`time("2026-09-06T09:00:00Z")` is `"12:00"`). 24 hour, both languages |
-| `date(value, { locale, calendar, month })` | `date("2026-09-06")` is `"6 Sept 2026"`; Arabic `"6 سبتمبر 2026"`; `calendar: "hijri"` gives `"24 Rab. I 1448 AH"` and `"24 ربيع الأول 1448 هـ"`; `month: "long"` for the long month name |
-| `dateBoth(value, { locale, month })` | Gregorian, then Hijri: `"6 Sept 2026 · 24 Rab. I 1448 AH"` |
-| `duration(seconds, mode = "min", minuteLabel = "min")` | `"6 min"` (mode `"min"`, rounded to whole minutes) or `"2:24"` (mode `"clock"`, minutes can pass 59) |
+| `time(value, { timeZone }?)` | a number is minutes since midnight (`time(755)` is `"12:35"`, `time(1500)` is `"01:00"`); a date or ISO string is its clock time in `timeZone`, Riyadh by default (`time("2026-09-06T09:00:00Z")` is `"12:00"`; with `{ timeZone: "Europe/London" }` it is `"10:00"`). 24 hour, both languages |
+| `date(value, { locale, calendar, month, timeZone })` | `date("2026-09-06")` is `"6 Sept 2026"`; Arabic `"6 سبتمبر 2026"`; `calendar: "hijri"` gives `"24 Rab. I 1448 AH"` and `"24 ربيع الأول 1448 هـ"`; `month: "long"` for the long month name. The day is the day in `timeZone` (default Riyadh): `date("2026-09-06T21:30:00Z")` is `"7 Sept 2026"`, and with `{ timeZone: "Europe/London" }` it is `"6 Sept 2026"` |
+| `dateBoth(value, { locale, month, timeZone })` | Gregorian, then Hijri: `"6 Sept 2026 · 24 Rab. I 1448 AH"` |
+| `duration(seconds, mode = "min", minuteLabel = "min")` | `"6 min"` (mode `"min"`, rounded to whole minutes) or `"2:24"` (mode `"clock"`, minutes can pass 59). **The default unit is the English `"min"`:** the plain function knows no language, so on an Arabic page pass the label (`"د"`), or use `useFormat().duration`, which reads it from the provider |
 | `initials(name)` | `"Jane Doe"` gives `"JD"` (first letter of the first two words) |
 
 Also exported for code that started on the earlier temporary helper: `formatDate(value, locale?, style?)`,
 `formatTime(value)`, `formatDateTime` and `formatHijriDate` (`formatDate`, `formatDateTime` and `formatHijriDate` take
-an `Intl` style `"short" | "medium" | "long"`, default `"medium"`), `formatMinutesSeconds(seconds)` (`"2:24"`; a negative length is `"0:00"`), `toInstant(value)`,
+an `Intl` style `"short" | "medium" | "long"`, default `"medium"`, always in Riyadh time), `formatMinutesSeconds(seconds)` (`"2:24"`; a negative length is `"0:00"`), `toInstant(value, timeZone?)`,
 `TIME_ZONE`, `NO_VALUE`, `stripBidiMarks(text)` and `resolveFormatLocale(tag)`.
 
 `useFormat()` returns `{ locale, num, int, pct, ratio, formatNumber, delta, time, date, dateBoth, duration }`. Its
-`duration` takes the minute unit from the label `duration.minuteShort` (in Arabic, `د`). The object is stable while the
-language and that label do not change, so it is safe in a dependency array.
+`date`, `dateBoth` and `time` take the same `timeZone` option as the plain functions. Its `duration` takes the minute
+unit from the label `duration.minuteShort` (in Arabic, `د`), so it is the one to use in a component. The object is
+stable while the language and that label do not change, so it is safe in a dependency array.
 
 Text comparison (sorting) is separate: `DataTable` sorts with an `Intl.Collator` for the provider's language, numeric
 aware (`"item 2"` before `"item 10"`), case and accent insensitive.
@@ -216,9 +220,14 @@ The components are written once and work in both directions. What that means in 
 
 - **Logical CSS only.** `inline-size`, `margin-inline-start`, `padding-inline`, `inset-inline-end`, `text-align: start`,
   `border-start-start-radius`. Never `left`, `right`, `margin-left`, `float: left`. Stylelint
-  (`stylelint-plugin-logical-css`, plus rules for four-value `margin`, `padding` and `inset` shorthands and for
-  `translateX`) fails the build on a physical property. A horizontal slide that cannot be logical uses the direction
-  sign: `translate: calc(16px * var(--rd-dir)) 0`.
+  (`stylelint-plugin-logical-css`, plus the value rules in `stylelint.config.mjs`) fails `pnpm lint:css` and `pnpm test`
+  on a physical property or value: four-value `margin`, `padding`, `inset`, `scroll-margin`, `scroll-padding`,
+  `border-width`, `border-style` and `border-color`; a `border-radius` that differs left to right; a literal horizontal
+  offset in `translate`, `translate()`, `translateX()` and `translate3d()`; `left` and `right` in `background-position`,
+  `object-position`, `transform-origin`, gradients and the vendor forms of `text-align`. A horizontal slide that cannot
+  be logical uses the direction sign: `translate: calc(16px * var(--rd-dir)) 0`, and a centring `-50%` is
+  `calc(-50% * var(--rd-dir))`. The rules cannot see an SVG `x` attribute, `clip-path: inset()`, `matrix()` or a value
+  built inside a custom property.
 - **Direction comes from `<html dir>`**, set by the server. Layout follows it through CSS.
 - **Floating layers are placed from the anchor's computed direction.** `Menu`, `Popover`, `Tooltip` and `Combobox`
   read `getComputedStyle(anchor).direction` when they open, so `"start"` and `"end"` mean the inline edges of the
@@ -317,7 +326,7 @@ take `className`. Props are shown in short form; the `.tsx` file has the full ty
 - `Progress` `{ value; max? /* 100 */; tone? /* accent */; size?: "sm"|"md"; label?; showValue?; valueLabel? }`. `role="progressbar"`. `SegmentBar` `{ segments: { value; tone?; color?; label }[]; height? /* 8, px */; showLegend? }`: parts of a whole, the first segment at the inline start.
 - `Timeline` `{ items: { id?; title; time?: string; description?; tone?; icon?; actor? }[]; dense? }`. An ordered list.
 - `Stepper` `{ steps: { label; description? }[]; current: number /* index */; orientation?: "horizontal"|"vertical" }`. A list that shows where the person is; it is not a control. Steps before `current` are completed (the check mark and a hidden `stepper.completed`).
-- `EmptyState` `{ icon?; title: string; description?; action?; compact?; tone?: "default"|"danger"|"warning" }`. `default` is an inbox icon. `danger` and `warning` show a warning triangle in the tone colour, and `danger` has `role="alert"`: use it for an error state.
+- `EmptyState` `{ icon?; title: string; headingLevel?: 1|2|3|4|5|6; description?; action?; compact?; tone?: "default"|"danger"|"warning" }`. `default` is an inbox icon. `danger` and `warning` show a warning triangle in the tone colour, and `danger` has `role="alert"`: use it for an error state. The title is a paragraph unless `headingLevel` is set, so an empty state inside a page adds no heading; set `headingLevel={1}` when the state is the whole page (a no-access or not-found page has no other heading).
 - `Skeleton` `{ width?; height? /* 12 */; radius?: "sm"|"md"|"lg"|"full"; announce? }`, `SkeletonText` `{ lines? /* 3 */; announce? }`. The shape is hidden from assistive technology. Set `announce` on one skeleton per loading area (it adds the text `skeleton.loading` for screen readers) and put `aria-busy="true"` on the area.
 - `Kbd` `{ children }`. A key hint.
 - `Section` `{ title; description?; actions? }`. An in-page heading block (`<h2>`).
@@ -390,7 +399,7 @@ Overlays are rendered into `<body>` and appear after mount.
 
 - `Alert` `{ tone?: Tone /* info */; title?; children?; icon?; action?; onDismiss? }`. `danger` and `warning` are `role="alert"`, the other tones `role="status"`. `onDismiss` adds a close button (`alert.dismiss`).
 - `ToastProvider` and `useToast()`. Mount `ToastProvider` once, inside `DesignSystemProvider`. `const toast = useToast(); toast({ title, description?, tone?, action?, duration? })` returns the toast id; `const { toast, dismiss } = useToast()` also works. `duration` is in ms (default 4500; 0 or less never closes). At most 5 toasts show. A toast pauses while it is hovered or focused; `danger` toasts are `role="alert"`, the others `role="status"`. The region lifts above the footer of an open modal or drawer. Outside a provider, `toast()` logs a warning and does nothing.
-- `Modal` `{ open; onClose; title; description?; size?: "sm"|"md"|"lg"|"xl" /* md */; footer? }` and `Drawer` `{ open; onClose; title; subtitle?; width?: number /* --drawer-w, 480 */; side?: "start"|"end" /* end */; footer? }`. `role="dialog"` with `aria-modal`, named by the title. Focus moves in on open (to `[data-autofocus]`, else the first control, else the panel), Tab is trapped, Escape and a press on the scrim close, focus returns to what had it, and the page does not scroll behind. `side="start"` slides in from the inline start (the right in Arabic), for a navigation drawer.
+- `Modal` `{ open; onClose; title; description?; size?: "sm"|"md"|"lg"|"xl" /* md */; footer? }` and `Drawer` `{ open; onClose; title; subtitle?; width?: number /* --drawer-w, 480 */; side?: "start"|"end" /* end */; initialFocus?: "content"|"close" /* content */; footer? }`. `role="dialog"` with `aria-modal`, named by the title. Focus moves in on open (to `[data-autofocus]`, else the first control that is not the close button, else the panel; with `initialFocus="close"`, to the close button, the first control in the document, so the rest follow it in order), Tab is trapped, Escape and a press on the scrim close, focus returns to what had it, and the page does not scroll behind. `side="start"` slides in from the inline start (the right in Arabic), for a navigation drawer.
 - `Menu` `{ trigger: ReactElement; items: MenuEntry[]; align?: "start"|"end" /* start */; label? }`. Entries: an item `{ label; icon?; onSelect?; href?; danger?; shortcut?; disabled? }`, `"separator"`, a heading `{ type: "heading"; label }`, or a radio group `{ type: "radio-group"; options: { value; label; icon?; disabled? }[]; value; onValueChange; heading?; label? }`. Radio options are `menuitemradio` with a check on the chosen one, inside a named `group`; choosing one closes the menu and calls `onValueChange` when the value changed. An item with `href` is a link through the provider. Items are reached with the arrow keys, not Tab; disabled items are skipped by the arrow keys and carry `aria-disabled`.
 - `Popover` `{ trigger: ReactElement; children; align?: "start"|"end"; width?: number; label?; open?; onOpenChange? }`. `role="dialog"`, opens under the trigger, closes on Escape (focus returns to the trigger) and on a press outside. Controlled with `open`, otherwise it keeps its own state.
 - `Tooltip` `{ content; children: ReactElement; side?: "top"|"bottom"|"start"|"end" /* top */ }`. Shows on hover and keyboard focus after 300ms, hides on Escape, scroll and resize, and is linked to the trigger with `aria-describedby`. **An `aria-disabled="true"` control keeps its focus and its tooltip and never acts:** a tap or click on it shows the tooltip at once (a touch screen has no hover) for about 2.6 seconds and stops the click. That is how a screen says why an action is unavailable. A native `disabled` control gets no pointer events at all, so use `aria-disabled` for a control that explains itself. Empty `content` renders the child alone.
@@ -513,8 +522,15 @@ The content limits (at most 4 summary figures, 7 table columns, 2 visible header
 - **Contract tests** read the sources: every class a component asks of its CSS Module exists in the CSS (a CSS Module
   under Vitest answers to any name), there is no physical direction, no undefined token, no English literal in an
   aria attribute, and every label key a component asks for exists in the label set. `test/stylelint-config.test.ts`
-  proves the Stylelint config rejects raw colours, pixel font sizes, ad-hoc shadows and physical direction, and accepts
-  tokens and logical properties.
+  proves the Stylelint config rejects raw colours (in any case), pixel and point font sizes, ad-hoc shadows and physical
+  direction (properties, four-value shorthands, translations, positions, origins), and accepts tokens and logical
+  properties. `test/lint-css.test.ts` runs Stylelint over `src/**/*.css` inside `pnpm test`, so physical CSS or a raw
+  colour fails the test run and not only `pnpm lint:css`.
+- **CSS text tests** read the style sheets and never render them: `test/focus-css.test.ts` (no `:focus-visible` rule
+  removes the outline without another indicator, and the controls that show only the soft ring are listed) and
+  `test/print-css.test.ts` (the rail, top bar, skip link and an open drawer are hidden when printing). They cannot show
+  that an indicator is visible enough (3:1 needs computed colours), that an ancestor does not clip it, or what a printed
+  page looks like.
 - **What jsdom cannot prove.** It has no layout and no style sheets, so no test shows that a right-to-left screen looks
   right: that the rail and drawer sit on the correct edge, that a menu lines up with its trigger, that nothing overflows on a phone. That evidence
   is screenshots in the consuming application, next to the mockups. Say so wherever a test is described.
@@ -534,8 +550,11 @@ The content limits (at most 4 summary figures, 7 table columns, 2 visible header
   file in `src/provider/label-sets/` and read it with `useLabels()`. Numbers and dates go through `useFormat()`.
 - **Props under `exactOptionalPropertyTypes`:** a prop the caller may pass as `undefined` is typed `?: T | undefined`
   (`className?: string | undefined`).
-- Focus: `:focus-visible { box-shadow: var(--focus-ring); outline: none; }` on interactive elements. Hit target at
-  least `--control-sm` (28px); the default control height is `--control-md` (34px).
+- Focus: `base.css` gives every `:focus-visible` element a 2px solid `--border-focus` outline (5:1 on white). A
+  component that replaces it must keep a visible indicator: a solid outline, or a focus border plus `--focus-ring`. The
+  soft ring alone (`outline: none; box-shadow: var(--focus-ring)`) is about 1.5:1 against white, below the 3:1 WCAG asks
+  for; `test/focus-css.test.ts` lists the controls that still do this. Hit target at least `--control-sm` (28px); the
+  default control height is `--control-md` (34px).
 - Disabled uses `--text-disabled`, `--bg-subtle` and `cursor: not-allowed`, not opacity alone.
 - Overlays: portal to `document.body`, close on Escape and outside press, trap focus in Modal and Drawer, restore focus on
   close, animate with opacity and a small translate over `--dur-base` (through `--rd-dir` for a horizontal one). Place floating layers with

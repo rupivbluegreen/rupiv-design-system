@@ -59,8 +59,10 @@ toward the fly-out (right in English, left in Arabic) does the same. Up, Down, H
 rail, closes it and returns the focus to its rail button. Tab out of the group closes it.
 
 **Drawer.** Below 1024px the rail is hidden and the menu button opens `NavDrawer` (a `Drawer` with `side="start"`:
-focus trap, Escape, scrim press, focus returns to the menu button). Each group is a section that opens and closes;
-the group with the active item starts open, else the first. Growing the window past 1024px closes it.
+focus trap, Escape, scrim press, focus returns to the menu button). Focus starts on the close button, the first
+control in the panel, so Tab then walks the groups in order (with focus on the first group instead, the close button
+would be the last of about a dozen stops). Each group is a section that opens and closes; the group with the active
+item starts open, else the first. Growing the window past 1024px closes it.
 
 **Skip link.** First in the tab order; moves the focus to `<main>`.
 
@@ -90,8 +92,16 @@ and Persian digits become 0 to 9. Not done: stemming, hamza on waw and yeh, tran
 ## NotificationsBell
 
 `<NotificationsBell unreadCount={n} href="/notifications" />` (a link through the provider) or `onClick` (a button).
-Put it in `end`. The badge is hidden from screen readers and always in Western digits ("99+" above 99); the accessible
-name carries the exact count (`railShell.notificationsUnread`). Zero shows no badge.
+With neither it is not interactive: a plain element (`role="img"`) with the same name and count, no hover state, and
+Tab skips it, so a person never lands on a control that does nothing. Put it in `end`. The badge is hidden from screen
+readers and always in Western digits ("99+" above 99); the accessible name carries the exact count
+(`railShell.notificationsUnread`). Zero shows no badge.
+
+## Print
+
+The rail, the top bar and the skip link are hidden when printing, and the page uses the whole sheet. An open
+navigation drawer and its scrim are hidden too. These are `@media print` rules in `rail-shell.module.css` and
+`drawer.module.css`, checked as CSS text in `test/print-css.test.ts`; nobody has looked at a printed page.
 
 ## Client boundary
 
