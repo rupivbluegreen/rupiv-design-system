@@ -48,6 +48,11 @@ export interface DataTableProps<T> {
   columns: Column<T>[];
   rows: T[];
   getRowId: (row: T) => string;
+  /**
+   * The name a screen reader hears for a row's checkbox ("Select row {name}"). Default: the row id. Give a person's name,
+   * because an id is often a UUID, which is meaningless read aloud (and English in an Arabic page).
+   */
+  rowLabel?: ((row: T) => string) | undefined;
   /** Whole row navigates. Clicks on links, buttons, inputs and menus inside the row don't. */
   rowHref?: ((row: T) => string) | undefined;
   selectable?: boolean | undefined;
@@ -146,6 +151,7 @@ export function DataTable<T>({
   columns,
   rows,
   getRowId,
+  rowLabel,
   rowHref,
   selectable = false,
   bulkActions,
@@ -451,7 +457,7 @@ export function DataTable<T>({
                         data-row-click="ignore"
                       >
                         <Checkbox
-                          aria-label={label("dataTable.selectRow", { id })}
+                          aria-label={label("dataTable.selectRow", { id: rowLabel ? rowLabel(row) : id })}
                           checked={isSelected}
                           onChange={() => toggleRow(id)}
                         />

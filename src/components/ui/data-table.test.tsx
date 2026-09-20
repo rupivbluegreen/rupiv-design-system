@@ -309,6 +309,15 @@ describe("DataTable selection and bulk actions", () => {
     expect((view.getByRole("checkbox", { name: "Select row a1" }) as HTMLInputElement).checked).toBe(false);
   });
 
+  it.each(LOCALE_CASES)("names each row's checkbox with rowLabel instead of the row id ($locale)", ({ locale }) => {
+    const view = renderIn(
+      locale,
+      <DataTable columns={columns} rows={rows} getRowId={(row) => `id-${row.id}`} rowLabel={(row) => `Person ${row.id}`} selectable />,
+    );
+    expect(view.getByRole("checkbox", { name: "Select row Person a1" })).toBeTruthy();
+    expect(view.queryByRole("checkbox", { name: "Select row id-a1" })).toBeNull();
+  });
+
   it("clears through the callback given to bulkActions", async () => {
     const user = userEvent.setup();
     const view = renderIn(

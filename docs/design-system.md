@@ -373,6 +373,7 @@ interface DataTableProps<T> {
   columns: Column<T>[];
   rows: T[];
   getRowId: (row: T) => string;
+  rowLabel?: (row: T) => string;   // the name a screen reader hears for the row checkbox ("Select row {name}"); default: the row id
   rowHref?: (row: T) => string;              // whole row navigates, through the provider's navigate
   selectable?: boolean;
   bulkActions?: (selectedIds: string[], clear: () => void) => ReactNode;
