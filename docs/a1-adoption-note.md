@@ -273,7 +273,7 @@ this repository rejects more CSS than before. Everything else there is additive 
 - **No reviewed Arabic.** The package ships English defaults; test label sets are stand-ins.
 - **Category colour names** (`madder`, `neem`, `turmeric`, `lac`, `kattha`) come from the source system and are kept
   unchanged. Renaming them is a separate change.
-- **A `LICENSE` file.** MIT is declared in `package.json`; the owner adds the file.
+- **Licence.** The repository is private (decided 20 Sep 2026): `package.json` says `UNLICENSED`; no `LICENSE` file is needed.
 - **No automated accessibility audit** (axe) in this repository, and no continuous integration or commit hook: the four
   commands under "Verify before merge" run only when someone runs them.
 - **Small edges left as they are:** `LinkComponentInput` accepts any component type, `--rd-dir` follows only
@@ -309,12 +309,12 @@ in Firefox or Safari, and no axe run exists. The rest is jsdom, which has no lay
 
 - **Push and merge.** The 16 commits and the review fixes exist only in this clone. The consuming application's pointer
   moves to a pushed and merged commit, so the owner pushes first.
-- **Decisions for the owner before the push** (the repository is public):
+- **Decisions for the owner before the push** (the repository was to be public; since 20 Sep 2026 it is private, so these are no longer blocking):
   - `legacy/ui-next/` (166 tracked files, about 1.2 MB) is the previous main project, kept for its history. It is not a
     workspace member and not part of the package. It carries the earlier project's package names, demo content and agent
     configuration, and one spec file names the consuming application. The same content is already in the public `main`
     (the earlier `main`), so the push adds no new disclosure; removing the folder changes the tip only, not the history.
-  - There is no `LICENSE` file although `package.json` and the README say MIT.
+  - Licence: private and `UNLICENSED`; no `LICENSE` file is needed.
 - **Re-run, more than once:** `pnpm install --frozen-lockfile`, `pnpm typecheck`, `pnpm lint:css`, `pnpm check:exports`,
   `pnpm test`. The `QuantityInput` fix in `b777ad9` removed a timing flake (3 failures in 6 runs); a test that fails once
   in a few runs is a finding, not noise.

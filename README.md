@@ -194,4 +194,6 @@ application that uses the package.
 
 ## Licence
 
-MIT is declared in `package.json`. There is no `LICENSE` file yet: the owner adds it, with the copyright holder.
+This repository is private and proprietary: `package.json` says `UNLICENSED`, and no `LICENSE` file is needed. It is pinned as
+a git submodule by the applications that use it. The source goes into an application's escrow deposit as a build input; a
+customer never needs access to it, because it is compiled into the application.

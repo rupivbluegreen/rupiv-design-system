@@ -2,7 +2,7 @@
   "name": "@rupiv/design-system",
   "version": "0.0.0",
   "description": "The rupiv-design system: semantic tokens, CSS Modules components and SVG charts for data-heavy web applications. Published as TypeScript source.",
-  "license": "MIT",
+  "license": "UNLICENSED",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.12.1",
