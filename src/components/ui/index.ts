@@ -22,6 +22,7 @@ export * from "./date-input";
 export * from "./quantity-input";
 export * from "./file-drop";
 export * from "./form-section";
+export * from "./form-footer";
 
 // navigation
 export * from "./tabs";
