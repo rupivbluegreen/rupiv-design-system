@@ -16,6 +16,7 @@ import {
   type DateOptions,
   type DateValue,
   type DurationMode,
+  type TimeOptions,
 } from "./format";
 
 /** The formatters of `@rupiv/design-system/format` with the provider's language already applied. */
@@ -30,7 +31,9 @@ export interface Formatters {
   ratio: (value: number | null | undefined, digits?: number) => string;
   formatNumber: (value: number | null | undefined, options?: Intl.NumberFormatOptions) => string;
   delta: (value: number | null | undefined, decimals?: 0 | 1 | 2) => string;
-  time: (value: number | DateValue) => string;
+  /** The clock time in `options.timeZone` (default Asia/Riyadh); a number is minutes since midnight. */
+  time: (value: number | DateValue, options?: TimeOptions) => string;
+  /** `options.timeZone` (an IANA name, default Asia/Riyadh) sets the zone of the day. */
   date: (value: DateValue, options?: Omit<DateOptions, "locale">) => string;
   dateBoth: (value: DateValue, options?: Omit<DateOptions, "locale" | "calendar">) => string;
   /** The unit for "min" mode comes from the label "duration.minuteShort". */
@@ -54,7 +57,7 @@ export function useFormat(): Formatters {
       ratio: (value, digits) => formatPercent(value, locale, digits),
       formatNumber: (value, options) => formatNumber(value, locale, options),
       delta: (value, decimals) => formatDelta(value, decimals, locale),
-      time: (value) => time(value),
+      time: (value, options) => time(value, options),
       date: (value, options) => date(value, { ...options, locale }),
       dateBoth: (value, options) => dateBoth(value, { ...options, locale }),
       duration: (seconds, mode) => duration(seconds, mode, minuteLabel),

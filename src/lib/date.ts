@@ -1,14 +1,17 @@
 /**
  * Dates, times and durations. Every date on a screen goes through here.
  *
- * - Time zone: always Asia/Riyadh (UTC+3 all year, Saudi Arabia has no daylight saving time), whatever the
- *   time zone of the browser or the server. Nothing here reads "now" and nothing reads the machine's zone.
+ * - Time zone: Asia/Riyadh by default (UTC+3 all year, Saudi Arabia has no daylight saving time), whatever the
+ *   time zone of the browser or the server. `date`, `dateBoth` and `time` take an optional IANA `timeZone`
+ *   ("Europe/London") for an application that shows another zone. Nothing here reads "now" and nothing reads the
+ *   machine's zone. An unknown zone name gives `NO_VALUE`, not a thrown error.
  * - Digits: Western (0 to 9) in English and Arabic. Arabic dates carry no Unicode direction marks.
  * - Calendars: Gregorian, and Hijri as Umm al-Qura through `Intl` (`islamic-umalqura`). The Hijri day changes at
  *   midnight in Riyadh, as the Umm al-Qura table does; it does not follow the sunset.
- * - Input: a `Date`, or an ISO 8601 string. "2026-09-06" is a calendar day (read as noon in Riyadh, so no zone
- *   moves it to another day). A date and time without an offset ("2026-09-06T12:00") is Riyadh time. Any other
- *   text, and impossible dates such as 30 February, are treated as missing.
+ * - Input: a `Date`, or an ISO 8601 string. "2026-09-06" is a calendar day (read as noon in the zone in use, so it
+ *   stays that day when written back in that zone). A date and time without an offset ("2026-09-06T12:00") is a
+ *   wall-clock time in that zone: Riyadh by default. Any other text, and impossible dates such as 30 February, are
+ *   treated as missing.
  * - Missing input (null, undefined, invalid) gives `NO_VALUE`, never a thrown error or the text "Invalid Date".
  *
  * The functions named like the reference kit's `RD.fmt` (`time`, `date`, `dateBoth`, `duration`) take the language
@@ -18,10 +21,10 @@
  */
 import { NO_VALUE, resolveFormatLocale, stripBidiMarks, type FormatLocale } from "./locale";
 
-/** All times are Riyadh times. */
+/** The default time zone of every date and time function: Riyadh. */
 export const TIME_ZONE = "Asia/Riyadh";
 
-/** Riyadh is UTC+3 with no daylight saving time. Used only to read strings that carry no offset. */
+/** Riyadh is UTC+3 with no daylight saving time. Used to read strings that carry no offset when the zone is Riyadh. */
 const RIYADH_OFFSET = "+03:00";
 
 /** What the date functions accept. Anything that is not a real date gives `NO_VALUE`. */
@@ -40,6 +43,16 @@ export interface DateOptions {
   calendar?: CalendarKind | undefined;
   /** Length of the month name. Default "short". */
   month?: "short" | "long" | undefined;
+  /**
+   * IANA time zone the date is read and written in, for example "Europe/London". Default `TIME_ZONE` ("Asia/Riyadh").
+   * An unknown name gives `NO_VALUE`.
+   */
+  timeZone?: string | undefined;
+}
+
+export interface TimeOptions {
+  /** IANA time zone the clock time is written in. Default `TIME_ZONE` ("Asia/Riyadh"). Not used for a number of minutes. */
+  timeZone?: string | undefined;
 }
 
 /* ------------------------------------------------------------------ */
@@ -64,23 +77,106 @@ function normaliseOffset(offset: string | undefined): string {
   return offset.includes(":") ? offset : `${offset.slice(0, 3)}:${offset.slice(3)}`;
 }
 
-function parseIsoText(text: string): Date | null {
+/* ------------------------------------------------------------------ */
+/* Time zones                                                          */
+/* ------------------------------------------------------------------ */
+
+const zoneClocks = new Map<string, Intl.DateTimeFormat | null>();
+
+/** An `Intl` clock for the zone (numeric parts, 24 hour), or null when the zone name is not known. Cached. */
+function zoneClock(timeZone: string): Intl.DateTimeFormat | null {
+  let clock = zoneClocks.get(timeZone);
+  if (clock === undefined) {
+    try {
+      clock = new Intl.DateTimeFormat("en-US", {
+        timeZone,
+        hourCycle: "h23",
+        year: "numeric",
+        month: "numeric",
+        day: "numeric",
+        hour: "numeric",
+        minute: "numeric",
+        second: "numeric",
+      });
+    } catch {
+      clock = null;
+    }
+    zoneClocks.set(timeZone, clock);
+  }
+  return clock;
+}
+
+/** The zone to use: the default when none is given, `null` when the name is not a known zone. */
+function resolveTimeZone(timeZone: string | null | undefined): string | null {
+  const zone = timeZone ?? TIME_ZONE;
+  return zoneClock(zone) === null ? null : zone;
+}
+
+/** How far the zone's wall clock is ahead of UTC at an instant, in milliseconds. */
+function zoneOffsetMs(instantMs: number, clock: Intl.DateTimeFormat): number {
+  const whole = Math.floor(instantMs / 1000) * 1000;
+  const parts: Record<string, number> = {};
+  for (const part of clock.formatToParts(whole)) {
+    if (part.type !== "literal") parts[part.type] = Number(part.value);
+  }
+  const wall = Date.UTC(
+    parts["year"] ?? 1970,
+    (parts["month"] ?? 1) - 1,
+    parts["day"] ?? 1,
+    parts["hour"] ?? 0,
+    parts["minute"] ?? 0,
+    parts["second"] ?? 0,
+  );
+  return wall - whole;
+}
+
+/**
+ * The instant at which a zone's wall clock shows this date and time. Reads the zone's offset at the guessed instant
+ * and again at the corrected one, so a time near a daylight saving change lands on the right side of it (a time that
+ * does not exist, or exists twice, gets the offset in force after the first correction).
+ */
+function wallClockToInstant(wallMs: number, timeZone: string): Date | null {
+  const clock = zoneClock(timeZone);
+  if (clock === null) return null;
+  const first = zoneOffsetMs(wallMs, clock);
+  let instant = wallMs - first;
+  const second = zoneOffsetMs(instant, clock);
+  if (second !== first) instant = wallMs - second;
+  return new Date(instant);
+}
+
+/* ------------------------------------------------------------------ */
+/* Reading input, continued                                            */
+/* ------------------------------------------------------------------ */
+
+function parseIsoText(text: string, timeZone: string): Date | null {
   const match = ISO_PATTERN.exec(text.trim());
   if (match === null) return null;
   const [, year = "", month = "", day = "", hour, minute = "0", second = "0", fraction = "", offset] = match;
   if (!isCalendarDay(Number(year), Number(month), Number(day))) return null;
   const isoDay = `${year}-${month}-${day}`;
-  // A calendar day: noon in Riyadh, so it never lands on the neighbouring day in any zone.
-  if (hour === undefined) return new Date(`${isoDay}T12:00:00${RIYADH_OFFSET}`);
+  const inRiyadh = timeZone === TIME_ZONE;
+  const wall = (h: number, m: number, sec: number, ms: number) =>
+    wallClockToInstant(Date.UTC(Number(year), Number(month) - 1, Number(day), h, m, sec, ms), timeZone);
+  // A calendar day: noon in the zone in use, so writing it back in that zone gives the same day.
+  if (hour === undefined) return inRiyadh ? new Date(`${isoDay}T12:00:00${RIYADH_OFFSET}`) : wall(12, 0, 0, 0);
   if (Number(hour) > 23 || Number(minute) > 59 || Number(second) > 59) return null;
+  if (offset === undefined && !inRiyadh) {
+    // No offset: the wall-clock time of the zone in use. `fraction` is ".5" or ".123", read as milliseconds.
+    const ms = fraction === "" ? 0 : Math.round(Number(`0${fraction}`) * 1000);
+    return wall(Number(hour), Number(minute), Number(second), ms);
+  }
   const clock = `${hour}:${minute.padStart(2, "0")}:${second.padStart(2, "0")}${fraction}`;
   return new Date(`${isoDay}T${clock}${normaliseOffset(offset)}`);
 }
 
-/** The instant a value stands for, or null when it is missing or not a real date. */
-export function toInstant(value: DateValue): Date | null {
+/**
+ * The instant a value stands for, or null when it is missing or not a real date. `timeZone` (default Riyadh) is the
+ * zone in which a string without an offset is read; a string with an offset, and a `Date`, name one instant already.
+ */
+export function toInstant(value: DateValue, timeZone: string = TIME_ZONE): Date | null {
   if (value === null || value === undefined) return null;
-  const instant = value instanceof Date ? value : parseIsoText(value);
+  const instant = value instanceof Date ? value : parseIsoText(value, timeZone);
   return instant === null || Number.isNaN(instant.getTime()) ? null : instant;
 }
 
@@ -103,11 +199,11 @@ const CLOCK_TAG = "en-GB-u-nu-latn";
 const dateFormats = new Map<string, Intl.DateTimeFormat>();
 
 /** Formats with `formatToParts` and drops the direction marks from every part, so no mark can survive in a literal. */
-function write(tag: string, options: Intl.DateTimeFormatOptions, instant: Date): string {
-  const key = `${tag}|${JSON.stringify(options)}`;
+function write(tag: string, options: Intl.DateTimeFormatOptions, instant: Date, timeZone: string = TIME_ZONE): string {
+  const key = `${tag}|${timeZone}|${JSON.stringify(options)}`;
   let format = dateFormats.get(key);
   if (format === undefined) {
-    format = new Intl.DateTimeFormat(tag, { ...options, timeZone: TIME_ZONE });
+    format = new Intl.DateTimeFormat(tag, { ...options, timeZone });
     dateFormats.set(key, format);
   }
   return format
@@ -130,30 +226,36 @@ const pad2 = (value: number): string => String(value).padStart(2, "0");
 /**
  * "HH:mm", 24 hour, Western digits, in both languages.
  * A number is minutes since midnight (rounded, and wrapped into one day: 1440 is 00:00, -30 is 23:30).
- * A `Date` or an ISO string is the Riyadh clock time of that instant.
+ * A `Date` or an ISO string is the clock time of that instant in `options.timeZone` (default Riyadh).
  */
-export function time(value: number | DateValue): string {
+export function time(value: number | DateValue, options: TimeOptions = {}): string {
   if (typeof value === "number") {
     if (!Number.isFinite(value)) return NO_VALUE;
     const minutes = ((Math.round(value) % 1440) + 1440) % 1440;
     return `${pad2(Math.floor(minutes / 60))}:${pad2(minutes % 60)}`;
   }
-  const instant = toInstant(value);
+  const zone = resolveTimeZone(options.timeZone);
+  if (zone === null) return NO_VALUE;
+  const instant = toInstant(value, zone);
   if (instant === null) return NO_VALUE;
-  return write(CLOCK_TAG, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }, instant);
+  return write(CLOCK_TAG, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }, instant, zone);
 }
 
 /**
  * "6 Sept 2026" in English (day, month, year), "6 سبتمبر 2026" in Arabic. With `calendar: "hijri"` the Umm al-Qura
- * date: "24 Rab. I 1448 AH" and "24 ربيع الأول 1448 هـ". Western digits, no direction marks.
+ * date: "24 Rab. I 1448 AH" and "24 ربيع الأول 1448 هـ". Western digits, no direction marks. The day is the day in
+ * `options.timeZone` (default Riyadh): 21:30 UTC on 6 September is 7 September in Riyadh and 6 September in London.
  */
 export function date(value: DateValue, options: DateOptions = {}): string {
-  const instant = toInstant(value);
+  const zone = resolveTimeZone(options.timeZone);
+  if (zone === null) return NO_VALUE;
+  const instant = toInstant(value, zone);
   if (instant === null) return NO_VALUE;
   return write(
     calendarTag(options.locale, options.calendar),
     { day: "numeric", month: options.month ?? "short", year: "numeric" },
     instant,
+    zone,
   );
 }
 
@@ -170,6 +272,8 @@ export type DurationMode = "min" | "clock";
 /**
  * A length of time given in seconds. Mode "min" (default) rounds to whole minutes and appends `minuteLabel`
  * (the provider label "duration.minuteShort", in Arabic "د"); mode "clock" gives "m:ss" with minutes that can pass 59.
+ * The default `minuteLabel` is the English "min": this plain function knows no language, so on a page in another
+ * language pass the label, or use `useFormat().duration`, which reads it from the provider.
  * A negative duration keeps its minus sign, and a value that rounds to zero has none ("0 min", never "-0 min").
  */
 export function duration(seconds: number | null | undefined, mode: DurationMode = "min", minuteLabel = "min"): string {

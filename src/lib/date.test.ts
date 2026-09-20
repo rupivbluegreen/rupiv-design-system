@@ -362,6 +362,133 @@ describe("the A0 helper names (formatDate, formatTime, formatDateTime, formatHij
   });
 });
 
+describe("the timeZone option", () => {
+  // 21:30 UTC on 6 September 2026: a few minutes into 7 September in Riyadh (UTC+3), still 6 September in London
+  // (UTC+1 in summer) and New York (UTC-4), and already the 7th in Kiritimati (UTC+14).
+  const nearMidnight = "2026-09-06T21:30:00Z";
+
+  it("keeps Asia/Riyadh as the default, and an explicit Riyadh is the same as none", () => {
+    expect(date(nearMidnight)).toBe("7 Sept 2026");
+    expect(date(nearMidnight, { timeZone: undefined })).toBe("7 Sept 2026");
+    expect(date(nearMidnight, { timeZone: TIME_ZONE })).toBe("7 Sept 2026");
+    expect(time(nearMidnight)).toBe("00:30");
+    expect(time(nearMidnight, { timeZone: TIME_ZONE })).toBe("00:30");
+  });
+
+  it("writes the day and the clock of another zone: a date near midnight is a different day", () => {
+    expect(date(nearMidnight, { timeZone: "Europe/London" })).toBe("6 Sept 2026");
+    expect(date(nearMidnight, { timeZone: "America/New_York" })).toBe("6 Sept 2026");
+    expect(date(nearMidnight, { timeZone: "Pacific/Kiritimati" })).toBe("7 Sept 2026");
+    expect(date(nearMidnight, { timeZone: "Pacific/Pago_Pago" })).toBe("6 Sept 2026");
+    expect(time(nearMidnight, { timeZone: "Europe/London" })).toBe("22:30");
+    expect(time(nearMidnight, { timeZone: "America/New_York" })).toBe("17:30");
+    expect(time(nearMidnight, { timeZone: "Asia/Kolkata" })).toBe("03:00");
+    expect(time(nearMidnight, { timeZone: "Pacific/Kiritimati" })).toBe("11:30");
+  });
+
+  it("follows daylight saving time where the zone has it, and a Date and an offset name one instant", () => {
+    expect(time("2026-01-15T21:30:00Z", { timeZone: "Europe/London" })).toBe("21:30");
+    expect(time("2026-07-15T21:30:00Z", { timeZone: "Europe/London" })).toBe("22:30");
+    expect(time(new Date(nearMidnight), { timeZone: "Europe/London" })).toBe("22:30");
+    expect(time("2026-09-07T00:30:00+03:00", { timeZone: "Europe/London" })).toBe("22:30");
+  });
+
+  it("works in Arabic, in the Hijri calendar and in dateBoth, with Western digits and no direction marks", () => {
+    expect(date(nearMidnight, { timeZone: "Europe/London", locale: "ar" })).toBe("6 سبتمبر 2026");
+    expect(date(nearMidnight, { timeZone: "Europe/London", locale: "ar", calendar: "hijri" })).toBe("24 ربيع الأول 1448 هـ");
+    expect(dateBoth(nearMidnight, { timeZone: "Europe/London" })).toBe("6 Sept 2026 \u00B7 24 Rab. I 1448 AH");
+    expect(dateBoth(nearMidnight)).toBe("7 Sept 2026 \u00B7 25 Rab. I 1448 AH");
+    for (const text of [
+      date(nearMidnight, { timeZone: "Europe/London", locale: "ar" }),
+      date(nearMidnight, { timeZone: "Europe/London", locale: "ar", calendar: "hijri" }),
+    ]) {
+      expect(BIDI.test(text)).toBe(false);
+      expect(ARABIC_INDIC_DIGITS.test(text)).toBe(false);
+    }
+  });
+
+  it("changes the Hijri day at midnight in the zone in use", () => {
+    // 21:30 UTC on 15 June 2026 is 00:30 on 16 June in Riyadh (1 Muh. 1448) and 22:30 on 15 June in London
+    expect(date("2026-06-15T21:30:00Z", { calendar: "hijri" })).toBe("1 Muh. 1448 AH");
+    expect(date("2026-06-15T21:30:00Z", { calendar: "hijri", timeZone: "Europe/London" })).toBe("29 Dhuʻl-H. 1447 AH");
+  });
+
+  it("reads a string with no offset as the wall clock of that zone, and writes it back unchanged", () => {
+    expect(time("2026-09-06T12:30", { timeZone: "Europe/London" })).toBe("12:30");
+    expect(time("2026-09-06T12:30", { timeZone: "America/New_York" })).toBe("12:30");
+    expect(time("2026-09-06T23:59:59", { timeZone: "Pacific/Kiritimati" })).toBe("23:59");
+    expect(date("2026-09-06T23:59:59", { timeZone: "Pacific/Pago_Pago" })).toBe("6 Sept 2026");
+    expect(toInstant("2026-09-06T12:30", "Europe/London")?.toISOString()).toBe("2026-09-06T11:30:00.000Z");
+    expect(toInstant("2026-09-06T12:30:15.5", "America/New_York")?.toISOString()).toBe("2026-09-06T16:30:15.500Z");
+    expect(toInstant("2026-01-15T12:30", "Europe/London")?.toISOString()).toBe("2026-01-15T12:30:00.000Z");
+    // an offset in the text still wins over the zone
+    expect(toInstant("2026-09-06T12:30:00Z", "Europe/London")?.toISOString()).toBe("2026-09-06T12:30:00.000Z");
+  });
+
+  it("finds the right side of a daylight saving change", () => {
+    // London springs forward at 01:00 UTC on 29 March 2026 (01:00 becomes 02:00) and falls back on 25 October (02:00 to 01:00).
+    expect(toInstant("2026-03-29T00:30", "Europe/London")?.toISOString()).toBe("2026-03-29T00:30:00.000Z");
+    expect(toInstant("2026-03-29T03:30", "Europe/London")?.toISOString()).toBe("2026-03-29T02:30:00.000Z");
+    expect(toInstant("2026-10-25T00:30", "Europe/London")?.toISOString()).toBe("2026-10-24T23:30:00.000Z");
+    expect(toInstant("2026-10-25T03:30", "Europe/London")?.toISOString()).toBe("2026-10-25T03:30:00.000Z");
+    // a wall-clock time that does not exist, or exists twice, still gives a real instant and never throws
+    expect(toInstant("2026-03-29T01:30", "Europe/London")).toBeInstanceOf(Date);
+    expect(toInstant("2026-10-25T01:30", "Europe/London")).toBeInstanceOf(Date);
+  });
+
+  it("does not move a plain calendar day in any zone, even far behind or ahead of Riyadh", () => {
+    for (const timeZone of ["Pacific/Pago_Pago", "Pacific/Kiritimati", "America/Los_Angeles", "Asia/Kolkata", "UTC"]) {
+      expect(date("2026-09-06", { timeZone })).toBe("6 Sept 2026");
+      expect(date("2026-01-01", { timeZone })).toBe("1 Jan 2026");
+      expect(date("2026-12-31", { timeZone })).toBe("31 Dec 2026");
+    }
+    expect(toInstant("2026-09-06", "Pacific/Pago_Pago")?.toISOString()).toBe("2026-09-06T23:00:00.000Z");
+  });
+
+  it("gives NO_VALUE for an unknown zone, and for missing input in any zone, and never throws", () => {
+    for (const timeZone of ["Nowhere/City", "", "GMT+3 please"]) {
+      expect(() => date(nearMidnight, { timeZone })).not.toThrow();
+      expect(date(nearMidnight, { timeZone })).toBe(NO_VALUE);
+      expect(dateBoth(nearMidnight, { timeZone })).toBe(NO_VALUE);
+      expect(time(nearMidnight, { timeZone })).toBe(NO_VALUE);
+      expect(toInstant("2026-09-06T12:30", timeZone)).toBeNull();
+    }
+    for (const bad of [null, undefined, "", "2026-02-30", "nope"]) {
+      expect(date(bad, { timeZone: "Europe/London" })).toBe(NO_VALUE);
+      expect(time(bad, { timeZone: "Europe/London" })).toBe(NO_VALUE);
+    }
+    // a number of minutes has no zone, so the option is ignored
+    expect(time(755, { timeZone: "Europe/London" })).toBe("12:35");
+    expect(time(755, { timeZone: "Nowhere/City" })).toBe("12:35");
+  });
+
+  it("does not depend on the machine's zone", () => {
+    const original = process.env["TZ"];
+    try {
+      process.env["TZ"] = "Pacific/Kiritimati";
+      const first = [date(nearMidnight, { timeZone: "Europe/London" }), time("2026-09-06T12:30", { timeZone: "Europe/London" })];
+      process.env["TZ"] = "Pacific/Pago_Pago";
+      const second = [date(nearMidnight, { timeZone: "Europe/London" }), time("2026-09-06T12:30", { timeZone: "Europe/London" })];
+      expect(second).toEqual(first);
+      expect(first).toEqual(["6 Sept 2026", "12:30"]);
+    } finally {
+      if (original === undefined) delete process.env["TZ"];
+      else process.env["TZ"] = original;
+    }
+  });
+});
+
+describe("duration's default unit", () => {
+  it("is the English \"min\" when no label is passed, whatever the page's language (documented: pass the label)", () => {
+    expect(duration(360)).toBe("6 min");
+    expect(duration(360, "min")).toBe("6 min");
+    expect(duration(360, "min", undefined)).toBe("6 min");
+    expect(duration(360, "min", "د")).toBe("6 د");
+    // clock mode has no unit, so it has no language
+    expect(duration(360, "clock")).toBe("6:00");
+  });
+});
+
 describe("determinism", () => {
   const original = process.env["TZ"];
 

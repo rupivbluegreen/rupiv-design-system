@@ -52,6 +52,22 @@ describe("useFormat", () => {
     }
   });
 
+  it("passes a time zone through to date, dateBoth and time (default Asia/Riyadh)", () => {
+    const en = renderHook(() => useFormat(), { wrapper: wrapper("en") }).result.current;
+    const ar = renderHook(() => useFormat(), { wrapper: wrapper("ar") }).result.current;
+    const nearMidnight = "2026-09-06T21:30:00Z";
+    for (const f of [en, ar]) {
+      expect(f.time(nearMidnight)).toBe("00:30");
+      expect(f.time(nearMidnight, { timeZone: "Europe/London" })).toBe("22:30");
+      expect(f.time(90, { timeZone: "Europe/London" })).toBe("01:30");
+    }
+    expect(en.date(nearMidnight)).toBe("7 Sept 2026");
+    expect(en.date(nearMidnight, { timeZone: "Europe/London" })).toBe("6 Sept 2026");
+    expect(ar.date(nearMidnight, { timeZone: "Europe/London" })).toBe("6 سبتمبر 2026");
+    expect(en.dateBoth(nearMidnight, { timeZone: "Europe/London" })).toBe("6 Sept 2026 \u{00B7} 24 Rab. I 1448 AH");
+    expect(en.date(nearMidnight, { timeZone: "Nowhere/City" })).toBe(NO_VALUE);
+  });
+
   it("takes the unit of a duration in minutes from the provider labels", () => {
     const en = renderHook(() => useFormat(), { wrapper: wrapper("en") }).result.current;
     const ar = renderHook(() => useFormat(), { wrapper: wrapper("ar", { "duration.minuteShort": "د" }) }).result.current;
