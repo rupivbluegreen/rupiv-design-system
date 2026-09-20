@@ -96,6 +96,66 @@
   line-height: var(--leading-snug);
 }
 
+/* The message for a file that was not taken (when the application gives no onReject). */
+.reject {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  padding-block: var(--space-8);
+  padding-inline: var(--space-12) var(--space-4);
+  border: 1px solid var(--danger-border);
+  border-radius: var(--radius-md);
+  background: var(--danger-bg);
+  color: var(--danger-text);
+  font-size: var(--text-13);
+  line-height: var(--leading-ui);
+}
+
+.rejectIcon {
+  flex-shrink: 0;
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+  margin-block-start: 2px;
+  color: var(--danger-solid);
+}
+
+.rejectText {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--space-2);
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.rejectLine {
+  margin: 0;
+}
+
+.dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: var(--control-sm);
+  block-size: var(--control-sm);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--danger-text);
+  transition: background-color var(--dur-fast) var(--ease-out);
+}
+
+.dismiss:hover {
+  background: var(--danger-border);
+}
+
+.dismiss > svg {
+  inline-size: var(--icon-sm);
+  block-size: var(--icon-sm);
+}
+
 .files {
   display: flex;
   flex-direction: column;

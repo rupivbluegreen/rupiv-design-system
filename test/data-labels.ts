@@ -1,5 +1,5 @@
-// Shared by the tests of the data and form components (DataTable, Pagination, FilterBar, FileDrop, QuantityInput,
-// SearchInput, Field, Breadcrumbs, PageHeader).
+// Shared by the tests of the data and form components (DataTable, Pagination, FilterBar, FileDrop, FormFooter,
+// QuantityInput, SearchInput, Field, Breadcrumbs, PageHeader).
 //
 // AR_DATA_LABELS is a stand-in Arabic label set, one entry per key of DATA_LABELS (the compiler checks that none is
 // missing). It is a first draft that proves the mechanism, not reviewed Arabic: the application supplies the real text.
@@ -50,6 +50,13 @@ export const AR_DATA_LABELS = {
   "fileDrop.sizeBytes": "{size} بايت",
   "fileDrop.sizeKb": "{size} كيلوبايت",
   "fileDrop.sizeMb": "{size} ميغابايت",
+  "fileDrop.rejectType": "{name} ليس نوع ملف مقبولاً.",
+  "fileDrop.rejectSize": "حجم {name} يتجاوز {max}.",
+  "fileDrop.dismiss": "إغلاق الرسالة",
+
+  "formFooter.label": "إجراءات النموذج",
+  "formFooter.unsaved": "تغييرات غير محفوظة",
+  "formFooter.clean": "لا توجد تغييرات غير محفوظة",
 
   "quantityInput.decrease": "إنقاص الكمية",
   "quantityInput.increase": "زيادة الكمية",

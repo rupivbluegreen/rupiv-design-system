@@ -1,9 +1,9 @@
 import type { LabelMap } from "../labels";
 
 /**
- * English defaults for the data and form components: DataTable, Pagination, FilterBar, FileDrop, QuantityInput,
- * SearchInput, Field, Breadcrumbs and PageHeader. Keys are "<component>.<name>"; values are strings with {name}
- * placeholders or functions. Counts are passed as numbers, so an application can write a plural function
+ * English defaults for the data and form components: DataTable, Pagination, FilterBar, FileDrop, FormFooter,
+ * QuantityInput, SearchInput, Field, Breadcrumbs and PageHeader. Keys are "<component>.<name>"; values are strings
+ * with {name} placeholders or functions. Counts are passed as numbers, so an application can write a plural function
  * (Arabic has six forms) for any label that takes `{n}`.
  */
 export const DATA_LABELS = {
@@ -33,7 +33,7 @@ export const DATA_LABELS = {
   "filterBar.clearAll": "Clear all",
   "filterBar.clearFilter": "Clear",
 
-  // FileDrop (sizes arrive already formatted for the locale)
+  // FileDrop (sizes arrive already formatted for the locale; {max} is the limit written the same way)
   "fileDrop.dropToUpload": "Drop to upload",
   "fileDrop.promptOne": "Drag a file here or",
   "fileDrop.promptMany": "Drag files here or",
@@ -43,6 +43,14 @@ export const DATA_LABELS = {
   "fileDrop.sizeBytes": "{size} B",
   "fileDrop.sizeKb": "{size} KB",
   "fileDrop.sizeMb": "{size} MB",
+  "fileDrop.rejectType": "{name} is not an accepted file type.",
+  "fileDrop.rejectSize": "{name} is larger than {max}.",
+  "fileDrop.dismiss": "Dismiss message",
+
+  // FormFooter (the group's name, and the status a screen reader hears when unsaved changes appear or go)
+  "formFooter.label": "Form actions",
+  "formFooter.unsaved": "Unsaved changes",
+  "formFooter.clean": "No unsaved changes",
 
   // QuantityInput
   "quantityInput.decrease": "Decrease",

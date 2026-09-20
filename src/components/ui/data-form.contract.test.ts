@@ -12,6 +12,7 @@ const COMPONENTS = [
   "pagination",
   "filter-bar",
   "file-drop",
+  "form-footer",
   "quantity-input",
   "field",
   "input",
@@ -99,5 +100,43 @@ describe("right-to-left: the CSS rules that mirror an icon match the markup", ()
     const css = stripComments(read("data-table", "module.css"));
     expect(css).toMatch(/\.toned td:first-child::before\s*\{[^}]*inset-inline-start: 0/);
     expect(css).not.toMatch(/box-shadow:\s*inset/);
+  });
+});
+
+describe("FormFooter: the CSS that makes it a sticky bar with the actions at the inline end", () => {
+  /** The declarations of the rule whose selector is exactly `selector`. */
+  function rule(css: string, selector: string): string {
+    const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(?:^|})\\s*${escaped}\\s*\\{([^}]*)\\}`).exec(stripComments(css))?.[1] ?? "";
+  }
+
+  const css = read("form-footer", "module.css");
+
+  it("sticks to the block end of its scroll container, above the form's content", () => {
+    const footer = rule(css, ".footer");
+    expect(footer).toMatch(/position:\s*sticky/);
+    expect(footer).toMatch(/inset-block-end:\s*0/);
+    expect(footer).toMatch(/z-index:\s*var\(--z-sticky\)/);
+  });
+
+  it("has the kit's look: a bordered, rounded, surface-coloured row that wraps", () => {
+    const footer = rule(css, ".footer");
+    expect(footer).toMatch(/display:\s*flex/);
+    expect(footer).toMatch(/flex-wrap:\s*wrap/);
+    expect(footer).toMatch(/border:\s*1px solid var\(--border-default\)/);
+    expect(footer).toMatch(/border-radius:\s*var\(--radius-lg\)/);
+    expect(footer).toMatch(/background:\s*var\(--bg-surface\)/);
+    expect(footer).toMatch(/padding:\s*var\(--space-12\) var\(--space-16\)/);
+  });
+
+  it("pushes the actions to the inline end and the status to the inline start, and reverses nothing", () => {
+    expect(rule(css, ".actions")).toMatch(/margin-inline-start:\s*auto/);
+    expect(rule(css, ".start")).toMatch(/margin-inline-end:\s*auto/);
+    expect(stripComments(css)).not.toMatch(/row-reverse|(?<![\w-])direction:|(?<![\w-])order:/);
+  });
+
+  it("reads no raw colour, pixel font size or shadow (the Stylelint rules also check this)", () => {
+    const text = stripComments(css);
+    expect(text).not.toMatch(/#[0-9a-f]{3,8}\b|rgb\(|hsl\(|font-size:\s*[\d.]+px|box-shadow/i);
   });
 });

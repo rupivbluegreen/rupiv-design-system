@@ -1,20 +1,38 @@
 "use client";
 
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import type { ChangeEvent, DragEvent } from "react";
-import { CloudUpload, FileText, X } from "lucide-react";
+import { CircleAlert, CloudUpload, FileText, X } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useFormat, type Formatters } from "../../lib/use-format";
 import { useLabels } from "../../provider";
 import type { LabelFn } from "../../provider";
 import styles from "./file-drop.module.css";
 
+/** Why a file was not taken: its type does not match `accept`, or it is larger than `maxSize`. */
+export type FileRejectReason = "type" | "size";
+
+/** A file that was offered and not taken. A file that fails both checks is reported as `"type"`. */
+export interface FileRejection {
+  file: File;
+  reason: FileRejectReason;
+}
+
 export interface FileDropProps {
-  /** Same syntax as the native `accept` attribute, e.g. ".pdf,image/*". */
+  /** Same syntax as the native `accept` attribute, e.g. ".pdf,image/*". A file that does not match is rejected. */
   accept?: string | undefined;
+  /** The largest file taken, in bytes (1 KB is 1024 bytes). A larger file is rejected. No limit when omitted. */
+  maxSize?: number | undefined;
   hint?: string | undefined;
   multiple?: boolean | undefined;
+  /** The whole current list, after an add or a remove. Rejected files are never in it. */
   onFiles?: ((files: File[]) => void) | undefined;
+  /**
+   * Called with the files that were not taken, from a drop or from the file picker; the others still reach
+   * `onFiles`. Without it the component shows its own message under the drop area. With it the application decides
+   * what to show and the component shows nothing.
+   */
+  onReject?: ((rejected: FileRejection[]) => void) | undefined;
   id?: string | undefined;
   className?: string | undefined;
 }
@@ -24,6 +42,14 @@ function formatBytes(bytes: number, format: Pick<Formatters, "int" | "num">, lab
   if (bytes < 1024) return label("fileDrop.sizeBytes", { size: format.int(bytes) });
   if (bytes < 1024 * 1024) return label("fileDrop.sizeKb", { size: format.num(bytes / 1024, bytes < 10 * 1024 ? 1 : 0) });
   return label("fileDrop.sizeMb", { size: format.num(bytes / (1024 * 1024), 1) });
+}
+
+/** The limit as "20 MB" or "1.5 KB": at most one decimal, rounded down so "larger than 1.5 MB" is never untrue. */
+function formatLimit(bytes: number, format: Pick<Formatters, "int" | "num">, label: LabelFn): string {
+  const down = (value: number) => format.num(Math.floor(value * 10 + 1e-9) / 10);
+  if (bytes < 1024) return label("fileDrop.sizeBytes", { size: format.int(bytes) });
+  if (bytes < 1024 * 1024) return label("fileDrop.sizeKb", { size: down(bytes / 1024) });
+  return label("fileDrop.sizeMb", { size: down(bytes / (1024 * 1024)) });
 }
 
 function isAccepted(file: File, accept?: string): boolean {
@@ -41,22 +67,47 @@ function isAccepted(file: File, accept?: string): boolean {
     });
 }
 
-export function FileDrop({ accept, hint, multiple = false, onFiles, id, className }: FileDropProps) {
+export function FileDrop({ accept, maxSize, hint, multiple = false, onFiles, onReject, id, className }: FileDropProps) {
   const label = useLabels();
   const format = useFormat();
   const autoId = useId();
+  const inputRef = useRef<HTMLInputElement>(null);
   const inputId = id ?? `file-drop-${autoId}`;
   const hintId = hint ? `${inputId}-hint` : undefined;
+  const rejectId = `${inputId}-reject`;
   const [files, setFiles] = useState<File[]>([]);
   const [dragging, setDragging] = useState(false);
+  // The message shown when the application gives no `onReject`. `round` changes with every new rejection, so the
+  // alert is inserted again and a screen reader says it again, also for the same file dropped twice.
+  const [rejection, setRejection] = useState<{ round: number; lines: string[] } | null>(null);
 
   function addFiles(list: FileList | null) {
     if (!list || list.length === 0) return;
-    const incoming = Array.from(list).filter((file) => isAccepted(file, accept));
-    if (incoming.length === 0) return;
-    const next = multiple ? [...files, ...incoming] : incoming.slice(0, 1);
+    const accepted: File[] = [];
+    const rejected: FileRejection[] = [];
+    const lines: string[] = [];
+    for (const file of Array.from(list)) {
+      if (!isAccepted(file, accept)) {
+        rejected.push({ file, reason: "type" });
+        lines.push(label("fileDrop.rejectType", { name: file.name }));
+      } else if (maxSize !== undefined && file.size > maxSize) {
+        rejected.push({ file, reason: "size" });
+        lines.push(label("fileDrop.rejectSize", { name: file.name, max: formatLimit(maxSize, format, label) }));
+      } else {
+        accepted.push(file);
+      }
+    }
+    if (rejected.length > 0) onReject?.(rejected);
+    setRejection((previous) => (rejected.length > 0 && !onReject ? { round: (previous?.round ?? 0) + 1, lines } : null));
+    if (accepted.length === 0) return;
+    const next = multiple ? [...files, ...accepted] : accepted.slice(0, 1);
     setFiles(next);
     onFiles?.(next);
+  }
+
+  function dismissRejection() {
+    setRejection(null);
+    inputRef.current?.focus();
   }
 
   function removeFile(index: number) {
@@ -98,12 +149,13 @@ export function FileDrop({ accept, hint, multiple = false, onFiles, id, classNam
         onDrop={handleDrop}
       >
         <input
+          ref={inputRef}
           id={inputId}
           type="file"
           accept={accept}
           multiple={multiple}
           className={styles.input}
-          aria-describedby={hintId}
+          aria-describedby={[hintId, rejection ? rejectId : undefined].filter(Boolean).join(" ") || undefined}
           onChange={handleChange}
         />
         <span className={styles.iconWrap} aria-hidden="true">
@@ -125,6 +177,22 @@ export function FileDrop({ accept, hint, multiple = false, onFiles, id, classNam
           </span>
         )}
       </label>
+
+      {rejection && (
+        <div className={styles.reject}>
+          <CircleAlert className={styles.rejectIcon} aria-hidden="true" />
+          <div key={rejection.round} id={rejectId} role="alert" className={styles.rejectText}>
+            {rejection.lines.map((line, index) => (
+              <p key={`${index}-${line}`} className={styles.rejectLine}>
+                {line}
+              </p>
+            ))}
+          </div>
+          <button type="button" className={styles.dismiss} aria-label={label("fileDrop.dismiss")} onClick={dismissRejection}>
+            <X aria-hidden="true" />
+          </button>
+        </div>
+      )}
 
       {files.length > 0 && (
         <ul role="list" className={styles.files} aria-label={label("fileDrop.selectedFiles")}>

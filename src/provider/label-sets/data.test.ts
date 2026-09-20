@@ -11,6 +11,7 @@ const SOURCES = [
   "pagination",
   "filter-bar",
   "file-drop",
+  "form-footer",
   "quantity-input",
   "field",
   "search-input",
@@ -18,7 +19,7 @@ const SOURCES = [
   "page-header",
 ] as const;
 
-const PREFIXES = ["dataTable", "pagination", "filterBar", "fileDrop", "quantityInput", "searchInput", "field", "breadcrumbs", "pageHeader"];
+const PREFIXES = ["dataTable", "pagination", "filterBar", "fileDrop", "formFooter", "quantityInput", "searchInput", "field", "breadcrumbs", "pageHeader"];
 
 function source(name: string): string {
   return readFileSync(new URL(`../../components/ui/${name}.tsx`, import.meta.url), "utf8");
