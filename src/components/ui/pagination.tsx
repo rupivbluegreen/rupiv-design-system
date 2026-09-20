@@ -79,6 +79,9 @@ export function Pagination({
             <Select
               size="sm"
               className={styles.pageSizeSelect}
+              // The wrapping label's text is display:none below 640px (the compact summary replaces it); an implicit
+              // <label> association does not survive that, so the name is repeated here, where it always applies.
+              aria-label={label("pagination.pageSize")}
               value={String(pageSize ?? pageSizeOptions[0])}
               options={pageSizeOptions.map((n) => ({ value: String(n), label: String(n) }))}
               onChange={(event) => onPageSizeChange(Number(event.target.value))}
