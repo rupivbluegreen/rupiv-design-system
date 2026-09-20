@@ -145,3 +145,10 @@
     translate: 0 0;
   }
 }
+
+/* Print: an open drawer and its scrim are not part of the page. */
+@media print {
+  .root {
+    display: none;
+  }
+}

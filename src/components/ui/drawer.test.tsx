@@ -11,9 +11,9 @@ beforeEach(() => {
   mockVisibleElements();
 });
 
-type HostProps = Partial<Pick<DrawerProps, "side" | "width">> & { onClose?: () => void };
+type HostProps = Partial<Pick<DrawerProps, "side" | "width" | "initialFocus">> & { onClose?: () => void };
 
-function Host({ onClose, side, width }: HostProps) {
+function Host({ onClose, side, width, initialFocus }: HostProps) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -30,6 +30,7 @@ function Host({ onClose, side, width }: HostProps) {
         subtitle="Read only"
         {...(side !== undefined ? { side } : {})}
         {...(width !== undefined ? { width } : {})}
+        {...(initialFocus !== undefined ? { initialFocus } : {})}
         footer={
           <>
             <button type="button">Cancel</button>
@@ -89,6 +90,39 @@ describe.each(LOCALE_CASES)("Drawer ($locale)", ({ locale }) => {
     it("moves focus into the drawer on open, to the first control that is not the close button", async () => {
       const user = userEvent.setup();
       const view = renderIn(locale, <Host />);
+      await user.click(view.getByRole("button", { name: "Open" }));
+      expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Note" }));
+    });
+
+    it("has the close button first in the document order, before the content and the footer", async () => {
+      const user = userEvent.setup();
+      const view = renderIn(locale, <Host />);
+      await user.click(view.getByRole("button", { name: "Open" }));
+      const stops = Array.from(screen.getByRole("dialog").querySelectorAll<HTMLElement>("a[href], button, input"));
+      expect(stops).toHaveLength(4);
+      expect(stops[0]?.hasAttribute("data-dialog-close")).toBe(true);
+      expect(stops.slice(1).map((el) => el.getAttribute("aria-label") ?? el.textContent)).toEqual(["Note", "Cancel", "Save"]);
+    });
+
+    it("initialFocus=\"close\" starts on the close button, and Tab then follows the document order", async () => {
+      const user = userEvent.setup();
+      const view = renderIn(locale, <Host initialFocus="close" />);
+      await user.click(view.getByRole("button", { name: "Open" }));
+      const close = screen.getByRole("button", { name: /close/i });
+      expect(document.activeElement).toBe(close);
+      await user.tab();
+      expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Note" }));
+      await user.tab();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Cancel" }));
+      await user.tab();
+      expect(document.activeElement).toBe(screen.getByRole("button", { name: "Save" }));
+      await user.tab();
+      expect(document.activeElement).toBe(close);
+    });
+
+    it("initialFocus=\"content\" is the default: the first control that is not the close button", async () => {
+      const user = userEvent.setup();
+      const view = renderIn(locale, <Host initialFocus="content" />);
       await user.click(view.getByRole("button", { name: "Open" }));
       expect(document.activeElement).toBe(screen.getByRole("textbox", { name: "Note" }));
     });

@@ -69,11 +69,28 @@ describe.each(LOCALE_CASES)("NavDrawer ($locale)", ({ locale }) => {
     expect(within(dialog).getByRole("navigation", { name: content.text.nav })).toBeTruthy();
   });
 
-  it("puts the focus on the first group when it opens, not on the close button", async () => {
+  it("puts the focus on the close button when it opens, so it is the first stop and the groups follow in order", async () => {
     const user = userEvent.setup();
     const view = renderHost(locale);
     const dialog = await openDrawer(view, user);
-    expect(document.activeElement).toBe(groupButton(dialog, locale, "plan"));
+    const close = dialog.querySelector<HTMLElement>("[data-dialog-close]");
+    expect(document.activeElement).toBe(close);
+    // The tab order is the document order, and the close button leads it.
+    const stops = Array.from(dialog.querySelectorAll<HTMLElement>("a[href], button")).filter((el) => !el.closest("[hidden]"));
+    expect(stops[0]).toBe(close);
+    expect(stops.length).toBeGreaterThan(3);
+    const visited: (Element | null)[] = [document.activeElement];
+    for (let index = 1; index < stops.length; index += 1) {
+      await user.tab();
+      visited.push(document.activeElement);
+    }
+    expect(visited).toEqual(stops);
+    // the first Tab after the close button reaches the first group, and Shift+Tab from the close button wraps to the last stop
+    expect(visited[1]).toBe(groupButton(dialog, locale, "plan"));
+    await user.tab();
+    expect(document.activeElement).toBe(close);
+    await user.tab({ shift: true });
+    expect(document.activeElement).toBe(stops[stops.length - 1]);
   });
 
   it("lists every group as a button that opens and closes its section", async () => {

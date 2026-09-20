@@ -27,6 +27,13 @@ export interface DrawerProps {
    * Arabic; `"start"` is the inline start, for a navigation drawer.
    */
   side?: "start" | "end";
+  /**
+   * Where focus goes when the drawer opens. `"content"` (default) is the element marked `data-autofocus`, or else the
+   * first control that is not the close button, which suits a drawer with a form. `"close"` is the close button, the
+   * first control in the panel, so the controls after it follow in order: it suits a drawer of many links, where the
+   * close button would otherwise be the last stop. (`data-autofocus` is read only with `"content"`.)
+   */
+  initialFocus?: "content" | "close";
   footer?: ReactNode;
   className?: string | undefined;
   children?: ReactNode;
@@ -51,6 +58,7 @@ export function Drawer({
   subtitle,
   width,
   side = "end",
+  initialFocus = "content",
   footer,
   className,
   children,
@@ -74,10 +82,16 @@ export function Drawer({
     body.style.overflow = "hidden";
     if (scrollbar > 0) body.style.paddingInlineEnd = `${scrollbar}px`;
 
+    // Read when the drawer opens: a change of `initialFocus` while it is open does not move focus.
     if (panel) {
-      const auto = panel.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
-      const first = focusables(panel).find((el) => !el.hasAttribute("data-dialog-close"));
-      (auto ?? first ?? panel).focus({ preventScroll: true });
+      const close = initialFocus === "close" ? panel.querySelector<HTMLElement>("[data-dialog-close]") : null;
+      if (close) {
+        close.focus({ preventScroll: true });
+      } else {
+        const auto = panel.querySelector<HTMLElement>("[autofocus], [data-autofocus]");
+        const first = focusables(panel).find((el) => !el.hasAttribute("data-dialog-close"));
+        (auto ?? first ?? panel).focus({ preventScroll: true });
+      }
     }
 
     return () => {

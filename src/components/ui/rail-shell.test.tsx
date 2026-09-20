@@ -660,6 +660,62 @@ describe("NotificationsBell", () => {
   });
 });
 
+describe("NotificationsBell with neither href nor onClick", () => {
+  it.each(LOCALE_CASES)("is a plain labelled element that Tab skips, with the count in Western digits ($locale)", async ({ locale }) => {
+    const user = userEvent.setup();
+    const content = SHELL_CONTENT[locale];
+    const view = renderIn(
+      locale,
+      <>
+        <button type="button">before</button>
+        <NotificationsBell unreadCount={12} />
+        <button type="button">after</button>
+      </>,
+      { labels: content.labels },
+    );
+    const bell = view.container.querySelector<HTMLElement>('[data-shell="bell"]');
+    if (!bell) throw new Error("no bell rendered");
+    // not a button, not a link, not focusable
+    expect(bell.tagName).toBe("SPAN");
+    expect(view.queryByRole("link")).toBeNull();
+    expect(view.getAllByRole("button").map((button) => button.textContent)).toEqual(["before", "after"]);
+    expect(bell.hasAttribute("tabindex")).toBe(false);
+    expect(bell.hasAttribute("href")).toBe(false);
+    bell.focus();
+    expect(document.activeElement).not.toBe(bell);
+    // Tab goes from the button before to the button after
+    view.getByRole("button", { name: "before" }).focus();
+    await user.tab();
+    expect(document.activeElement).toBe(view.getByRole("button", { name: "after" }));
+    // it still has a name with the count, and the badge stays hidden from screen readers
+    const name = locale === "ar" ? "الإشعارات: 12 غير مقروءة" : "Notifications: 12 unread";
+    expect(view.getByRole("img", { name })).toBe(bell);
+    const badge = bell.querySelector('[data-shell="bell-count"]');
+    expect(badge?.textContent).toBe("12");
+    expect(badge?.getAttribute("aria-hidden")).toBe("true");
+    expect(/[٠-٩۰-۹]/.test(`${bell.textContent}${bell.getAttribute("aria-label")}`)).toBe(false);
+  });
+
+  it("shows no badge and a plain name at zero, and 99+ above 99", () => {
+    const none = renderIn("en", <NotificationsBell unreadCount={0} />);
+    expect(none.getByRole("img", { name: "Notifications" }).querySelector('[data-shell="bell-count"]')).toBeNull();
+    none.unmount();
+    const many = renderIn("en", <NotificationsBell unreadCount={250} />);
+    expect(many.getByRole("img", { name: "Notifications: 250 unread" }).textContent).toBe("99+");
+  });
+
+  it("is a link with an href and a button with an onClick, as before, and a class name reaches every kind", () => {
+    const link = renderIn("en", <NotificationsBell unreadCount={2} href="/n" className="mine" />);
+    expect(link.getByRole("link", { name: "Notifications: 2 unread" }).classList.contains("mine")).toBe(true);
+    link.unmount();
+    const button = renderIn("en", <NotificationsBell unreadCount={2} onClick={() => {}} className="mine" />);
+    expect(button.getByRole("button", { name: "Notifications: 2 unread" }).classList.contains("mine")).toBe(true);
+    button.unmount();
+    const inert = renderIn("en", <NotificationsBell unreadCount={2} className="mine" />);
+    expect(inert.getByRole("img", { name: "Notifications: 2 unread" }).classList.contains("mine")).toBe(true);
+  });
+});
+
 describe("the package entry", () => {
   it("exports the shell components, the notifications bell and the search box", async () => {
     const entry = await import("./index");

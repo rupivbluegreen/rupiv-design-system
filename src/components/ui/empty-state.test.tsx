@@ -91,4 +91,34 @@ describe("EmptyState", () => {
       expect(root.classList.contains("extra")).toBe(true);
     }
   });
+
+  it("keeps the title a paragraph by default, so it adds no heading to the page", () => {
+    const views = renderBoth(<EmptyState title="Nothing here" />);
+    for (const view of [views.en, views.ar]) {
+      expect(view.queryByRole("heading")).toBeNull();
+      const title = view.getByText("Nothing here");
+      expect(title.tagName).toBe("P");
+      expect(hasModuleClass(title, "title")).toBe(true);
+    }
+  });
+
+  it.each([1, 2, 3, 4, 5, 6] as const)("headingLevel %i makes the title an h%i with the same look", (level) => {
+    const views = renderBoth(<EmptyState title="لا يوجد وصول" headingLevel={level} description="اطلب الإذن" />);
+    for (const view of [views.en, views.ar]) {
+      const heading = view.getByRole("heading", { level, name: "لا يوجد وصول" });
+      expect(heading.tagName).toBe(`H${level}`);
+      expect(hasModuleClass(heading, "title")).toBe(true);
+      expect(view.getAllByRole("heading")).toHaveLength(1);
+      // the description stays a plain block
+      expect(view.getByText("اطلب الإذن").tagName).toBe("DIV");
+    }
+  });
+
+  it("a page made of an empty state can have exactly one h1, with the danger tone still an alert", () => {
+    const views = renderBoth(<EmptyState tone="danger" headingLevel={1} title="Access denied" />);
+    for (const view of [views.en, views.ar]) {
+      expect(view.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+      expect(view.getByRole("alert").contains(view.getByRole("heading", { level: 1 }))).toBe(true);
+    }
+  });
 });

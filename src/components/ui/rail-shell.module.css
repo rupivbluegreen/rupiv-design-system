@@ -296,10 +296,11 @@
   color: var(--text-title);
 }
 
+/* A solid 2px outline, like the rail items: the soft focus ring alone is about 1.5:1 against the top bar. */
 .brand:focus-visible {
-  outline: none;
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
   border-radius: var(--radius-sm);
-  box-shadow: var(--focus-ring);
 }
 
 .wordmark {
@@ -349,8 +350,16 @@
 }
 
 .iconButton:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* A bell with neither a link nor a handler only shows the count: no hover state, no pointer. */
+.iconButton.inert,
+.iconButton.inert:hover {
+  background: transparent;
+  color: var(--text-label);
+  cursor: default;
 }
 
 .iconButton > svg {
@@ -420,5 +429,24 @@
 
   .end {
     gap: var(--space-4);
+  }
+}
+
+/* ---------- Print: the page, without the navigation ---------- */
+@media print {
+  .rail,
+  .topbar,
+  .skip {
+    display: none;
+  }
+
+  .shell {
+    display: block;
+    min-block-size: 0;
+  }
+
+  .main {
+    max-inline-size: none;
+    padding: 0;
   }
 }

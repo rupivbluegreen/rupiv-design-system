@@ -171,8 +171,9 @@ export interface NavDrawerProps {
 /**
  * The rail as a drawer, for screens narrower than 1024px. It slides in from the inline start (the right edge in
  * Arabic) and lists the same groups as the rail, each as a section that opens and closes. The group with the active
- * item starts open (the first group when none is active). Focus trap, Escape, the scrim and returning focus to the
- * menu button are the Drawer's own. Choosing a link closes it.
+ * item starts open (the first group when none is active). Focus starts on the close button, the first control in the
+ * panel, so the groups follow it in order. Focus trap, Escape, the scrim and returning focus to the menu button are the
+ * Drawer's own. Choosing a link closes it.
  */
 export function NavDrawer({ open, onClose, groups, title, navLabel, className }: NavDrawerProps) {
   const label = useLabels();
@@ -184,7 +185,14 @@ export function NavDrawer({ open, onClose, groups, title, navLabel, className }:
   const anyActive = resolved.some((entry) => entry.active);
 
   return (
-    <Drawer open={open} onClose={onClose} title={title} side="start" className={cn(styles.panel, className)}>
+    <Drawer
+      open={open}
+      onClose={onClose}
+      title={title}
+      side="start"
+      initialFocus="close"
+      className={cn(styles.panel, className)}
+    >
       <div className={styles.bleed}>
         <nav aria-label={navLabel ?? label("railShell.nav")} className={styles.nav} data-shell="drawer-nav">
           {resolved.map(({ group, items, active }, index) => {

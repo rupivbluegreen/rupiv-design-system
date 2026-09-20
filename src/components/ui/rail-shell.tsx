@@ -340,12 +340,19 @@ export type NotificationsBellProps = {
   /** Unread notifications. Zero shows no badge; above 99 the badge reads "99+". The badge always uses Western digits. */
   unreadCount: number;
   className?: string | undefined;
-} & ({ href: string; onClick?: undefined } | { href?: undefined; onClick: () => void });
+} & (
+  | { href: string; onClick?: undefined }
+  | { href?: undefined; onClick: () => void }
+  // Neither: the bell only shows the count. It is a plain, non-focusable element, not a button that does nothing.
+  | { href?: undefined; onClick?: undefined }
+);
 
 /**
  * The bell of the top bar, with a count of unread items. Give it `href` to make it a link (through the provider's link
- * component) or `onClick` to make it a button. Its accessible name carries the count ("Notifications: 3 unread"); the
- * number on the badge is hidden from screen readers so it is not read twice. Put it in the `end` slot of the RailShell.
+ * component) or `onClick` to make it a button. With neither it is not interactive: a plain element with the same
+ * accessible name, which Tab skips, so a person never lands on a control that does nothing. Its accessible name carries
+ * the count ("Notifications: 3 unread"); the number on the badge is hidden from screen readers so it is not read twice.
+ * Put it in the `end` slot of the RailShell.
  */
 export function NotificationsBell({ unreadCount, href, onClick, className }: NotificationsBellProps) {
   const label = useLabels();
@@ -371,9 +378,16 @@ export function NotificationsBell({ unreadCount, href, onClick, className }: Not
       </Link>
     );
   }
+  if (onClick !== undefined) {
+    return (
+      <button type="button" className={classes} aria-label={name} onClick={onClick} data-shell="bell">
+        {content}
+      </button>
+    );
+  }
   return (
-    <button type="button" className={classes} aria-label={name} onClick={onClick} data-shell="bell">
+    <span role="img" className={cn(classes, styles.inert)} aria-label={name} data-shell="bell">
       {content}
-    </button>
+    </span>
   );
 }
