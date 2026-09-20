@@ -458,6 +458,9 @@ export function DataTable<T>({
                       >
                         <Checkbox
                           aria-label={label("dataTable.selectRow", { id: rowLabel ? rowLabel(row) : id })}
+                          // rowLabel is often a record's own name or code: an aria-label is one string with no subtree of
+                          // its own to mark, so a consumer whose rowLabel is data, not copy, cannot exempt just that part.
+                          translate={rowLabel ? "no" : undefined}
                           checked={isSelected}
                           onChange={() => toggleRow(id)}
                         />
