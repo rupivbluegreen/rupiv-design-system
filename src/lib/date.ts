@@ -266,6 +266,34 @@ export function dateBoth(value: DateValue, options: Omit<DateOptions, "calendar"
   return `${gregorian} \u00B7 ${date(value, { ...options, calendar: "hijri" })}`;
 }
 
+/**
+ * The weekday name alone: "Sun" (default) or, with `length: "long"`, "Sunday". The same seven names name a day
+ * whichever calendar its date is also written in, so there is no `calendar` option here. The day read is the one
+ * in `options.timeZone` (default Riyadh), same as `date`.
+ */
+export function weekday(value: DateValue, options: { locale?: string; length?: "short" | "long"; timeZone?: string } = {}): string {
+  const zone = resolveTimeZone(options.timeZone);
+  if (zone === null) return NO_VALUE;
+  const instant = toInstant(value, zone);
+  if (instant === null) return NO_VALUE;
+  return write(calendarTag(options.locale, "gregory"), { weekday: options.length ?? "short" }, instant, zone);
+}
+
+/** The seven weekday names, Sunday first, in the reader's language: a calendar grid's header row. */
+export function weekdayNames(options: { locale?: string; length?: "short" | "long" } = {}): string[] {
+  // 13 September 2026 is a Sunday; UTC avoids any zone's date line moving one of the seven off its day.
+  return Array.from({ length: 7 }, (_, i) => weekday(new Date(Date.UTC(2026, 8, 13 + i, 12)), { ...options, timeZone: "UTC" }));
+}
+
+/** The month name alone: "September" (default) or, with `month: "short"`, "Sept". Hijri names with `calendar: "hijri"`. */
+export function monthName(value: DateValue, options: DateOptions = {}): string {
+  const zone = resolveTimeZone(options.timeZone);
+  if (zone === null) return NO_VALUE;
+  const instant = toInstant(value, zone);
+  if (instant === null) return NO_VALUE;
+  return write(calendarTag(options.locale, options.calendar), { month: options.month ?? "long" }, instant, zone);
+}
+
 /** "min" is a count of minutes ("6 min"), "clock" is minutes and seconds ("10:52"). */
 export type DurationMode = "min" | "clock";
 

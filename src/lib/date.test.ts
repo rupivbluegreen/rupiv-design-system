@@ -11,10 +11,13 @@ import {
   formatHijriDate,
   formatMinutesSeconds,
   formatTime,
+  monthName,
   resolveFormatLocale,
   stripBidiMarks,
   time,
   toInstant,
+  weekday,
+  weekdayNames,
 } from "./format";
 
 const BIDI = /[\u200E\u200F\u061C]/;
@@ -256,6 +259,78 @@ describe("dateBoth", () => {
   it("gives NO_VALUE when the date is missing, not half a string", () => {
     expect(dateBoth(null)).toBe(NO_VALUE);
     expect(dateBoth("2026-02-30", { locale: "ar" })).toBe(NO_VALUE);
+  });
+});
+
+describe("weekday", () => {
+  const sunday = "2026-09-06";
+
+  it("gives the short name by default, the long name with length long", () => {
+    expect(weekday(sunday)).toBe("Sun");
+    expect(weekday(sunday, { length: "long" })).toBe("Sunday");
+  });
+
+  it("gives the Arabic name with Western digits (there are none to check, but no direction marks)", () => {
+    expect(weekday(sunday, { locale: "ar" })).not.toMatch(BIDI);
+    expect(weekday(sunday, { locale: "ar", length: "long" })).not.toMatch(BIDI);
+  });
+
+  it("uses the Riyadh day, not the machine's or UTC's", () => {
+    expect(weekday("2026-09-06T21:30:00Z")).toBe("Mon"); // 00:30 on 7 Sep in Riyadh
+    expect(weekday("2026-09-06T20:59:59Z")).toBe("Sun");
+  });
+
+  it("gives NO_VALUE for missing or impossible dates", () => {
+    expect(weekday(null)).toBe(NO_VALUE);
+    expect(weekday("2026-02-30")).toBe(NO_VALUE);
+  });
+});
+
+describe("weekdayNames", () => {
+  it("gives the seven short names, Sunday first", () => {
+    expect(weekdayNames()).toEqual(["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+  });
+
+  it("gives the seven long names when asked", () => {
+    expect(weekdayNames({ length: "long" })).toEqual(["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]);
+  });
+
+  it("gives Arabic names with no direction marks", () => {
+    for (const name of weekdayNames({ locale: "ar" })) expect(name).not.toMatch(BIDI);
+  });
+
+  it("reads no clock: the same call twice is the same seven names, in order", () => {
+    expect(weekdayNames()).toEqual(weekdayNames());
+  });
+});
+
+describe("monthName", () => {
+  const day = "2026-09-06";
+
+  it("gives the long name by default, the short name with month short", () => {
+    expect(monthName(day)).toBe("September");
+    expect(monthName(day, { month: "short" })).toBe("Sept");
+  });
+
+  it("gives the Hijri month name with calendar hijri", () => {
+    expect(monthName(day, { calendar: "hijri" })).toBe("Rabiʻ I");
+    expect(monthName(day, { calendar: "hijri", month: "short" })).toBe("Rab. I");
+  });
+
+  it("gives Arabic names with no direction marks", () => {
+    expect(monthName(day, { locale: "ar" })).not.toMatch(BIDI);
+    expect(monthName(day, { locale: "ar", calendar: "hijri" })).not.toMatch(BIDI);
+  });
+
+  it("uses the Riyadh day, not the machine's or UTC's", () => {
+    // 21:30 UTC on 31 Aug is 00:30 on 1 Sep in Riyadh
+    expect(monthName("2026-08-31T21:30:00Z")).toBe("September");
+    expect(monthName("2026-08-31T20:59:59Z")).toBe("August");
+  });
+
+  it("gives NO_VALUE for missing or impossible dates", () => {
+    expect(monthName(null)).toBe(NO_VALUE);
+    expect(monthName("2026-02-30")).toBe(NO_VALUE);
   });
 });
 
