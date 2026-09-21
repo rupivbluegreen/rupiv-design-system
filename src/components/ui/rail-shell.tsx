@@ -8,7 +8,7 @@ import type {
   PointerEvent as ReactPointerEvent,
   ReactNode,
 } from "react";
-import { Bell, Menu } from "lucide-react";
+import { Bell, ChevronDown, ChevronsLeft, ChevronsRight, Menu } from "lucide-react";
 import { cn } from "../../lib/cn";
 import { useActivePath, useDir, useLabels, useLink } from "../../provider";
 import { NavDrawer, NavItemTail, resolveActive, sectionsOf, type NavBrand, type NavGroup } from "./nav-drawer";
@@ -36,6 +36,16 @@ export interface RailShellProps {
   children?: ReactNode;
   /** The id of <main>, the target of the skip link. Default "main-content". */
   mainId?: string;
+  /**
+   * Whether the rail is labelled (icon + text, an inline accordion instead of a fly-out) rather than icon-only,
+   * when the application owns the state. Pair it with `onExpandedChange`. Persisting the choice, if any, is the
+   * application's: the shell holds no storage of its own.
+   */
+  expanded?: boolean | undefined;
+  /** Whether the rail starts labelled, when it keeps its own state. Default false (icon-only). */
+  defaultExpanded?: boolean | undefined;
+  /** Called with the new value after the rail-width toggle is pressed, controlled or not. */
+  onExpandedChange?: ((expanded: boolean) => void) | undefined;
   className?: string | undefined;
 }
 
@@ -65,7 +75,18 @@ function stepIndex(current: number, length: number, key: string): number {
 
 const STEP_KEYS: ReadonlySet<string> = new Set(["ArrowDown", "ArrowUp", "Home", "End"]);
 
-export function RailShell({ groups, brand, search, end, children, mainId = "main-content", className }: RailShellProps) {
+export function RailShell({
+  groups,
+  brand,
+  search,
+  end,
+  children,
+  mainId = "main-content",
+  expanded: expandedProp,
+  defaultExpanded = false,
+  onExpandedChange,
+  className,
+}: RailShellProps) {
   const label = useLabels();
   const Link = useLink();
   const dir = useDir();
@@ -79,13 +100,30 @@ export function RailShell({ groups, brand, search, end, children, mainId = "main
   const focusFirstOf = useRef<string | null>(null);
   const [open, setOpen] = useState<OpenFlyout | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [innerExpanded, setInnerExpanded] = useState(defaultExpanded);
+  const expanded = expandedProp ?? innerExpanded;
   const resolved = useMemo(() => resolveActive(groups, activePath), [groups, activePath]);
   const wordmark = brand.name ?? brand.label;
   const openId = open?.id;
 
-  // The fly-out lines up with its rail button and stays inside the window.
+  function setExpanded(next: boolean) {
+    if (expandedProp === undefined) setInnerExpanded(next);
+    onExpandedChange?.(next);
+  }
+
+  // Labelling the rail opens the active section's panel, so its siblings show without an extra click.
+  useEffect(() => {
+    if (!expanded) return;
+    const activeId = resolved.find((entry) => entry.active)?.group.id;
+    if (activeId === undefined) return;
+    setOpen((current) => current ?? { id: activeId, pinned: true });
+    // Deliberately only [expanded]: not every time resolved changes underneath it.
+  }, [expanded]);
+
+  // The fly-out lines up with its rail button and stays inside the window. Expanded: it is laid out
+  // inline instead, so there is nothing to position.
   useLayoutEffect(() => {
-    if (openId === undefined) return;
+    if (openId === undefined || expanded) return;
     const wrap = groupElement(navRef.current, openId);
     const flyout = wrap?.querySelector<HTMLElement>("[data-shell-flyout]");
     if (!wrap || !flyout) return;
@@ -210,7 +248,7 @@ export function RailShell({ groups, brand, search, end, children, mainId = "main
   }
 
   return (
-    <div className={cn(styles.shell, className)} data-shell="root">
+    <div className={cn(styles.shell, expanded && styles.shellExpanded, className)} data-shell="root">
       <a className={styles.skip} href={`#${mainId}`} onClick={skipToMain}>
         {label("railShell.skip")}
       </a>
@@ -239,10 +277,10 @@ export function RailShell({ groups, brand, search, end, children, mainId = "main
                 >
                   <button
                     type="button"
-                    className={styles.railItem}
+                    className={cn(styles.railItem, expanded && styles.railItemExpanded)}
                     data-shell-trigger={group.id}
                     data-active={active ? "true" : "false"}
-                    aria-label={group.label}
+                    aria-label={expanded ? undefined : group.label}
                     aria-expanded={isOpen}
                     aria-controls={flyoutId}
                     onPointerDown={() => {
@@ -253,16 +291,25 @@ export function RailShell({ groups, brand, search, end, children, mainId = "main
                     <span className={styles.railIcon} aria-hidden="true">
                       {group.icon ?? <span className={styles.initial}>{Array.from(group.label)[0] ?? ""}</span>}
                     </span>
+                    {expanded ? (
+                      <>
+                        <span className={styles.railLabel}>{group.label}</span>
+                        <ChevronDown
+                          className={cn(styles.chevron, isOpen && styles.chevronOpen)}
+                          aria-hidden="true"
+                        />
+                      </>
+                    ) : null}
                   </button>
                   <div
                     id={flyoutId}
-                    className={styles.flyout}
+                    className={cn(styles.flyout, expanded && styles.flyoutInline)}
                     role="group"
                     aria-labelledby={titleId}
                     hidden={!isOpen}
                     data-shell-flyout={group.id}
                   >
-                    <div id={titleId} className={styles.flyoutTitle}>
+                    <div id={titleId} className={cn(styles.flyoutTitle, expanded && styles.flyoutTitleHidden)}>
                       {group.label}
                     </div>
                     {sectionsOf(items).map((section, sectionIndex) => {
@@ -270,7 +317,7 @@ export function RailShell({ groups, brand, search, end, children, mainId = "main
                       return (
                         <div key={`${sectionIndex}-${section.heading ?? ""}`}>
                           {section.heading !== undefined ? (
-                            <div id={headingId} className={styles.flyoutHeading}>
+                            <div id={headingId} className={cn(styles.flyoutHeading, expanded && styles.flyoutHeadingInline)}>
                               {section.heading}
                             </div>
                           ) : null}
@@ -279,7 +326,7 @@ export function RailShell({ groups, brand, search, end, children, mainId = "main
                               <li key={item.id}>
                                 <Link
                                   href={item.href}
-                                  className={styles.flyoutItem}
+                                  className={cn(styles.flyoutItem, expanded && styles.flyoutItemInline)}
                                   aria-current={itemActive ? "page" : undefined}
                                   data-shell-item={item.id}
                                   onClick={() => setOpen(null)}
@@ -299,6 +346,20 @@ export function RailShell({ groups, brand, search, end, children, mainId = "main
             })}
           </ul>
         </nav>
+        <div className={styles.railFoot}>
+          <button
+            type="button"
+            className={cn(styles.railItem, expanded && styles.railItemExpanded)}
+            aria-label={expanded ? undefined : label("railShell.railExpand")}
+            aria-pressed={expanded}
+            onClick={() => setExpanded(!expanded)}
+          >
+            <span className={styles.railIcon} aria-hidden="true">
+              {expanded ? <ChevronsLeft /> : <ChevronsRight />}
+            </span>
+            {expanded ? <span className={styles.railLabel}>{label("railShell.railCollapse")}</span> : null}
+          </button>
+        </div>
       </div>
 
       <div className={styles.column}>

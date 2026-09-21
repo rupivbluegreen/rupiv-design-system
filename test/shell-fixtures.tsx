@@ -18,6 +18,8 @@ export const AR_SHELL_LABELS = {
   "railShell.nav": "التنقل الرئيسي",
   "railShell.skip": "تخطي إلى المحتوى الرئيسي",
   "railShell.menuOpen": "فتح القائمة",
+  "railShell.railExpand": "توسيع التنقل",
+  "railShell.railCollapse": "طي التنقل",
   "railShell.notifications": "الإشعارات",
   "railShell.notificationsUnread": "الإشعارات: {count} غير مقروءة",
   "commandPalette.placeholder": "بحث",
@@ -55,6 +57,8 @@ export interface ShellContent {
     nav: string;
     skip: string;
     menuOpen: string;
+    railExpand: string;
+    railCollapse: string;
     notifications: string;
     placeholder: string;
     empty: string;
@@ -90,6 +94,8 @@ export const SHELL_CONTENT: Readonly<Record<TestLocale, ShellContent>> = {
       nav: "Main navigation",
       skip: "Skip to main content",
       menuOpen: "Open menu",
+      railExpand: "Expand the navigation",
+      railCollapse: "Collapse the navigation",
       notifications: "Notifications",
       placeholder: "Search",
       empty: "No results",
@@ -123,6 +129,8 @@ export const SHELL_CONTENT: Readonly<Record<TestLocale, ShellContent>> = {
       nav: "التنقل الرئيسي",
       skip: "تخطي إلى المحتوى الرئيسي",
       menuOpen: "فتح القائمة",
+      railExpand: "توسيع التنقل",
+      railCollapse: "طي التنقل",
       notifications: "الإشعارات",
       placeholder: "بحث",
       empty: "لا توجد نتائج",

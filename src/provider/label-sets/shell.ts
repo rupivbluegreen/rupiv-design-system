@@ -6,6 +6,9 @@ export const SHELL_LABELS = {
   "railShell.nav": "Main navigation",
   "railShell.skip": "Skip to main content",
   "railShell.menuOpen": "Open menu",
+  // RailShell: the rail-width toggle (icon-only, or labelled with an inline accordion)
+  "railShell.railExpand": "Expand the navigation",
+  "railShell.railCollapse": "Collapse the navigation",
   // NotificationsBell: its name with no unread items, and with a count (a function, so the plural is right)
   "railShell.notifications": "Notifications",
   "railShell.notificationsUnread": ({ count }) =>

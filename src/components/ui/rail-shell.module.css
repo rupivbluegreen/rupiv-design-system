@@ -11,6 +11,12 @@
   font-family: var(--font-ui);
 }
 
+/* Labelled rail: icon + text rows, an inline accordion instead of a fly-out. User-toggled; the
+   application decides whether and how to remember the choice (`onExpandedChange`). */
+.shellExpanded {
+  --rail-w: 224px;
+}
+
 .column {
   display: flex;
   flex-direction: column;
@@ -261,6 +267,75 @@
   font-weight: var(--weight-semibold);
   font-variant-numeric: tabular-nums;
   line-height: 18px;
+}
+
+/* ---------- Labelled rail: rows, the inline panel, the rail-width toggle ---------- */
+.railItemExpanded {
+  display: flex;
+  justify-content: flex-start;
+  gap: var(--space-12);
+  padding-inline: var(--space-16);
+}
+
+.railLabel {
+  flex: 1;
+  min-inline-size: 0;
+  overflow: hidden;
+  font-size: var(--text-14);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chevron {
+  flex: none;
+  inline-size: var(--icon-md);
+  block-size: var(--icon-md);
+  color: var(--flyout-muted);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+.chevronOpen {
+  transform: rotate(180deg);
+}
+
+/* The fly-out, laid out in the rail column instead of floating over the page. */
+.flyoutInline {
+  position: static;
+  inset-inline-start: auto;
+  inset-block-start: auto;
+  min-inline-size: 0;
+  max-inline-size: none;
+  max-block-size: none;
+  overflow: visible;
+  border-radius: 0;
+  background: transparent;
+  padding-block: 0;
+}
+
+/* Kept for its aria-labelledby target: the rail button beside it already shows the name. */
+.flyoutTitleHidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.flyoutHeadingInline,
+.flyoutItemInline {
+  padding-inline-start: 50px;
+}
+
+.flyoutItemInline {
+  padding-inline-end: var(--space-16);
+}
+
+.railFoot {
+  margin-block-start: auto;
+  padding-block: var(--space-8);
 }
 
 /* ---------- Top bar ---------- */

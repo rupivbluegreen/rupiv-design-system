@@ -451,6 +451,60 @@ describe.each(LOCALE_CASES)("RailShell ($locale)", ({ locale, dir }) => {
     });
   });
 
+  describe("the rail-width toggle", () => {
+    it("starts icon-only; the toggle labels the rail buttons and switches to an inline panel", async () => {
+      const user = userEvent.setup();
+      const view = renderShell(locale);
+      // Collapsed: the button is named by aria-label; it carries no visible label text of its own.
+      expect(within(trigger(view, "plan")).queryByText(group(locale, "plan").label)).toBeNull();
+      const toggle = view.getByRole("button", { name: content.text.railExpand });
+      expect(toggle.getAttribute("aria-pressed")).toBe("false");
+      await user.click(toggle);
+      expect(within(trigger(view, "plan")).getByText(group(locale, "plan").label)).toBeTruthy();
+      expect(view.getByRole("button", { name: content.text.railCollapse }).getAttribute("aria-pressed")).toBe(
+        "true",
+      );
+      await user.click(view.getByRole("button", { name: content.text.railCollapse }));
+      expect(within(trigger(view, "plan")).queryByText(group(locale, "plan").label)).toBeNull();
+      expect(view.getByRole("button", { name: content.text.railExpand })).toBeTruthy();
+    });
+
+    it("opens the active group's panel as soon as the rail is expanded, with no extra click", async () => {
+      const user = userEvent.setup();
+      const view = renderShell(locale, {}, { activePath: "/plan/capacity" });
+      expect(flyout("plan", locale)).toBeNull();
+      await user.click(view.getByRole("button", { name: content.text.railExpand }));
+      expect(openFlyout("plan", locale)).toBeTruthy();
+      expect(trigger(view, "plan").getAttribute("aria-expanded")).toBe("true");
+    });
+
+    it("still opens and closes a group's panel by clicking its row, inline, not floating", async () => {
+      const user = userEvent.setup();
+      const view = renderShell(locale);
+      await user.click(view.getByRole("button", { name: content.text.railExpand }));
+      await user.click(trigger(view, "plan"));
+      const open = openFlyout("plan", locale);
+      expect(within(open).getAllByRole("link")).toHaveLength(3);
+      await user.click(trigger(view, "plan"));
+      expect(flyout("plan", locale)).toBeNull();
+    });
+
+    it("is uncontrolled by default, and can start expanded", () => {
+      const view = renderShell(locale, { defaultExpanded: true });
+      expect(view.getByRole("button", { name: group(locale, "plan").label })).toBeTruthy();
+    });
+
+    it("is controlled by `expanded`, and reports every toggle through `onExpandedChange`", async () => {
+      const user = userEvent.setup();
+      const onExpandedChange = vi.fn();
+      const view = renderShell(locale, { expanded: false, onExpandedChange });
+      await user.click(view.getByRole("button", { name: content.text.railExpand }));
+      expect(onExpandedChange).toHaveBeenCalledWith(true);
+      // The application did not change the prop, so the rail is still icon-only.
+      expect(within(trigger(view, "plan")).queryByText(group(locale, "plan").label)).toBeNull();
+    });
+  });
+
   describe("the navigation drawer", () => {
     beforeEach(() => {
       mockVisibleElements();
@@ -585,6 +639,8 @@ describe("RailShell with Arabic labels", () => {
     expect(view.container.lang).toBe("ar");
     await user.click(view.getByRole("button", { name: content.text.menuOpen }));
     expectNoDefaultEnglish(screen.getByRole("dialog"));
+    await user.click(view.getByRole("button", { name: content.text.railExpand }));
+    expectNoDefaultEnglish(view.container);
   });
 });
 

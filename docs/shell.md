@@ -17,6 +17,9 @@ is passed in.
 | `end` | `ReactNode` | The end of the top bar: the application's own controls (bell, language switch, user). The application decides the order. |
 | `children` | `ReactNode` | The page. |
 | `mainId` | `string` | Id of `<main>`, target of the skip link. Default `main-content`. |
+| `expanded` | `boolean` | Labelled rail instead of icon-only, when the application owns the state. Pair with `onExpandedChange`. |
+| `defaultExpanded` | `boolean` | Whether the rail starts labelled, when it keeps its own state. Default `false`. |
+| `onExpandedChange` | `(expanded: boolean) => void` | Called after the rail-width toggle is pressed, controlled or not. The shell holds no storage of its own; persisting the choice, if any, is the application's. |
 
 ```ts
 interface NavGroup { id: string; label: string; icon?: ReactNode; items: NavItem[] }
@@ -57,6 +60,14 @@ toward the fly-out (right in English, left in Arabic) does the same. Up, Down, H
 
 **Keyboard in a fly-out.** Up, Down, Home, End move between items (wrapping). Escape, or the arrow back toward the
 rail, closes it and returns the focus to its rail button. Tab out of the group closes it.
+
+**Rail width.** A toggle at the foot of the rail switches it between icon-only (72px, the default)
+and labelled (224px, `railShell.railExpand` / `railShell.railCollapse`). Labelled, each rail button
+shows its group's name and a chevron, and a click opens its items as an inline panel below the
+button — the same disclosure button and `role="group"` fly-out as icon-only mode, laid out in the
+rail column instead of floating, so the keyboard behaviour below is unchanged either way. Expanding
+opens the active group's panel with no extra click. Below 1024px the rail is hidden regardless
+(**Drawer**, next), so the toggle only matters at desktop widths.
 
 **Drawer.** Below 1024px the rail is hidden and the menu button opens `NavDrawer` (a `Drawer` with `side="start"`:
 focus trap, Escape, scrim press, focus returns to the menu button). Focus starts on the close button, the first
